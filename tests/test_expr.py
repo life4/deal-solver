@@ -33,6 +33,8 @@ from .helpers import prove_f
     '13 // 5 == 2',
     '13 % 5 == 3',
     '-5 % 2 == 1',
+    '-1 % 3 == 2',
+    '1 % -3 == -2',
     '5 % -2 == -1',
     '2 ** 3 == 8',
 
@@ -303,7 +305,7 @@ def test_list_extend():
     left=hypothesis.strategies.integers(),
     right=hypothesis.strategies.integers(),
     op=hypothesis.strategies.sampled_from([
-        '+', '-', '*', '/',
+        '+', '-', '*', '/', '%',
         '<', '<=', '==', '!=', '>=', '>',
     ]),
 )

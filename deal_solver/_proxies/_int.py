@@ -95,7 +95,7 @@ class IntSort(ProxySort):
         result = if_expr(
             test=other.expr >= zero,
             val_then=self.expr % other.expr,
-            val_else=-(self.expr % other.expr),
+            val_else=-((-self.expr) % (-other.expr)),
         )
         if as_float:
             return result.as_float
