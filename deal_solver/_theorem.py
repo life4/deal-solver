@@ -8,8 +8,8 @@ import astroid
 import z3
 
 # app
-from ._cached_property import cached_property
 from ._annotations import ann2sort
+from ._cached_property import cached_property
 from ._context import Context
 from ._eval_contracts import eval_contracts
 from ._eval_stmt import eval_stmt

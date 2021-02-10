@@ -1,8 +1,8 @@
 # app
 from .._context import Context
+from .._exceptions import UnsupportedError
 from .._proxies import IntSort, ListSort
 from ._registry import register
-from .._exceptions import UnsupportedError
 
 
 @register('builtins.list.index')
