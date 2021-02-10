@@ -4,13 +4,11 @@ version: "3"
 vars:
   PYTHON_BIN: python3.7
   VENVS: ./venvs/
-  FLAKE8_ENV: "{{.VENVS}}flake8"
-  MYPY_ENV:   "{{.VENVS}}mypy"
   FLIT_ENV:   "{{.VENVS}}flit"
-  PYTEST_ENV: "{{.VENVS}}pytest"
-  SPHINX_ENV: "{{.VENVS}}sphinx"
-  ISORT_ENV:  "{{.VENVS}}isort"
-  DEAL_ENV:   "{{.VENVS}}deal"
+  FLAKE8_ENV: "{{.VENVS}}tests"
+  MYPY_ENV:   "{{.VENVS}}tests"
+  PYTEST_ENV: "{{.VENVS}}tests"
+  ISORT_ENV:  "{{.VENVS}}tests"
 
   TESTS_PATH: tests/
 

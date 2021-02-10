@@ -52,4 +52,5 @@ tests = [
     "isort",
     "mypy",
     "pytest",
+    "pytest-cov",
 ]
