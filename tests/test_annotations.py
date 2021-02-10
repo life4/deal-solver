@@ -16,6 +16,11 @@ from .helpers import prove_f
     ),
     (
         '',
+        '"int"',
+        'a - a == 0',
+    ),
+    (
+        '',
         'float',
         'a + 0.0 == a or not (a > 10 or a <= 10)',
     ),

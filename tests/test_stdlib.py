@@ -10,6 +10,8 @@ from .helpers import prove_f
 
 @pytest.mark.parametrize('check', [
     'math.isclose(5, 5)',
+    'math.isclose(5.0, 5)',
+    'math.isclose(5, 5.0)',
     'not math.isclose(5, 4)',
     'math.isclose(7.8 / 2.5, 3.12)',
     'math.isclose(2.7 - 1.4, 1.3)',
@@ -23,12 +25,14 @@ from .helpers import prove_f
     'math.isinf(float("inf"))',
     'math.isinf(float("-inf"))',
     'not math.isinf(123)',
+    'not math.isinf(123 / 5)',
     'not math.isinf(123.456)',
     'not math.isinf(float("nan"))',
 
     'math.isnan(math.nan)',
     'math.isnan(float("nan"))',
     'not math.isnan(123)',
+    'not math.isnan(123 / 5)',
     'not math.isnan(123.456)',
     'not math.isnan(float("inf"))',
     'not math.isnan(float("-inf"))',

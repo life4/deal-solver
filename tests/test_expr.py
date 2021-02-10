@@ -109,6 +109,8 @@ from .helpers import prove_f
     # bool functions
     'int(True) == 1',
     'int(False) == 0',
+    'bool(True)',
+    'not bool(False)',
 
     # list
     '[1, 2, 3] == [1, 2, 3]',
