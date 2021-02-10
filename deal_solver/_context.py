@@ -1,4 +1,4 @@
-# built-in
+# stdlib
 import typing
 from collections import Counter
 from contextlib import contextmanager

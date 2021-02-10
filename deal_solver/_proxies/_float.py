@@ -1,4 +1,4 @@
-# built-in
+# stdlib
 from sys import float_info
 
 # external

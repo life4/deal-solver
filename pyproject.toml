@@ -13,7 +13,7 @@ not_skip = "__init__.py"
 multi_line_output = 5
 include_trailing_comma = true
 
-import_heading_stdlib = "built-in"
+import_heading_stdlib = "stdlib"
 import_heading_thirdparty = "external"
 import_heading_firstparty = "project"
 import_heading_localfolder = "app"

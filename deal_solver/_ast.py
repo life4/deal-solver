@@ -1,4 +1,4 @@
-# built-in
+# stdlib
 from contextlib import suppress
 from typing import Optional, Tuple
 

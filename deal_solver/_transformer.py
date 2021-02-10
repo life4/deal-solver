@@ -1,4 +1,4 @@
-# built-in
+# stdlib
 import typing
 from functools import partial
 

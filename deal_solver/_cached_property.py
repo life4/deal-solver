@@ -1,4 +1,4 @@
-# built-in
+# stdlib
 from typing import Any, Callable, Generic, Optional, Type, TypeVar, overload
 
 

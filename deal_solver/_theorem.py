@@ -1,4 +1,4 @@
-# built-in
+# stdlib
 import enum
 import typing
 from textwrap import dedent

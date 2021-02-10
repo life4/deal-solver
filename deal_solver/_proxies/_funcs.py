@@ -1,4 +1,4 @@
-# built-in
+# stdlib
 from random import choices
 from string import ascii_letters
 from typing import Optional
