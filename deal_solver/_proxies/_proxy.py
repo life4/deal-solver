@@ -58,6 +58,10 @@ class ProxySort:
         raise UnsupportedError('cannot convert {} to int'.format(self.type_name))
 
     @property
+    def as_float(self):
+        raise UnsupportedError('cannot convert {} to float'.format(self.type_name))
+
+    @property
     def length(self):
         raise UnsupportedError('{}.__len__ is not defined'.format(self.type_name))
 
@@ -111,7 +115,7 @@ class ProxySort:
 
     # math binary operations
 
-    def _math_op(self, other, handler):
+    def _math_op(self, other, handler) -> 'ProxySort':
         cls = type(self)
         expr = self._binary_op(other=other, handler=handler)
         return cls(expr=expr)

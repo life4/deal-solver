@@ -3,7 +3,7 @@ import z3
 
 # app
 from .._exceptions import UnsupportedError
-from ._funcs import wrap
+from ._funcs import wrap, if_expr
 from ._proxy import ProxySort
 from ._registry import registry
 
@@ -54,6 +54,16 @@ class IntSort(ProxySort):
         expr = z3.If(self.expr >= z3.IntVal(0), self.expr, -self.expr)
         return cls(expr=expr)
 
+    def _math_op(self, other, handler):
+        float_proxy = registry['float']
+        as_float = isinstance(other, float_proxy)
+        if as_float:
+            other = other.as_int
+        result = super()._math_op(other=other, handler=handler)
+        if as_float:
+            return result.as_float
+        return result
+
     def __truediv__(self, other):
         cls = registry['float']
         real = z3.ToReal(self.expr)
@@ -64,7 +74,7 @@ class IntSort(ProxySort):
         if other.is_real:
             expr = real / other.as_real.expr
         else:
-            expr = self.as_fp / other.as_fp.expr
+            expr = self.as_fp.expr / other.as_fp.expr
         return cls(expr=expr)
 
     def __floordiv__(self, other):
@@ -72,5 +82,21 @@ class IntSort(ProxySort):
             return IntSort(expr=self.expr / other.expr)
         float_proxy = registry['float']
         if isinstance(other, float_proxy):
-            return IntSort(expr=self.expr / other.as_int.expr)
+            return IntSort(expr=self.expr / other.as_int.expr).as_float
         raise UnsupportedError('unsupported denominator sort', other.sort())
+
+    def __mod__(self, other):
+        float_proxy = registry['float']
+        as_float = isinstance(other, float_proxy)
+        if as_float:
+            other = other.as_int
+
+        zero = self.val(0)
+        result = if_expr(
+            test=other.expr >= zero,
+            val_then=self.expr % other.expr,
+            val_else=-(self.expr % other.expr),
+        )
+        if as_float:
+            return result.as_float
+        return result
