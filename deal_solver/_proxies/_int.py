@@ -3,7 +3,7 @@ import z3
 
 # app
 from .._exceptions import UnsupportedError
-from ._funcs import wrap, if_expr
+from ._funcs import if_expr, wrap
 from ._proxy import ProxySort
 from ._registry import registry
 
