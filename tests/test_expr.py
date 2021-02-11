@@ -31,6 +31,8 @@ from .helpers import prove_f
     '7 * 4 == 28',
     '12 / 5 == 2.4',
     '13 // 5 == 2',
+    '-13 // 5 == -3',
+    '13 // -5 == -3',
     '13 % 5 == 3',
     '-5 % 2 == 1',
     '-1 % 3 == 2',
@@ -305,7 +307,7 @@ def test_list_extend():
     left=hypothesis.strategies.integers(),
     right=hypothesis.strategies.integers(),
     op=hypothesis.strategies.sampled_from([
-        '+', '-', '*', '/', '%',
+        '+', '-', '*', '/', '%', '//',
         '<', '<=', '==', '!=', '>=', '>',
     ]),
 )

@@ -78,24 +78,30 @@ class IntSort(ProxySort):
         return cls(expr=expr)
 
     def __floordiv__(self, other):
-        if isinstance(other, IntSort):
-            return IntSort(expr=self.expr / other.expr)
         float_proxy = registry['float']
-        if isinstance(other, float_proxy):
-            return IntSort(expr=self.expr / other.as_int.expr).as_float
-        raise UnsupportedError('unsupported denominator sort', other.sort())
+        as_float = isinstance(other, float_proxy)
+        if as_float:
+            other = other.as_int
+        zero = self.val(0)
+        result = if_expr(
+            test=other.expr >= zero,
+            val_then=self.expr / other.expr,
+            val_else=-self.expr / -other.expr,
+        )
+        if as_float:
+            return result.as_float
+        return result
 
     def __mod__(self, other):
         float_proxy = registry['float']
         as_float = isinstance(other, float_proxy)
         if as_float:
             other = other.as_int
-
         zero = self.val(0)
         result = if_expr(
             test=other.expr >= zero,
             val_then=self.expr % other.expr,
-            val_else=-((-self.expr) % (-other.expr)),
+            val_else=-(-self.expr % -other.expr),
         )
         if as_float:
             return result.as_float
