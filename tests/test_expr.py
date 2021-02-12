@@ -46,6 +46,9 @@ from .helpers import prove_f
     '7.0 % 3.0 == 1.0',
     '7.0 % 3.5 == 0.0',
     '7.3 // 2.0 == 3.0',
+    '7.3 // -2.0 == -4.0',
+    '-7.3 // 2.0 == -4.0',
+    '0.005 // 0.005 == 1.0',
     '2.7 > 1.4',
     '1.4 < 2.7',
     '2.7 == 2.7',
@@ -117,10 +120,14 @@ from .helpers import prove_f
     '"abcd".index("bc") == 1',
 
     # float functions
+    'bool(2.1) == True',
+    'bool(0.0) == False',
     'int(4.2) == 4',
+    'float(4.2) == 4.2',
+    'float(10 / 2) == 5.0',
     'float("NaN") != 2.3',
     'float("Inf") > 100000',
-    # 'abs(-4.2) == 4.2',
+    'abs(-4.2) == 4.2',
     # 'str(4.2) == "4.2"',
 
     # bool functions

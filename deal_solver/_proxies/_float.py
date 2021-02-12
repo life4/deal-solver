@@ -54,7 +54,7 @@ class FloatSort(ProxySort):
         return z3.RealSort()
 
     @property
-    def as_float(self):
+    def as_float(self) -> 'FloatSort':
         return self
 
     @property
@@ -69,10 +69,8 @@ class FloatSort(ProxySort):
     def as_str(self):
         raise UnsupportedError('cannot convert float to str')
 
-    def __floordiv__(self, other):
-        int_proxy = registry['int']
-        val = int_proxy(expr=self.as_int.expr / other.as_int.expr)
-        return val.as_float
+    def __floordiv__(self, other) -> 'FloatSort':
+        return (self / other).as_int.as_float
 
 
 class RealSort(FloatSort):
@@ -89,10 +87,6 @@ class RealSort(FloatSort):
         return z3.fpRealToFP(z3.RNE(), x, cls.fp_sort())
 
     @property
-    def as_float(self):
-        return self
-
-    @property
     def as_real(self):
         return self
 
@@ -107,7 +101,7 @@ class RealSort(FloatSort):
 
     @property
     def as_bool(self):
-        return self.expr == z3.RealVal(0)
+        return self.expr != z3.RealVal(0)
 
     @property
     def abs(self):
@@ -158,10 +152,6 @@ class FPSort(FloatSort):
         return z3.fpToReal(x)
 
     @property
-    def as_float(self):
-        return self
-
-    @property
     def as_real(self):
         return RealSort(expr=self._as_real(self.expr))
 
@@ -176,7 +166,7 @@ class FPSort(FloatSort):
 
     @property
     def as_bool(self):
-        return self.expr == z3.FPVal(0, self.fp_sort())
+        return self.expr != z3.FPVal(0, self.fp_sort())
 
     @property
     def is_nan(self):
