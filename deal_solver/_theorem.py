@@ -1,6 +1,7 @@
 # stdlib
 import enum
 import typing
+from itertools import chain
 from textwrap import dedent
 
 # external
@@ -90,27 +91,20 @@ class Theorem:
             result[arg.name] = wrap(z3.Const(name=arg.name, sort=sort))
         return result
 
-    @cached_property
-    def constraint(self) -> z3.BoolRef:
-        asserts = z3.Goal(ctx=self.z3_context)
+    @property
+    def constraints(self) -> typing.Iterator[z3.BoolRef]:
         eval_stmt(node=self._func, ctx=self.context)
-        asserts.add(*self.context.expected)
-        asserts.add(self.contracts['post'].as_expr())
 
-        return z3.And(
-            # pre-condition must be always true
-            self.contracts['pre'].as_expr(),
-            *self.context.given,
-            # try to break body asserts or post-condition
-            z3.Not(asserts.as_expr()),
+        constraints = chain(
+            self.context.expected,
+            self.contracts['post'],
         )
-
-    @cached_property
-    def solver(self) -> z3.Solver:
-        # z3.get_ctx(None).__init__()
-        solver = z3.Solver(ctx=self.z3_context)
-        solver.add(self.constraint)
-        return solver
+        for constraint in constraints:
+            yield z3.And(
+                *self.contracts['pre'],
+                *self.context.given,
+                z3.Not(constraint),
+            )
 
     def reset(self) -> None:
         func = self._func
@@ -120,26 +114,34 @@ class Theorem:
     def prove(self) -> None:
         if self.conclusion is not None:
             raise RuntimeError('already proved')
+        for constraint in self.constraints:
+            solver = z3.Solver(ctx=self.z3_context)
+            solver.add(constraint)
+            ok = self._prove(solver=solver)
+            if not ok:
+                return
+
+    def _prove(self, solver: z3.Solver) -> bool:
         try:
-            result = self.solver.check()
+            result = solver.check()
         except UnsupportedError as exc:
             self.conclusion = Conclusion.SKIP
             self.error = exc
-            return
+            return True
 
         if result == z3.unsat:
             self.conclusion = Conclusion.OK
-            return
+            return True
 
         if result == z3.unknown:
             self.conclusion = Conclusion.SKIP
             self.error = ProveError('cannot validate theorem')
-            return
+            return True
 
         if result == z3.sat:
             self.conclusion = Conclusion.FAIL
-            self.example = self.solver.model()
-            return
+            self.example = solver.model()
+            return False
 
         raise RuntimeError('unreachable')
 

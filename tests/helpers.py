@@ -11,6 +11,6 @@ def prove_f(text: str) -> Theorem:
     theorem.prove()
     if theorem.conclusion != Conclusion.OK:
         print('error:', repr(theorem.error))
-        print('constraint:', repr(theorem.constraint))
+        print('constraint:', repr(theorem.constraints))
         print('example:', theorem.example)
     return theorem

@@ -3,13 +3,13 @@ import typing
 
 # external
 import astroid
-import z3
 
 # app
 from ._ast import get_name
 from ._context import Context, Scope
 from ._eval_expr import eval_expr
 from ._exceptions import UnsupportedError
+from ._goal import Goal
 
 
 SUPPORTED_CONTRACTS = {'deal.pre', 'deal.post', 'deal.raises', 'deal.pure', 'deal.has'}
@@ -50,10 +50,10 @@ def get_contracts(decorators: typing.List) -> typing.Iterator[typing.Tuple[str, 
             yield from get_contracts([expr.value])
 
 
-def eval_contracts(decorators: astroid.Decorators, ctx: Context) -> typing.Dict[str, z3.Goal]:
+def eval_contracts(decorators: astroid.Decorators, ctx: Context) -> typing.Dict[str, Goal]:
     goals = dict(
-        pre=z3.Goal(),
-        post=z3.Goal(),
+        pre=Goal(),
+        post=Goal(),
     )
     if not decorators:
         return goals
