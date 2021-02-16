@@ -88,32 +88,3 @@ def test_int_two_args_fail_for_some():
             assert a != b
     """)
     assert theorem.conclusion is Conclusion.FAIL
-
-
-def test_pre_condition_ok():
-    theorem = prove_f("""
-        @deal.pre(lambda a: a > 10)
-        def f(a: int) -> int:
-            assert a > 5
-    """)
-    assert theorem.conclusion is Conclusion.OK
-
-
-def test_pre_condition_fail():
-    theorem = prove_f("""
-        @deal.pre(lambda a: a > 5)
-        def f(a: int) -> int:
-            assert a > 10
-    """)
-    assert theorem.conclusion is Conclusion.FAIL
-
-
-def test_pre_post_condition_name_conflict():
-    theorem = prove_f("""
-        @deal.post(lambda a: a > 10)
-        @deal.pre(lambda a: a > 5)
-        @deal.pre(lambda a: a < 10)
-        def f(a: int) -> int:
-            return a * 2
-    """)
-    assert theorem.conclusion is Conclusion.OK
