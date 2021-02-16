@@ -84,3 +84,32 @@ def test_if_return_after_if():
             return True
     """)
     assert theorem.conclusion is Conclusion.OK
+
+
+def test_if_then_shapes_assert_ok():
+    theorem = prove_f("""
+        def f(a: int):
+            if a > 10:
+                assert a > 0
+    """)
+    assert theorem.conclusion is Conclusion.OK
+
+
+def test_if_then_shapes_assert_fail():
+    theorem = prove_f("""
+        def f(a: int):
+            if a > 0:
+                assert a > 10
+    """)
+    assert theorem.conclusion is Conclusion.FAIL
+
+
+def test_if_else_shapes_assert_ok():
+    theorem = prove_f("""
+        def f(a: int):
+            if a > 0:
+                pass
+            else:
+                assert a < 10
+    """)
+    assert theorem.conclusion is Conclusion.OK

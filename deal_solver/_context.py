@@ -11,21 +11,29 @@ from ._types import SortType, Z3Bool
 
 
 class Asserts:
-    _asserts: typing.List[Z3Bool]
+    layer: typing.List[Z3Bool]
+    _parent: typing.Optional['Asserts']
 
-    def __init__(self) -> None:
-        self._asserts = []
+    def __init__(self, parent=None) -> None:
+        self.layer = []
+        self._parent = parent
 
     def add(self, cond: Z3Bool) -> None:
-        self._asserts.append(cond)
+        self.layer.append(cond)
+
+    def make_child(self) -> 'Asserts':
+        cls = type(self)
+        return cls(parent=self)
 
     def __iter__(self) -> typing.Iterator[Z3Bool]:
-        return iter(self._asserts)
+        yield from self.layer
+        if self._parent:
+            yield from self._parent
 
     def __repr__(self) -> str:
         return '{n}({r})'.format(
             n=type(self).__name__,
-            r=repr(self._asserts),
+            r=repr(self.layer),
         )
 
 
@@ -116,4 +124,8 @@ class Context(typing.NamedTuple):
         return self._replace
 
     def make_child(self) -> 'Context':
-        return self.evolve(scope=self.scope.make_child())
+        return self.evolve(
+            scope=self.scope.make_child(),
+            given=self.given.make_child(),
+            expected=self.expected.make_child(),
+        )

@@ -89,6 +89,7 @@ def eval_if_else(node: astroid.If, ctx: Context):
     for subnode in (node.orelse or []):
         eval_stmt(node=subnode, ctx=ctx_else)
 
+    # update variables
     changed_vars = set(ctx_then.scope.layer) | set(ctx_else.scope.layer)
     for var_name in changed_vars:
         val_then = ctx_then.scope.get(name=var_name)
@@ -98,6 +99,13 @@ def eval_if_else(node: astroid.If, ctx: Context):
 
         value = if_expr(test_ref, val_then, val_else)
         ctx.scope.set(name=var_name, value=value)
+
+    # update new assertions
+    true = z3.BoolVal(True)
+    for constr in ctx_then.expected.layer:
+        ctx.expected.add(if_expr(test_ref, constr, true))
+    for constr in ctx_else.expected.layer:
+        ctx.expected.add(if_expr(test_ref, true, constr))
 
 
 @eval_stmt.register(astroid.Global)
