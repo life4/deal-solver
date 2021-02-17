@@ -20,3 +20,12 @@ def test_fail():
             raise ZeroDivisionError
     """)
     assert theorem.conclusion is Conclusion.FAIL
+
+
+def test_subclasses_builtin():
+    theorem = prove_f("""
+        @deal.raises(LookupError)
+        def f():
+            raise IndexError
+    """)
+    assert theorem.conclusion is Conclusion.OK
