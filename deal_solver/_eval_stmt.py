@@ -108,10 +108,12 @@ def eval_if_else(node: astroid.If, ctx: Context):
         ctx.expected.add(if_expr(test_ref, true, constr))
 
 
-@eval_expr.register(astroid.Raise)
+@eval_stmt.register(astroid.Raise)
 def eval_raise(node: astroid.Raise, ctx: Context):
     true = z3.BoolVal(True)
     for exc in (node.exc, node.cause):
+        if exc is None:
+            continue
         if isinstance(exc, astroid.Name):
             ctx.exceptions.add(name=exc.name, cond=true)
             continue

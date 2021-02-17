@@ -12,7 +12,7 @@ from ._exceptions import UnsupportedError
 from ._goal import Goal
 
 
-SUPPORTED_CONTRACTS = {'deal.pre', 'deal.post', 'deal.raises', 'deal.pure', 'deal.has'}
+SUPPORTED_CONTRACTS = {'deal.pre', 'deal.post', 'deal.raises'}
 SUPPORTED_MARKERS = {'deal.pure'}
 
 
