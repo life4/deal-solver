@@ -12,7 +12,7 @@ import z3
 from ._annotations import ann2sort
 from ._cached_property import cached_property
 from ._context import Context
-from ._eval_contracts import eval_contracts
+from ._eval_contracts import eval_contracts, Contracts
 from ._eval_stmt import eval_stmt
 from ._exceptions import ProveError, UnsupportedError
 from ._proxies import wrap
@@ -72,7 +72,7 @@ class Theorem:
         return ctx
 
     @cached_property
-    def contracts(self) -> typing.Dict[str, z3.Goal]:
+    def contracts(self) -> Contracts:
         return eval_contracts(
             decorators=self._func.decorators,
             ctx=self.context,
@@ -97,13 +97,21 @@ class Theorem:
 
         constraints = chain(
             self.context.expected,
-            self.contracts['post'],
+            self.contracts.post,
         )
         for constraint in constraints:
             yield z3.And(
-                *self.contracts['pre'],
+                *self.contracts.pre,
                 *self.context.given,
                 z3.Not(constraint),
+            )
+        for exc in self.context.exceptions:
+            if exc.name in self.contracts.raises:
+                continue
+            yield z3.And(
+                *self.contracts.pre,
+                *self.context.given,
+                exc.cond,
             )
 
     def reset(self) -> None:
@@ -114,6 +122,7 @@ class Theorem:
     def prove(self) -> None:
         if self.conclusion is not None:
             raise RuntimeError('already proved')
+        self.conclusion = Conclusion.OK
         for constraint in self.constraints:
             solver = z3.Solver(ctx=self.z3_context)
             solver.add(constraint)

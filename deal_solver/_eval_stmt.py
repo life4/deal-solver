@@ -108,6 +108,16 @@ def eval_if_else(node: astroid.If, ctx: Context):
         ctx.expected.add(if_expr(test_ref, true, constr))
 
 
+@eval_expr.register(astroid.Raise)
+def eval_raise(node: astroid.Raise, ctx: Context):
+    true = z3.BoolVal(True)
+    for exc in (node.exc, node.cause):
+        if isinstance(exc, astroid.Name):
+            ctx.exceptions.add(name=exc.name, cond=true)
+            continue
+        raise UnsupportedError(f'cannot interpret exception: {exc.as_string()}')
+
+
 @eval_stmt.register(astroid.Global)
 @eval_stmt.register(astroid.ImportFrom)
 @eval_stmt.register(astroid.Import)

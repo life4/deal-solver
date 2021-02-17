@@ -37,6 +37,38 @@ class Asserts:
         )
 
 
+class ExceptionInfo(typing.NamedTuple):
+    name: str
+    cond: Z3Bool
+
+
+class Exceptions:
+    _parent: typing.Optional['Exceptions']
+    layer: typing.List[ExceptionInfo]
+
+    def __init__(self, parent: typing.Optional['Exceptions'] = None) -> None:
+        self._parent = parent
+        self.layer = []
+
+    def make_child(self) -> 'Exceptions':
+        cls = type(self)
+        return cls(parent=self)
+
+    def add(self, *, name: str, cond: Z3Bool) -> None:
+        self.layer.append(ExceptionInfo(name=name, cond=cond))
+
+    def __iter__(self) -> typing.Iterator[ExceptionInfo]:
+        yield from self.layer
+        if self._parent:
+            yield from self._parent
+
+    def __repr__(self) -> str:
+        return '{n}({r})'.format(
+            n=type(self).__name__,
+            r=repr(self.layer),
+        )
+
+
 class Scope:
     _parent: typing.Optional['Scope']
     layer: typing.Dict[str, SortType]
@@ -107,6 +139,7 @@ class Context(typing.NamedTuple):
     scope: Scope
     given: Asserts
     expected: Asserts
+    exceptions: Exceptions
     trace: Trace
 
     @classmethod
@@ -116,6 +149,7 @@ class Context(typing.NamedTuple):
             scope=Scope.make_empty(),
             given=Asserts(),
             expected=Asserts(),
+            exceptions=Exceptions(),
             trace=Trace(),
         )
 
@@ -128,4 +162,5 @@ class Context(typing.NamedTuple):
             scope=self.scope.make_child(),
             given=self.given.make_child(),
             expected=self.expected.make_child(),
+            exceptions=self.exceptions.make_child(),
         )

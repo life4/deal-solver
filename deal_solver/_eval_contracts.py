@@ -16,6 +16,12 @@ SUPPORTED_CONTRACTS = {'deal.pre', 'deal.post', 'deal.raises', 'deal.pure', 'dea
 SUPPORTED_MARKERS = {'deal.pure'}
 
 
+class Contracts(typing.NamedTuple):
+    pre: Goal
+    post: Goal
+    raises: typing.Set[str]
+
+
 def get_contracts(decorators: typing.List) -> typing.Iterator[typing.Tuple[str, list]]:
     for contract in decorators:
         if isinstance(contract, astroid.Attribute):
@@ -50,39 +56,67 @@ def get_contracts(decorators: typing.List) -> typing.Iterator[typing.Tuple[str, 
             yield from get_contracts([expr.value])
 
 
-def eval_contracts(decorators: astroid.Decorators, ctx: Context) -> typing.Dict[str, Goal]:
-    goals = dict(
+def eval_contracts(decorators: astroid.Decorators, ctx: Context) -> Contracts:
+    goals = Contracts(
         pre=Goal(),
         post=Goal(),
+        raises=set(),
     )
     if not decorators:
         return goals
-    return_value = ctx.scope.get('return')
     for contract_name, args in get_contracts(decorators.nodes):
-        if contract_name not in {'pre', 'post'}:
-            continue
-        if contract_name == 'post' and return_value is None:
-            raise UnsupportedError('cannot resolve return value to check deal.post')
-        contract = args[0]
-        if not isinstance(contract, astroid.Lambda):
-            continue
-        if not contract.args:
-            continue
-
-        # make context
-        cargs = contract.args.arguments
-        contract_context = ctx
+        if contract_name == 'pre':
+            value = _eval_pre(ctx=ctx, args=args)
+            if value is None:
+                continue
+            goals.pre.add(value)
         if contract_name == 'post':
-            assert return_value is not None
-            # check post-condition in a new clear scope
-            # with mapping `return` value in it as an argument.
-            contract_context = contract_context.evolve(scope=Scope.make_empty())
-            contract_context.scope.set(
-                name=cargs[0].name,
-                value=return_value,
-            )
-
-        # eval contract
-        value = eval_expr(node=contract.body, ctx=contract_context)
-        goals[contract_name].add(value)
+            value = _eval_post(ctx=ctx, args=args)
+            if value is None:
+                continue
+            goals.post.add(value)
+        if contract_name == 'raises':
+            values = _eval_raises(ctx=ctx, args=args)
+            goals.raises.update(values)
     return goals
+
+
+def _eval_pre(ctx: Context, args: list):
+    contract = args[0]
+    if not isinstance(contract, astroid.Lambda):
+        return
+    if not contract.args:
+        return
+    # eval contract
+    return eval_expr(node=contract.body, ctx=ctx)
+
+
+def _eval_post(ctx: Context, args: list):
+    return_value = ctx.scope.get('return')
+    if return_value is None:
+        raise UnsupportedError('cannot resolve return value to check deal.post')
+    contract = args[0]
+    if not isinstance(contract, astroid.Lambda):
+        return
+    if not contract.args:
+        return
+
+    # make context
+    cargs = contract.args.arguments
+
+    # check post-condition in a new clear scope
+    # with mapping `return` value in it as an argument.
+    ctx = ctx.evolve(scope=Scope.make_empty())
+    ctx.scope.set(
+        name=cargs[0].name,
+        value=return_value,
+    )
+
+    # eval contract
+    return eval_expr(node=contract.body, ctx=ctx)
+
+
+def _eval_raises(ctx: Context, args: list):
+    for arg in args:
+        if isinstance(arg, astroid.Name):
+            yield arg.name

@@ -383,8 +383,8 @@ def _call_function(node: astroid.FunctionDef, ctx: Context, call_args=typing.Lis
     # we ask pre-conditions to be true
     # and promise post-condition to be true
     contracts = eval_contracts(decorators=node.decorators, ctx=func_ctx)
-    ctx.expected.add(contracts['pre'].as_expr())
-    ctx.given.add(contracts['post'].as_expr())
+    ctx.expected.add(contracts.pre.as_expr())
+    ctx.given.add(contracts.post.as_expr())
 
     return result
 
