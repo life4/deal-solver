@@ -29,3 +29,15 @@ def test_subclasses_builtin():
             raise IndexError
     """)
     assert theorem.conclusion is Conclusion.OK
+
+
+def test_subclasses_custom_class():
+    theorem = prove_f("""
+        class Custom(IndexError):
+            pass
+
+        @deal.raises(LookupError)
+        def f():
+            raise Custom
+    """)
+    assert theorem.conclusion is Conclusion.OK

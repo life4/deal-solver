@@ -38,7 +38,7 @@ class Asserts:
 
 
 class ExceptionInfo(typing.NamedTuple):
-    name: str
+    names: typing.Set[str]
     cond: Z3Bool
 
 
@@ -54,8 +54,8 @@ class Exceptions:
         cls = type(self)
         return cls(parent=self)
 
-    def add(self, *, name: str, cond: Z3Bool) -> None:
-        self.layer.append(ExceptionInfo(name=name, cond=cond))
+    def add(self, *, names: typing.Set[str], cond: Z3Bool) -> None:
+        self.layer.append(ExceptionInfo(names=names, cond=cond))
 
     def __iter__(self) -> typing.Iterator[ExceptionInfo]:
         yield from self.layer

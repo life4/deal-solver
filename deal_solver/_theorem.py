@@ -1,5 +1,4 @@
 # stdlib
-import builtins
 import enum
 import typing
 from itertools import chain
@@ -107,23 +106,13 @@ class Theorem:
                 z3.Not(constraint),
             )
         for exc in self.context.exceptions:
-            if self._allowed_exc(exc.name):
+            if exc.names & self.contracts.raises:
                 continue
             yield z3.And(
                 *self.contracts.pre,
                 *self.context.given,
                 exc.cond,
             )
-
-    def _allowed_exc(self, name: str) -> bool:
-        if name in self.contracts.raises:
-            return True
-        exc = getattr(builtins, name, None)
-        if exc is not None:
-            for parent in self._get_all_bases(exc):
-                if parent in self.contracts.raises:
-                    return True
-        return False
 
     @classmethod
     def _get_all_bases(cls, exc) -> typing.Iterator[str]:

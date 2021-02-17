@@ -1,9 +1,11 @@
 # external
+import typing
 import astroid
 import z3
 
 # app
 from ._annotations import ann2sort
+from ._ast import infer
 from ._context import Context
 from ._eval_expr import eval_expr
 from ._exceptions import UnsupportedError
@@ -114,10 +116,24 @@ def eval_raise(node: astroid.Raise, ctx: Context):
     for exc in (node.exc, node.cause):
         if exc is None:
             continue
+        names = set()
         if isinstance(exc, astroid.Name):
-            ctx.exceptions.add(name=exc.name, cond=true)
+            names.add(exc.name)
+            names.update(_get_all_bases(exc))
+        ctx.exceptions.add(names=names, cond=true)
+
+
+def _get_all_bases(node) -> typing.Iterator[str]:
+    if isinstance(node, astroid.Name):
+        yield node.name
+    def_nodes = infer(node)
+    for def_node in def_nodes:
+        if not isinstance(def_node, astroid.ClassDef):
             continue
-        raise UnsupportedError(f'cannot interpret exception: {exc.as_string()}')
+        for parent_node in def_node.bases:
+            assert isinstance(parent_node, astroid.Name)
+            yield parent_node.name
+            yield from _get_all_bases(parent_node)
 
 
 @eval_stmt.register(astroid.Global)
