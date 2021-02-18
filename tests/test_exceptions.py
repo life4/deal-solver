@@ -81,3 +81,21 @@ def test_if_else_fail():
                 raise ValueError
     """)
     assert theorem.conclusion is Conclusion.FAIL
+
+
+def test_raise_from_first():
+    theorem = prove_f("""
+        @deal.raises(ZeroDivisionError)
+        def f():
+            raise ValueError from ZeroDivisionError
+    """)
+    assert theorem.conclusion is Conclusion.OK
+
+
+def test_raise_from_second():
+    theorem = prove_f("""
+        @deal.raises(ValueError)
+        def f():
+            raise ValueError from ZeroDivisionError
+    """)
+    assert theorem.conclusion is Conclusion.OK

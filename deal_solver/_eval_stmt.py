@@ -126,27 +126,27 @@ def eval_if_else(node: astroid.If, ctx: Context):
 @eval_stmt.register(astroid.Raise)
 def eval_raise(node: astroid.Raise, ctx: Context):
     true = z3.BoolVal(True)
+    names: typing.Set[str] = set()
     for exc in (node.exc, node.cause):
         if exc is None:
             continue
-        names = set()
         if isinstance(exc, astroid.Name):
-            names.add(exc.name)
             names.update(_get_all_bases(exc))
-        ctx.exceptions.add(names=names, cond=true)
+    ctx.exceptions.add(names=names, cond=true)
 
 
 def _get_all_bases(node) -> typing.Iterator[str]:
-    if isinstance(node, astroid.Name):
+    if isinstance(node, astroid.Instance):
+        node = node._proxied
+    if not isinstance(node, astroid.ClassDef):
         yield node.name
     def_nodes = infer(node)
     for def_node in def_nodes:
         if not isinstance(def_node, astroid.ClassDef):
             continue
         for parent_node in def_node.bases:
-            assert isinstance(parent_node, astroid.Name)
-            yield parent_node.name
-            yield from _get_all_bases(parent_node)
+            if isinstance(parent_node, astroid.Name):
+                yield from _get_all_bases(parent_node)
 
 
 @eval_stmt.register(astroid.Global)
