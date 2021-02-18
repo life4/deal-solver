@@ -130,20 +130,21 @@ def eval_raise(node: astroid.Raise, ctx: Context):
     for exc in (node.exc, node.cause):
         if exc is None:
             continue
-        if isinstance(exc, astroid.Name):
-            names.update(_get_all_bases(exc))
+        names.update(_get_all_bases(exc))
     ctx.exceptions.add(names=names, cond=true)
 
 
 def _get_all_bases(node) -> typing.Iterator[str]:
-    if isinstance(node, astroid.Instance):
-        node = node._proxied
-    if not isinstance(node, astroid.ClassDef):
-        yield node.name
     def_nodes = infer(node)
     for def_node in def_nodes:
+        if isinstance(def_node, astroid.Instance):
+            def_node = def_node._proxied
+        if isinstance(node, astroid.Name):
+            yield node.name
+
         if not isinstance(def_node, astroid.ClassDef):
             continue
+        yield def_node.name
         for parent_node in def_node.bases:
             if isinstance(parent_node, astroid.Name):
                 yield from _get_all_bases(parent_node)
