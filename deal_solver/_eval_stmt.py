@@ -109,6 +109,19 @@ def eval_if_else(node: astroid.If, ctx: Context):
     for constr in ctx_else.expected.layer:
         ctx.expected.add(if_expr(test_ref, true, constr))
 
+    # update new exceptions
+    false = z3.BoolVal(False)
+    for exc in ctx_then.exceptions.layer:
+        ctx.exceptions.add(
+            names=exc.names,
+            cond=if_expr(test_ref, exc.cond, false),
+        )
+    for exc in ctx_else.exceptions.layer:
+        ctx.exceptions.add(
+            names=exc.names,
+            cond=if_expr(test_ref, false, exc.cond),
+        )
+
 
 @eval_stmt.register(astroid.Raise)
 def eval_raise(node: astroid.Raise, ctx: Context):

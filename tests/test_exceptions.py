@@ -41,3 +41,43 @@ def test_subclasses_custom_class():
             raise Custom
     """)
     assert theorem.conclusion is Conclusion.OK
+
+
+def test_if_then_ok():
+    theorem = prove_f("""
+        def f():
+            if False:
+                raise ValueError
+    """)
+    assert theorem.conclusion is Conclusion.OK
+
+
+def test_if_then_fail():
+    theorem = prove_f("""
+        def f():
+            if True:
+                raise ValueError
+    """)
+    assert theorem.conclusion is Conclusion.FAIL
+
+
+def test_if_else_ok():
+    theorem = prove_f("""
+        def f():
+            if True:
+                pass
+            else:
+                raise ValueError
+    """)
+    assert theorem.conclusion is Conclusion.OK
+
+
+def test_if_else_fail():
+    theorem = prove_f("""
+        def f():
+            if False:
+                pass
+            else:
+                raise ValueError
+    """)
+    assert theorem.conclusion is Conclusion.FAIL
