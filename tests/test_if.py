@@ -113,3 +113,13 @@ def test_if_else_shapes_assert_ok():
                 assert a < 10
     """)
     assert theorem.conclusion is Conclusion.OK
+
+
+def test_if_dont_interrupt():
+    theorem = prove_f("""
+        def f(a: int):
+            if a > 0:
+                pass
+            assert False
+    """)
+    assert theorem.conclusion is Conclusion.FAIL

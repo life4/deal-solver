@@ -117,3 +117,25 @@ def test_raise_from_second():
             raise ValueError from ZeroDivisionError
     """)
     assert theorem.conclusion is Conclusion.OK
+
+
+def test_raise_shadow_assert():
+    theorem = prove_f("""
+        @deal.raises(ValueError)
+        def f():
+            if True:
+                raise ValueError
+            assert False
+    """)
+    assert theorem.conclusion is Conclusion.OK
+
+
+def test_raise_do_not_shadow_assert():
+    theorem = prove_f("""
+        @deal.raises(ValueError)
+        def f():
+            if False:
+                raise ValueError
+            assert False
+    """)
+    assert theorem.conclusion is Conclusion.FAIL

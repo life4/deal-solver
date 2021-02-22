@@ -21,6 +21,7 @@ from ._transformer import if_transformer
 
 class Conclusion(enum.Enum):
     OK = 'proved!'
+    PARTIAL = 'partially proved'
     SKIP = 'skipped'
     FAIL = 'failed'
 

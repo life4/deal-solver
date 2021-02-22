@@ -57,6 +57,14 @@ class Exceptions:
     def add(self, *, names: typing.Set[str], cond: Z3Bool) -> None:
         self.layer.append(ExceptionInfo(names=names, cond=cond))
 
+    @property
+    def empty(self) -> bool:
+        if self.layer:
+            return False
+        if self._parent:
+            return self._parent.empty
+        return True
+
     def __iter__(self) -> typing.Iterator[ExceptionInfo]:
         yield from self.layer
         if self._parent:
@@ -152,6 +160,13 @@ class Context(typing.NamedTuple):
             exceptions=Exceptions(),
             trace=Trace(),
         )
+
+    @property
+    def interrupted(self) -> Z3Bool:
+        if self.exceptions.empty:
+            return z3.BoolVal(False, ctx=self.z3_ctx)
+        constr = [exc.cond for exc in self.exceptions]
+        return z3.Or(*constr)
 
     @property
     def evolve(self) -> typing.Callable[..., 'Context']:

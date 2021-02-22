@@ -47,7 +47,9 @@ def eval_assert(node: astroid.Assert, ctx: Context):
     expr = eval_expr(node=node.test, ctx=ctx)
     if isinstance(expr, ProxySort):
         expr = expr.as_bool
-    ctx.expected.add(expr)
+    true = z3.BoolVal(True, ctx=ctx.z3_ctx)
+    expr = z3.If(ctx.interrupted, true, expr, ctx=ctx.z3_ctx)
+    ctx.expected.add(expr)  # type: ignore
 
 
 @eval_stmt.register(astroid.Expr)
@@ -103,14 +105,14 @@ def eval_if_else(node: astroid.If, ctx: Context):
         ctx.scope.set(name=var_name, value=value)
 
     # update new assertions
-    true = z3.BoolVal(True)
+    true = z3.BoolVal(True, ctx=ctx.z3_ctx)
     for constr in ctx_then.expected.layer:
         ctx.expected.add(if_expr(test_ref, constr, true))
     for constr in ctx_else.expected.layer:
         ctx.expected.add(if_expr(test_ref, true, constr))
 
     # update new exceptions
-    false = z3.BoolVal(False)
+    false = z3.BoolVal(False, ctx=ctx.z3_ctx)
     for exc in ctx_then.exceptions.layer:
         ctx.exceptions.add(
             names=exc.names,
@@ -125,7 +127,7 @@ def eval_if_else(node: astroid.If, ctx: Context):
 
 @eval_stmt.register(astroid.Raise)
 def eval_raise(node: astroid.Raise, ctx: Context):
-    true = z3.BoolVal(True)
+    true = z3.BoolVal(True, ctx=ctx.z3_ctx)
     names: typing.Set[str] = set()
     for exc in (node.exc, node.cause):
         if exc is None:
