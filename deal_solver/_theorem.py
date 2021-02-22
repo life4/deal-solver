@@ -143,12 +143,6 @@ class Theorem:
                 ),
             )
 
-    @classmethod
-    def _get_all_bases(cls, exc) -> typing.Iterator[str]:
-        for parent in exc.__bases__:
-            yield parent.__name__
-            yield from cls._get_all_bases(parent)
-
     def reset(self) -> None:
         func = self._func
         self.__dict__.clear()
