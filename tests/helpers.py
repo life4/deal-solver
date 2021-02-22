@@ -6,11 +6,9 @@ def prove_f(text: str) -> Theorem:
     theorems = list(Theorem.from_text(text))
     theorem = theorems[-1]
     assert theorem.name == 'f'
-    assert theorem.error is None
-    assert theorem.example is None
+    assert theorem.result is None
     theorem.prove()
-    if theorem.conclusion != Conclusion.OK:
-        print('error:', repr(theorem.error))
-        print('constraint:', repr(list(theorem.constraints)))
-        print('example:', theorem.example)
+    assert theorem.result is not None
+    if theorem.result.conclusion != Conclusion.OK:
+        print(repr(theorem.result))
     return theorem

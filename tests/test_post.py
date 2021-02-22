@@ -20,7 +20,7 @@ def test_fail():
             return a
     """)
     assert theorem.conclusion is Conclusion.FAIL
-    assert 'a = 13' in str(theorem.example)
+    assert 'a = 13' in str(theorem.result.example)
 
 
 def test_fail_1_out_of_2():
@@ -31,7 +31,8 @@ def test_fail_1_out_of_2():
             return a ** 2
     """)
     assert theorem.conclusion is Conclusion.FAIL
-    assert 'a = 3' in str(theorem.example) or 'a = -3' in str(theorem.example)
+    actual = str(theorem.result.example)
+    assert 'a = 3' in actual or 'a = -3' in actual
 
 
 def test_pre_post_condition_name_conflict():

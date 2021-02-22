@@ -1,7 +1,6 @@
 # stdlib
 import enum
 import typing
-from itertools import chain
 from textwrap import dedent
 
 # external
@@ -17,6 +16,7 @@ from ._eval_stmt import eval_stmt
 from ._exceptions import ProveError, UnsupportedError
 from ._proxies import wrap
 from ._transformer import if_transformer
+from ._types import Z3Bool
 
 
 class Conclusion(enum.Enum):
@@ -34,11 +34,21 @@ class Conclusion(enum.Enum):
         return 'yellow'
 
 
-class Theorem:
-    _func: astroid.FunctionDef
-    conclusion: typing.Optional[Conclusion] = None
+class TheoremResult(typing.NamedTuple):
+    conclusion: Conclusion
+    description: str
     error: typing.Optional[Exception] = None
     example: typing.Optional[z3.ModelRef] = None
+
+
+class Constraint(typing.NamedTuple):
+    condition: Z3Bool
+    description: str
+
+
+class Theorem:
+    _func: astroid.FunctionDef
+    result: typing.Optional[TheoremResult] = None
 
     def __init__(self, node: astroid.FunctionDef) -> None:
         self._func = node
@@ -58,6 +68,13 @@ class Theorem:
     @property
     def name(self) -> str:
         return self._func.name or 'unknown_function'
+
+    @property
+    def conclusion(self) -> Conclusion:
+        if self.result is None:
+            msg = 'prove() must be called before accessing conclusion'
+            raise RuntimeError(msg)
+        return self.result.conclusion
 
     @cached_property
     def z3_context(self) -> typing.Optional[z3.Context]:
@@ -93,26 +110,37 @@ class Theorem:
         return result
 
     @property
-    def constraints(self) -> typing.Iterator[z3.BoolRef]:
+    def constraints(self) -> typing.Iterator[Constraint]:
         eval_stmt(node=self._func, ctx=self.context)
 
-        constraints = chain(
-            self.context.expected,
-            self.contracts.post,
-        )
-        for constraint in constraints:
-            yield z3.And(
-                *self.contracts.pre,
-                *self.context.given,
-                z3.Not(constraint),
+        for constraint in self.context.expected:
+            yield Constraint(
+                description='assertion',
+                condition=z3.And(
+                    *self.contracts.pre,
+                    *self.context.given,
+                    z3.Not(constraint),
+                ),
+            )
+        for constraint in self.contracts.post:
+            yield Constraint(
+                description='post-condition',
+                condition=z3.And(
+                    *self.contracts.pre,
+                    *self.context.given,
+                    z3.Not(constraint),
+                ),
             )
         for exc in self.context.exceptions:
             if exc.names & self.contracts.raises:
                 continue
-            yield z3.And(
-                *self.contracts.pre,
-                *self.context.given,
-                exc.cond,
+            yield Constraint(
+                description=f'exception {exc.names}',
+                condition=z3.And(
+                    *self.contracts.pre,
+                    *self.context.given,
+                    exc.cond,
+                ),
             )
 
     @classmethod
@@ -127,36 +155,56 @@ class Theorem:
         self._func = func
 
     def prove(self) -> None:
-        if self.conclusion is not None:
+        if self.result is not None:
             raise RuntimeError('already proved')
-        self.conclusion = Conclusion.OK
+        self.result = TheoremResult(
+            conclusion=Conclusion.OK,
+            description='nothing to prove',
+        )
         for constraint in self.constraints:
             solver = z3.Solver(ctx=self.z3_context)
-            solver.add(constraint)
-            ok = self._prove(solver=solver)
+            solver.add(constraint.condition)
+            ok = self._prove(solver=solver, descr=constraint.description)
             if not ok:
                 return
 
-    def _prove(self, solver: z3.Solver) -> bool:
+    def _prove(self, solver: z3.Solver, descr: str) -> bool:
         try:
             result = solver.check()
         except UnsupportedError as exc:
-            self.conclusion = Conclusion.SKIP
-            self.error = exc
+            self.result = TheoremResult(
+                conclusion=Conclusion.SKIP,
+                description=descr,
+                error=exc,
+                example=None,
+            )
             return True
 
         if result == z3.unsat:
-            self.conclusion = Conclusion.OK
+            self.result = TheoremResult(
+                conclusion=Conclusion.OK,
+                description=descr,
+                error=None,
+                example=None,
+            )
             return True
 
         if result == z3.unknown:
-            self.conclusion = Conclusion.SKIP
-            self.error = ProveError('cannot validate theorem')
+            self.result = TheoremResult(
+                conclusion=Conclusion.SKIP,
+                description=descr,
+                error=ProveError('cannot validate theorem'),
+                example=None,
+            )
             return True
 
         if result == z3.sat:
-            self.conclusion = Conclusion.FAIL
-            self.example = solver.model()
+            self.result = TheoremResult(
+                conclusion=Conclusion.FAIL,
+                description=descr,
+                error=None,
+                example=solver.model(),
+            )
             return False
 
         raise RuntimeError('unreachable')
