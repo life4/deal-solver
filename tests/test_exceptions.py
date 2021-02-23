@@ -139,3 +139,23 @@ def test_raise_do_not_shadow_assert():
             assert False
     """)
     assert theorem.conclusion is Conclusion.FAIL
+
+
+def test_return_shadows_raise():
+    theorem = prove_f("""
+        def f():
+            if True:
+                return 123
+            raise Exception
+    """)
+    assert theorem.conclusion is Conclusion.OK
+
+
+def test_return_not_shadow_raise():
+    theorem = prove_f("""
+        def f():
+            if False:
+                return 123
+            raise Exception
+    """)
+    assert theorem.conclusion is Conclusion.FAIL

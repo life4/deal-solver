@@ -33,7 +33,7 @@ class Conclusion(enum.Enum):
         return 'yellow'
 
 
-class TheoremResult(typing.NamedTuple):
+class Proof(typing.NamedTuple):
     conclusion: Conclusion
     description: str
     error: typing.Optional[Exception] = None
@@ -47,7 +47,6 @@ class Constraint(typing.NamedTuple):
 
 class Theorem:
     _func: astroid.FunctionDef
-    result: typing.Optional[TheoremResult] = None
 
     def __init__(self, node: astroid.FunctionDef) -> None:
         self._func = node
@@ -67,13 +66,6 @@ class Theorem:
     @property
     def name(self) -> str:
         return self._func.name or 'unknown_function'
-
-    @property
-    def conclusion(self) -> Conclusion:
-        if self.result is None:
-            msg = 'prove() must be called before accessing conclusion'
-            raise RuntimeError(msg)
-        return self.result.conclusion
 
     @cached_property
     def z3_context(self) -> typing.Optional[z3.Context]:
@@ -147,58 +139,54 @@ class Theorem:
         self.__dict__.clear()
         self._func = func
 
-    def prove(self) -> None:
-        if self.result is not None:
-            raise RuntimeError('already proved')
-        self.result = TheoremResult(
+    def prove(self) -> Proof:
+        result = Proof(
             conclusion=Conclusion.OK,
             description='nothing to prove',
         )
         for constraint in self.constraints:
             solver = z3.Solver(ctx=self.z3_context)
             solver.add(constraint.condition)
-            ok = self._prove(solver=solver, descr=constraint.description)
-            if not ok:
-                return
+            result = self._prove(solver=solver, descr=constraint.description)
+            if result.conclusion == Conclusion.FAIL:
+                return result
+        return result
 
-    def _prove(self, solver: z3.Solver, descr: str) -> bool:
+    @staticmethod
+    def _prove(solver: z3.Solver, descr: str) -> Proof:
         try:
             result = solver.check()
         except UnsupportedError as exc:
-            self.result = TheoremResult(
+            return Proof(
                 conclusion=Conclusion.SKIP,
                 description=descr,
                 error=exc,
                 example=None,
             )
-            return True
 
         if result == z3.unsat:
-            self.result = TheoremResult(
+            return Proof(
                 conclusion=Conclusion.OK,
                 description=descr,
                 error=None,
                 example=None,
             )
-            return True
 
         if result == z3.unknown:
-            self.result = TheoremResult(
+            return Proof(
                 conclusion=Conclusion.SKIP,
                 description=descr,
                 error=ProveError('cannot validate theorem'),
                 example=None,
             )
-            return True
 
         if result == z3.sat:
-            self.result = TheoremResult(
+            return Proof(
                 conclusion=Conclusion.FAIL,
                 description=descr,
                 error=None,
                 example=solver.model(),
             )
-            return False
 
         raise RuntimeError('unreachable')
 
