@@ -3,12 +3,12 @@ import typing
 
 # external
 import astroid
+import z3
 
 # app
 from ._ast import get_name
 from ._context import Context, Scope
 from ._eval_expr import eval_expr
-from ._exceptions import UnsupportedError
 from ._goal import Goal
 
 
@@ -71,10 +71,10 @@ def eval_contracts(decorators: astroid.Decorators, ctx: Context) -> Contracts:
                 continue
             goals.pre.add(value)
         if contract_name == 'post':
-            value = _eval_post(ctx=ctx, args=args)
-            if value is None:
-                continue
-            goals.post.add(value)
+            for value in _eval_post(ctx=ctx, args=args):
+                if value is None:
+                    continue
+                goals.post.add(value)
         if contract_name == 'raises':
             values = _eval_raises(ctx=ctx, args=args)
             goals.raises.update(values)
@@ -92,28 +92,22 @@ def _eval_pre(ctx: Context, args: list):
 
 
 def _eval_post(ctx: Context, args: list):
-    return_value = ctx.return_value
-    if return_value is None:
-        raise UnsupportedError('cannot resolve return value to check deal.post')
     contract = args[0]
     if not isinstance(contract, astroid.Lambda):
         return
     if not contract.args:
         return
-
-    # make context
     cargs = contract.args.arguments
-
-    # check post-condition in a new clear scope
-    # with mapping `return` value in it as an argument.
-    ctx = ctx.evolve(scope=Scope.make_empty())
-    ctx.scope.set(
-        name=cargs[0].name,
-        value=return_value,
-    )
-
-    # eval contract
-    return eval_expr(node=contract.body, ctx=ctx)
+    for ret in ctx.returns:
+        ctx = ctx.evolve(scope=Scope.make_empty())
+        ctx.scope.set(
+            name=cargs[0].name,
+            value=ret.value,
+        )
+        yield z3.Or(
+            z3.Not(ret.cond),
+            eval_expr(node=contract.body, ctx=ctx),
+        )
 
 
 def _eval_raises(ctx: Context, args: list):

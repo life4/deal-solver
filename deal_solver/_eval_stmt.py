@@ -75,7 +75,7 @@ def eval_assign(node: astroid.Assign, ctx: Context):
 def eval_return(node: astroid.Return, ctx: Context):
     ctx.returns.add(ReturnInfo(
         value=eval_expr(node=node.value, ctx=ctx),
-        cond=z3.BoolVal(True, ctx=ctx.z3_ctx),
+        cond=z3.Not(ctx.interrupted),
     ))
 
 
@@ -142,13 +142,15 @@ def eval_if_else(node: astroid.If, ctx: Context):
 
 @eval_stmt.register(astroid.Raise)
 def eval_raise(node: astroid.Raise, ctx: Context):
-    true = z3.BoolVal(True, ctx=ctx.z3_ctx)
     names: typing.Set[str] = set()
     for exc in (node.exc, node.cause):
         if exc is None:
             continue
         names.update(_get_all_bases(exc))
-    ctx.exceptions.add(ExceptionInfo(names=names, cond=true))
+    ctx.exceptions.add(ExceptionInfo(
+        names=names,
+        cond=z3.Not(ctx.interrupted),
+    ))
 
 
 def _get_all_bases(node) -> typing.Iterator[str]:
