@@ -11,7 +11,7 @@ import z3
 from ._annotations import ann2sort
 from ._cached_property import cached_property
 from ._context import Context
-from ._eval_contracts import eval_contracts, Contracts
+from ._eval_contracts import Contract, eval_contracts, Contracts
 from ._eval_stmt import eval_stmt
 from ._exceptions import ProveError, UnsupportedError
 from ._proxies import wrap
@@ -51,6 +51,15 @@ class Theorem:
     def __init__(self, node: astroid.FunctionDef) -> None:
         self._func = node
 
+    @staticmethod
+    def get_contracts(func: astroid.FunctionDef) -> typing.Iterator[Contract]:
+        """The function should yield the information about contracts.
+
+        Redefine this function for your needs.
+        See tests/helpers.py for an example.
+        """
+        raise NotImplementedError
+
     @classmethod
     def from_text(cls, content: str) -> typing.Iterator['Theorem']:
         content = dedent(content)
@@ -74,7 +83,7 @@ class Theorem:
 
     @cached_property
     def context(self) -> Context:
-        ctx = Context.make_empty()
+        ctx = Context.make_empty(get_contracts=self.get_contracts)
         ctx = ctx.evolve(z3_ctx=self.z3_context)
         for name, value in self.arguments.items():
             ctx.scope.set(name=name, value=value)
@@ -82,10 +91,7 @@ class Theorem:
 
     @cached_property
     def contracts(self) -> Contracts:
-        return eval_contracts(
-            decorators=self._func.decorators,
-            ctx=self.context,
-        )
+        return eval_contracts(func=self._func, ctx=self.context)
 
     @cached_property
     def arguments(self) -> typing.Dict[str, z3.SortRef]:

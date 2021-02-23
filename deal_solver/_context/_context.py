@@ -36,9 +36,11 @@ class Context(typing.NamedTuple):
     # It is used to mock recursive calls.
     trace: Trace
 
+    get_contracts: typing.Callable[[typing.Any], typing.Iterator]
+
     @classmethod
-    def make_empty(cls) -> 'Context':
-        return cls(
+    def make_empty(cls, *, get_contracts, **kwargs) -> 'Context':
+        obj = cls(
             z3_ctx=None,
             scope=Scope.make_empty(),
             given=Layer(),
@@ -46,7 +48,9 @@ class Context(typing.NamedTuple):
             exceptions=Layer(),
             returns=Layer(),
             trace=Trace(),
+            get_contracts=get_contracts,
         )
+        return obj.evolve(**kwargs)
 
     @property
     def interrupted(self) -> Z3Bool:

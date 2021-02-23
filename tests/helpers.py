@@ -1,9 +1,31 @@
+import typing
+
+import astroid
+
 # project
-from deal_solver import Theorem, Proof
+from deal_solver import Contract, Theorem, Proof
+from deal_solver._ast import get_name
+
+
+class TestTheorem(Theorem):
+    @staticmethod
+    def get_contracts(func: astroid.FunctionDef) -> typing.Iterator[Contract]:
+        """
+        Redefine this function for your needs.
+        """
+        if not func.decorators:
+            return
+        for contract in func.decorators.nodes:
+            name = get_name(contract.func)
+            assert name
+            yield Contract(
+                name=name.split('.')[-1],
+                args=contract.args,
+            )
 
 
 def prove_f(text: str) -> Proof:
-    theorems = list(Theorem.from_text(text))
+    theorems = list(TestTheorem.from_text(text))
     theorem = theorems[-1]
     assert theorem.name == 'f'
     result = theorem.prove()

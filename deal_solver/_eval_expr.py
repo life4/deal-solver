@@ -370,7 +370,7 @@ def _call_function(node: astroid.FunctionDef, ctx: Context, call_args=typing.Lis
     from ._eval_stmt import eval_stmt
 
     # put arguments into the scope
-    func_ctx = Context.make_empty().evolve(trace=ctx.trace)
+    func_ctx = Context.make_empty(get_contracts=ctx.get_contracts, trace=ctx.trace)
     for arg, value in zip(node.args.args or [], call_args):
         func_ctx.scope.set(name=arg.name, value=value)
 
@@ -382,7 +382,7 @@ def _call_function(node: astroid.FunctionDef, ctx: Context, call_args=typing.Lis
 
     # we ask pre-conditions to be true
     # and promise post-condition to be true
-    contracts = eval_contracts(decorators=node.decorators, ctx=func_ctx)
+    contracts = eval_contracts(func=node, ctx=func_ctx)
     ctx.expected.add(contracts.pre.as_expr())
     ctx.given.add(contracts.post.as_expr())
 

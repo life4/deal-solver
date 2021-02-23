@@ -6,14 +6,15 @@ import astroid
 import z3
 
 # app
-from ._ast import get_name
 from ._context import Context, Scope
 from ._eval_expr import eval_expr
 from ._goal import Goal
+from ._types import AstNode
 
 
-SUPPORTED_CONTRACTS = {'deal.pre', 'deal.post', 'deal.raises'}
-SUPPORTED_MARKERS = {'deal.pure'}
+class Contract(typing.NamedTuple):
+    name: str
+    args: typing.List[AstNode]
 
 
 class Contracts(typing.NamedTuple):
@@ -22,61 +23,25 @@ class Contracts(typing.NamedTuple):
     raises: typing.Set[str]
 
 
-def get_contracts(decorators: typing.List) -> typing.Iterator[typing.Tuple[str, list]]:
-    for contract in decorators:
-        if isinstance(contract, astroid.Attribute):
-            name = get_name(contract)
-            if name not in SUPPORTED_MARKERS:
-                continue
-            yield name.split('.')[-1], []
-
-        if isinstance(contract, astroid.Call):
-            if not isinstance(contract.func, astroid.Attribute):
-                continue
-            name = get_name(contract.func)
-            if name == 'deal.chain':
-                yield from get_contracts(contract.args)
-            if name not in SUPPORTED_CONTRACTS:
-                continue
-            yield name.split('.')[-1], contract.args
-
-        # infer assigned value
-        if isinstance(contract, astroid.Name):
-            assigments = contract.lookup(contract.name)[1]
-            if not assigments:
-                continue
-            # use only the closest assignment
-            expr = assigments[0]
-            # can it be not an assignment? IDK
-            if not isinstance(expr, astroid.AssignName):  # pragma: no cover
-                continue
-            expr = expr.parent
-            if not isinstance(expr, astroid.Assign):  # pragma: no cover
-                continue
-            yield from get_contracts([expr.value])
-
-
-def eval_contracts(decorators: astroid.Decorators, ctx: Context) -> Contracts:
+def eval_contracts(func: astroid.FunctionDef, ctx: Context) -> Contracts:
     goals = Contracts(
         pre=Goal(),
         post=Goal(),
         raises=set(),
     )
-    if not decorators:
-        return goals
-    for contract_name, args in get_contracts(decorators.nodes):
-        if contract_name == 'pre':
-            value = _eval_pre(ctx=ctx, args=args)
+    for contract in ctx.get_contracts(func):
+        if contract.name == 'pre':
+            value = _eval_pre(ctx=ctx, args=contract.args)
             if value is None:
                 continue
             goals.pre.add(value)
-        if contract_name == 'post':
-            for value in _eval_post(ctx=ctx, args=args):
+        if contract.name == 'post':
+            for value in _eval_post(ctx=ctx, args=contract.args):
                 if value is None:
                     continue
                 goals.post.add(value)
-        if contract_name == 'raises':
-            values = _eval_raises(ctx=ctx, args=args)
+        if contract.name == 'raises':
+            values = _eval_raises(ctx=ctx, args=contract.args)
             goals.raises.update(values)
     return goals
 
