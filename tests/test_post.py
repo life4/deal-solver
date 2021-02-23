@@ -44,3 +44,41 @@ def test_pre_post_condition_name_conflict():
             return a * 2
     """)
     assert theorem.conclusion is Conclusion.OK
+
+
+def test_post_condition_branching():
+    theorem = prove_f("""
+        @deal.post(lambda r: r >= 0)
+        def f(a: int) -> int:
+            if a > 0:
+                return a
+            else:
+                return -a
+    """)
+    assert theorem.conclusion is Conclusion.OK
+
+
+def test_post_condition_branching_no_else():
+    theorem = prove_f("""
+        @deal.post(lambda r: r >= 0)
+        def f(a: int) -> int:
+            if a > 0:
+                return a
+            return -a
+    """)
+    assert theorem.conclusion is Conclusion.OK
+
+
+def test_post_condition_branching_many_branches():
+    theorem = prove_f("""
+        @deal.post(lambda r: r >= 0)
+        def f(a: int) -> int:
+            if a > 20:
+                return a-20
+            if a > 10:
+                return a-10
+            if a > 0:
+                return a
+            return -a
+    """)
+    assert theorem.conclusion is Conclusion.OK

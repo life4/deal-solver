@@ -85,3 +85,17 @@ def test_subcall_pre_contract_fail():
             assert another(a) > 5
     """)
     assert theorem.conclusion is Conclusion.FAIL
+
+
+def test_subcall_many_returns():
+    theorem = prove_f("""
+        @deal.post(lambda r: r >= 0)
+        def my_abs(a: int) -> int:
+            if a > 0:
+                return a
+            return -a
+
+        def f(a: int) -> int:
+            assert my_abs(a) * 2 >= 0
+    """)
+    assert theorem.conclusion is Conclusion.OK

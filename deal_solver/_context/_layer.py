@@ -20,10 +20,13 @@ class ReturnInfo(typing.NamedTuple):
     cond: Z3Bool
 
     def merge(self, other: 'ReturnInfo') -> 'ReturnInfo':
+        from .._proxies import if_expr
+
+        true = z3.BoolVal(True)
         cls = type(self)
         return cls(
-            cond=z3.Or(self.cond, other.cond),
-            value=z3.If(self.cond, self.value, other.value),
+            cond=if_expr(self.cond, true, other.cond),
+            value=if_expr(self.cond, self.value, other.value),
         )
 
 
