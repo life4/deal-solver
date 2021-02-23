@@ -7,8 +7,7 @@ import z3
 
 # app
 from .._types import Z3Bool
-from ._asserts import Asserts
-from ._exceptions import Exceptions
+from ._layer import Layer, ExceptionInfo
 from ._scope import Scope
 from ._trace import Trace
 
@@ -16,9 +15,9 @@ from ._trace import Trace
 class Context(typing.NamedTuple):
     z3_ctx: typing.Optional[z3.Context]
     scope: Scope
-    given: Asserts
-    expected: Asserts
-    exceptions: Exceptions
+    given: Layer[Z3Bool]
+    expected: Layer[Z3Bool]
+    exceptions: Layer[ExceptionInfo]
     trace: Trace
 
     @classmethod
@@ -26,18 +25,17 @@ class Context(typing.NamedTuple):
         return cls(
             z3_ctx=None,
             scope=Scope.make_empty(),
-            given=Asserts(),
-            expected=Asserts(),
-            exceptions=Exceptions(),
+            given=Layer(),
+            expected=Layer(),
+            exceptions=Layer(),
             trace=Trace(),
         )
 
     @property
     def interrupted(self) -> Z3Bool:
-        if self.exceptions.empty:
-            return z3.BoolVal(False, ctx=self.z3_ctx)
+        false = z3.BoolVal(False, ctx=self.z3_ctx)
         constr = [exc.cond for exc in self.exceptions]
-        return z3.Or(*constr)
+        return z3.Or(false, *constr)
 
     @property
     def evolve(self) -> typing.Callable[..., 'Context']:

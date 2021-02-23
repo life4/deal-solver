@@ -6,7 +6,7 @@ import z3
 # app
 from ._annotations import ann2sort
 from ._ast import infer
-from ._context import Context
+from ._context import Context, ExceptionInfo
 from ._eval_expr import eval_expr
 from ._exceptions import UnsupportedError
 from ._proxies import ProxySort, if_expr, unwrap
@@ -114,15 +114,15 @@ def eval_if_else(node: astroid.If, ctx: Context):
     # update new exceptions
     false = z3.BoolVal(False, ctx=ctx.z3_ctx)
     for exc in ctx_then.exceptions.layer:
-        ctx.exceptions.add(
+        ctx.exceptions.add(ExceptionInfo(
             names=exc.names,
             cond=if_expr(test_ref, exc.cond, false),
-        )
+        ))
     for exc in ctx_else.exceptions.layer:
-        ctx.exceptions.add(
+        ctx.exceptions.add(ExceptionInfo(
             names=exc.names,
             cond=if_expr(test_ref, false, exc.cond),
-        )
+        ))
 
 
 @eval_stmt.register(astroid.Raise)
@@ -133,7 +133,7 @@ def eval_raise(node: astroid.Raise, ctx: Context):
         if exc is None:
             continue
         names.update(_get_all_bases(exc))
-    ctx.exceptions.add(names=names, cond=true)
+    ctx.exceptions.add(ExceptionInfo(names=names, cond=true))
 
 
 def _get_all_bases(node) -> typing.Iterator[str]:
