@@ -13,6 +13,11 @@ from ._types import AstNode
 
 
 class Contract(typing.NamedTuple):
+    """
+    + `name` can be `pre`, `post`, or `raises`. Everything else is ignored.
+    + `args` contains one node for `pre` and `post` (which is the validator)
+      and many nodes for `raises` (which are exceptions).
+    """
     name: str
     args: typing.List[AstNode]
 

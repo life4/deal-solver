@@ -10,9 +10,6 @@ from deal_solver._ast import get_name
 class TestTheorem(Theorem):
     @staticmethod
     def get_contracts(func: astroid.FunctionDef) -> typing.Iterator[Contract]:
-        """
-        Redefine this function for your needs.
-        """
         if not func.decorators:
             return
         for contract in func.decorators.nodes:

@@ -11,7 +11,7 @@ import z3
 from ._annotations import ann2sort
 from ._cached_property import cached_property
 from ._context import Context
-from ._eval_contracts import Contract, eval_contracts, Contracts
+from ._eval_contracts import Contract, eval_contracts
 from ._eval_stmt import eval_stmt
 from ._exceptions import ProveError, UnsupportedError
 from ._proxies import wrap
@@ -24,20 +24,20 @@ class Conclusion(enum.Enum):
     SKIP = 'skipped'
     FAIL = 'failed'
 
-    @property
-    def color(self) -> str:
-        if self == Conclusion.OK:
-            return 'green'
-        if self == Conclusion.FAIL:
-            return 'red'
-        return 'yellow'
-
 
 class Proof(typing.NamedTuple):
     conclusion: Conclusion
     description: str
     error: typing.Optional[Exception] = None
     example: typing.Optional[z3.ModelRef] = None
+
+    @property
+    def color(self) -> str:
+        if self.conclusion == Conclusion.OK:
+            return 'green'
+        if self.conclusion == Conclusion.FAIL:
+            return 'red'
+        return 'yellow'
 
 
 class Constraint(typing.NamedTuple):
@@ -63,7 +63,7 @@ class Theorem:
     @classmethod
     def from_text(cls, content: str) -> typing.Iterator['Theorem']:
         content = dedent(content)
-        module = cls._parse(content)
+        module = astroid.parse(content)
         yield from cls.from_astroid(module)
 
     @classmethod
@@ -77,21 +77,17 @@ class Theorem:
         return self._func.name or 'unknown_function'
 
     @cached_property
-    def z3_context(self) -> typing.Optional[z3.Context]:
+    def _z3_context(self) -> typing.Optional[z3.Context]:
         # return z3.Context()
         return None
 
     @cached_property
-    def context(self) -> Context:
+    def _context(self) -> Context:
         ctx = Context.make_empty(get_contracts=self.get_contracts)
-        ctx = ctx.evolve(z3_ctx=self.z3_context)
+        ctx = ctx.evolve(z3_ctx=self._z3_context)
         for name, value in self.arguments.items():
             ctx.scope.set(name=name, value=value)
         return ctx
-
-    @cached_property
-    def contracts(self) -> Contracts:
-        return eval_contracts(func=self._func, ctx=self.context)
 
     @cached_property
     def arguments(self) -> typing.Dict[str, z3.SortRef]:
@@ -100,7 +96,7 @@ class Theorem:
         for arg, annotation in zip(args.args, args.annotations):
             if annotation is None:
                 raise UnsupportedError('missed annotation for', arg.name)
-            sort = ann2sort(annotation, ctx=self.z3_context)
+            sort = ann2sort(annotation, ctx=self._z3_context)
             if sort is None:
                 raise UnsupportedError('unsupported annotation type', annotation.as_string())
             result[arg.name] = wrap(z3.Const(name=arg.name, sort=sort))
@@ -108,34 +104,35 @@ class Theorem:
 
     @property
     def constraints(self) -> typing.Iterator[Constraint]:
-        eval_stmt(node=self._func, ctx=self.context)
+        eval_stmt(node=self._func, ctx=self._context)
+        contracts = eval_contracts(func=self._func, ctx=self._context)
 
-        for constraint in self.context.expected:
+        for constraint in self._context.expected:
             yield Constraint(
                 description='assertion',
                 condition=z3.And(
-                    *self.contracts.pre,
-                    *self.context.given,
+                    *contracts.pre,
+                    *self._context.given,
                     z3.Not(constraint),
                 ),
             )
-        for constraint in self.contracts.post:
+        for constraint in contracts.post:
             yield Constraint(
                 description='post-condition',
                 condition=z3.And(
-                    *self.contracts.pre,
-                    *self.context.given,
+                    *contracts.pre,
+                    *self._context.given,
                     z3.Not(constraint),
                 ),
             )
-        for exc in self.context.exceptions:
-            if exc.names & self.contracts.raises:
+        for exc in self._context.exceptions:
+            if exc.names & contracts.raises:
                 continue
             yield Constraint(
                 description=f'exception {exc.names}',
                 condition=z3.And(
-                    *self.contracts.pre,
-                    *self.context.given,
+                    *contracts.pre,
+                    *self._context.given,
                     exc.cond,
                 ),
             )
@@ -151,7 +148,7 @@ class Theorem:
             description='nothing to prove',
         )
         for constraint in self.constraints:
-            solver = z3.Solver(ctx=self.z3_context)
+            solver = z3.Solver(ctx=self._z3_context)
             solver.add(constraint.condition)
             result = self._prove(solver=solver, descr=constraint.description)
             if result.conclusion == Conclusion.FAIL:
@@ -195,8 +192,3 @@ class Theorem:
             )
 
         raise RuntimeError('unreachable')
-
-    @staticmethod
-    def _parse(text: str) -> astroid.Module:
-        module = astroid.parse(text)
-        return module
