@@ -15,7 +15,6 @@ from ._eval_contracts import eval_contracts, Contracts
 from ._eval_stmt import eval_stmt
 from ._exceptions import ProveError, UnsupportedError
 from ._proxies import wrap
-from ._transformer import if_transformer
 from ._types import Z3Bool
 
 
@@ -205,7 +204,5 @@ class Theorem:
 
     @staticmethod
     def _parse(text: str) -> astroid.Module:
-        if_transformer.register()
         module = astroid.parse(text)
-        if_transformer.unregister()
         return module
