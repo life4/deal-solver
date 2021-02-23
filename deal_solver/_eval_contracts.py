@@ -87,7 +87,6 @@ def _eval_pre(ctx: Context, args: list):
         return
     if not contract.args:
         return
-    # eval contract
     return eval_expr(node=contract.body, ctx=ctx)
 
 
@@ -104,6 +103,8 @@ def _eval_post(ctx: Context, args: list):
             name=cargs[0].name,
             value=ret.value,
         )
+        # The contract is valid if the return value is not reached
+        # or it passed the pos-condition test.
         yield z3.Or(
             z3.Not(ret.cond),
             eval_expr(node=contract.body, ctx=ctx),

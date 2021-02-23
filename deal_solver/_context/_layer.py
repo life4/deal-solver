@@ -11,8 +11,8 @@ T = typing.TypeVar('T')
 
 
 class ExceptionInfo(typing.NamedTuple):
-    names: typing.Set[str]
-    cond: Z3Bool
+    names: typing.Set[str]  # exception name and names of all its bases
+    cond: Z3Bool            # indicates if the exception is raised
 
 
 class ReturnInfo(typing.NamedTuple):
