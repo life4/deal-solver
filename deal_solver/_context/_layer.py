@@ -14,6 +14,8 @@ class ExceptionInfo(typing.NamedTuple):
 
 
 class Layer(typing.Generic[T]):
+    __slots__ = ['layer', 'parent']
+
     layer: typing.List[T]
     parent: typing.Optional['Layer[T]']
 

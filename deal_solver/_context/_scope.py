@@ -6,11 +6,13 @@ from .._types import SortType
 
 
 class Scope:
-    _parent: typing.Optional['Scope']
+    __slots__ = ['layer', 'parent']
+
     layer: typing.Dict[str, SortType]
+    parent: typing.Optional['Scope']
 
     def __init__(self, parent: typing.Optional['Scope'], vars) -> None:
-        self._parent = parent
+        self.parent = parent
         self.layer = vars
 
     @classmethod
@@ -31,8 +33,8 @@ class Scope:
         var = self.layer.get(name)
         if var is not None:
             return var
-        if self._parent is not None:
-            return self._parent.get(name=name)
+        if self.parent is not None:
+            return self.parent.get(name=name)
         return None
 
     def set(self, name: str, value: SortType) -> None:
