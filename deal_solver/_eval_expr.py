@@ -376,7 +376,7 @@ def _call_function(node: astroid.FunctionDef, ctx: Context, call_args=typing.Lis
 
     # call the function
     eval_stmt(node=node, ctx=func_ctx)
-    result = func_ctx.scope.get(name='return')
+    result = func_ctx.return_value
     if result is None:
         raise UnsupportedError('cannot find return value for', node.name)
 

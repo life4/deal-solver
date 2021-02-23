@@ -6,7 +6,7 @@ import z3
 # app
 from ._annotations import ann2sort
 from ._ast import infer
-from ._context import Context, ExceptionInfo
+from ._context import Context, ExceptionInfo, ReturnInfo
 from ._eval_expr import eval_expr
 from ._exceptions import UnsupportedError
 from ._proxies import ProxySort, if_expr, unwrap
@@ -28,10 +28,10 @@ def eval_func(node: astroid.FunctionDef, ctx: Context):
         sorts.append(ann2sort(node.returns, ctx=ctx.z3_ctx))
 
         func = z3.Function(node.name, *sorts)
-        ctx.scope.set(
-            name='return',
+        ctx.returns.add(ReturnInfo(
             value=func(*args),
-        )
+            cond=z3.BoolVal(True, ctx=ctx.z3_ctx)
+        ))
         return
 
     # otherwise, try to execute it
@@ -73,8 +73,10 @@ def eval_assign(node: astroid.Assign, ctx: Context):
 
 @eval_stmt.register(astroid.Return)
 def eval_return(node: astroid.Return, ctx: Context):
-    value_ref = eval_expr(node=node.value, ctx=ctx)
-    ctx.scope.set(name='return', value=value_ref)
+    ctx.returns.add(ReturnInfo(
+        value=eval_expr(node=node.value, ctx=ctx),
+        cond=z3.BoolVal(True, ctx=ctx.z3_ctx),
+    ))
 
 
 @eval_stmt.register(astroid.If)
@@ -122,6 +124,19 @@ def eval_if_else(node: astroid.If, ctx: Context):
         ctx.exceptions.add(ExceptionInfo(
             names=exc.names,
             cond=if_expr(test_ref, false, exc.cond),
+        ))
+
+    # update new return statements
+    false = z3.BoolVal(False, ctx=ctx.z3_ctx)
+    for ret in ctx_then.returns.layer:
+        ctx.returns.add(ReturnInfo(
+            value=ret.value,
+            cond=if_expr(test_ref, ret.cond, false),
+        ))
+    for ret in ctx_else.returns.layer:
+        ctx.returns.add(ReturnInfo(
+            value=ret.value,
+            cond=if_expr(test_ref, false, ret.cond),
         ))
 
 

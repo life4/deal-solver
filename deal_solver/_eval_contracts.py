@@ -92,7 +92,7 @@ def _eval_pre(ctx: Context, args: list):
 
 
 def _eval_post(ctx: Context, args: list):
-    return_value = ctx.scope.get('return')
+    return_value = ctx.return_value
     if return_value is None:
         raise UnsupportedError('cannot resolve return value to check deal.post')
     contract = args[0]

@@ -1,6 +1,8 @@
 # stdlib
 import typing
 
+import z3
+
 # app
 from .._types import Z3Bool
 
@@ -11,6 +13,18 @@ T = typing.TypeVar('T')
 class ExceptionInfo(typing.NamedTuple):
     names: typing.Set[str]
     cond: Z3Bool
+
+
+class ReturnInfo(typing.NamedTuple):
+    value: typing.Any
+    cond: Z3Bool
+
+    def merge(self, other: 'ReturnInfo') -> 'ReturnInfo':
+        cls = type(self)
+        return cls(
+            cond=z3.Or(self.cond, other.cond),
+            value=z3.If(self.cond, self.value, other.value),
+        )
 
 
 class Layer(typing.Generic[T]):
