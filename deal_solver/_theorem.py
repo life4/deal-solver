@@ -153,11 +153,6 @@ class Theorem:
                 ),
             )
 
-    def reset(self) -> None:
-        func = self._func
-        self.__dict__.clear()
-        self._func = func
-
     def prove(self) -> Proof:
         result = Proof(
             conclusion=Conclusion.OK,
@@ -200,4 +195,4 @@ class Theorem:
                 example=solver.model(),
             )
 
-        raise RuntimeError('unreachable')
+        raise RuntimeError('unreachable')  # pragma: no cover

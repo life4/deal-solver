@@ -42,8 +42,7 @@ def eval_func(node: astroid.FunctionDef, ctx: Context):
 
 @eval_stmt.register(astroid.Assert)
 def eval_assert(node: astroid.Assert, ctx: Context):
-    if node.test is None:
-        raise UnsupportedError('assert without condition')
+    assert node.test is not None, 'assert without condition'
     expr = eval_expr(node=node.test, ctx=ctx)
     if isinstance(expr, ProxySort):
         expr = expr.as_bool
@@ -81,10 +80,8 @@ def eval_return(node: astroid.Return, ctx: Context):
 
 @eval_stmt.register(astroid.If)
 def eval_if_else(node: astroid.If, ctx: Context):
-    if node.test is None:
-        raise UnsupportedError(type(node))
-    if node.body is None:
-        raise UnsupportedError(type(node))
+    assert node.test
+    assert node.body
 
     test_ref = eval_expr(node=node.test, ctx=ctx)
 

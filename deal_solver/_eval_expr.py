@@ -109,13 +109,10 @@ def eval_compare(node: astroid.Compare, ctx: Context):
 
 @eval_expr.register(astroid.BoolOp)
 def eval_bool_op(node: astroid.BoolOp, ctx: Context):
-    if not node.op:
-        raise UnsupportedError('unsupported operator', node.op)
+    assert node.op
     operation = BOOL_OPERATIONS.get(node.op)
-    if not operation:
-        raise UnsupportedError(repr(node.op))
-    if not node.values:
-        raise UnsupportedError('empty bool operator')
+    assert operation, 'unsupported binary boolean operation'
+    assert node.values
 
     subnodes = []
     for subnode in node.values:
@@ -318,19 +315,15 @@ def eval_unary_op(node: astroid.UnaryOp, ctx: Context):
         return z3.Not(value_ref, ctx=ctx.z3_ctx)
 
     operation = UNARY_OPERATIONS.get(node.op)
-    if operation is None:
-        raise UnsupportedError('unary operation', node.op)
+    assert operation is not None, 'unsupported unary operation'
     return operation(value_ref)
 
 
 @eval_expr.register(astroid.IfExp)
 def eval_ternary_op(node: astroid.IfExp, ctx: Context):
-    if node.test is None:
-        raise UnsupportedError(type(node))
-    if node.body is None:
-        raise UnsupportedError(type(node))
-    if node.orelse is None:
-        raise UnsupportedError(type(node))
+    assert node.test is not None
+    assert node.body is not None
+    assert node.orelse is not None
 
     # execute child nodes
     test_ref = eval_expr(node=node.test, ctx=ctx)

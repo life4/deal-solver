@@ -1,7 +1,10 @@
 from time import monotonic
 
+import pytest
+import z3
+
 # project
-from deal_solver import Conclusion, ProveError
+from deal_solver import Conclusion, ProveError, UnsupportedError
 
 # app
 from .helpers import prove_f
@@ -26,7 +29,35 @@ def test_timeout():
             items.append('')
             assert items.count('') >= 1
     """, timeout=.5)
-    assert .5 <= monotonic() - start < .7
+    assert .5 <= monotonic() - start < 1
     assert theorem.conclusion is Conclusion.SKIP
     assert type(theorem.error) is ProveError
     assert theorem.error.args[0] == 'timeout'
+
+
+@pytest.mark.parametrize('expr', [
+    'set()',
+    '[1,2,3,4][::2]',
+    '[1,2,3,4].hello',
+    'hello',
+    '[1,2,3](2)',
+    '4[0]',
+    'str(12.34)',
+])
+def test_type_error(expr):
+    with pytest.raises(UnsupportedError):
+        prove_f(f"""
+            def f():
+                assert {expr}
+        """)
+
+
+@pytest.mark.parametrize('expr', [
+    '12 ** "hello"',
+])
+def test_sort_mismatch(expr):
+    with pytest.raises(z3.Z3Exception, match='sort mismatch'):
+        prove_f(f"""
+            def f():
+                assert {expr}
+        """)

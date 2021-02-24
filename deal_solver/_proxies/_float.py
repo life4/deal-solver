@@ -44,7 +44,7 @@ class FloatSort(ProxySort):
             return RealSort(expr=expr)
         if z3.is_fp(expr):
             return FPSort(expr=expr)
-        raise RuntimeError('unreachable')
+        raise RuntimeError('unreachable')  # pragma: no cover
 
     @staticmethod
     def fp_sort():
