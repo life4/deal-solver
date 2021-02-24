@@ -5,6 +5,7 @@ from sys import float_info
 import z3
 
 # app
+from ._funcs import switch
 from .._exceptions import UnsupportedError
 from ._proxy import ProxySort
 from ._registry import registry
@@ -70,7 +71,20 @@ class FloatSort(ProxySort):
         raise UnsupportedError('cannot convert float to str')
 
     def __floordiv__(self, other) -> 'FloatSort':
-        return (self / other).as_int.as_float
+        if self.is_real and other.is_real:
+            return (self / other).as_int.as_float
+
+        zero = self.val(0.0)
+        one = self.val(1.0)
+        nan = z3.fpNaN(self.sort())
+        return switch(
+            (z3.fpIsInf(self.expr), nan),
+            (z3.Not(z3.fpIsInf(other.expr)), (self / other).as_int.as_fp),
+            (z3.fpIsZero(self.expr), zero),
+            (z3.And(self < zero, other < zero), zero),
+            (z3.And(self > zero, other > zero), zero),
+            default=-one,
+        )
 
 
 class RealSort(FloatSort):

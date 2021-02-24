@@ -1,7 +1,7 @@
 # stdlib
+import typing
 from random import choices
 from string import ascii_letters
-from typing import Optional
 
 # external
 import z3
@@ -45,7 +45,7 @@ def wrap(expr) -> SortType:
     return expr
 
 
-def if_expr(test, val_then, val_else, ctx: Optional[z3.Context] = None):
+def if_expr(test, val_then, val_else, ctx: typing.Optional[z3.Context] = None):
     # app
     from ._proxy import ProxySort
 
@@ -62,3 +62,10 @@ def if_expr(test, val_then, val_else, ctx: Optional[z3.Context] = None):
 def random_name(prefix: str = 'v') -> str:
     suffix = ''.join(choices(ascii_letters, k=20))
     return prefix + '__' + suffix
+
+
+def switch(*cases: typing.Tuple[typing.Any, typing.Any], default):
+    result = default
+    for cond, then in reversed(cases):
+        result = if_expr(cond, then, result)
+    return result

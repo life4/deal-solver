@@ -48,6 +48,9 @@ from .helpers import prove_f
     '7.3 // 2.0 == 3.0',
     '7.3 // -2.0 == -4.0',
     '-7.3 // 2.0 == -4.0',
+    '8.0 // float("-inf") == -1.0',
+    '-8.0 // float("-inf") == 0.0',
+    '0.0 // float("inf") == 0.0',
     '0.005 // 0.005 == 1.0',
     '2.7 > 1.4',
     '1.4 < 2.7',
@@ -350,7 +353,7 @@ float_strategy = hypothesis.strategies.one_of(
     left=float_strategy,
     right=float_strategy,
     op=hypothesis.strategies.sampled_from([
-        '+', '-', '*', '/',
+        '+', '-', '*', '/', '//',
         '==', '!=', '<=', '<', '>=', '>',
     ]),
 )
