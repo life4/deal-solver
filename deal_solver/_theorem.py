@@ -18,6 +18,9 @@ from ._proxies import wrap
 from ._types import Z3Bool
 
 
+DEFAULT_TIMEOUT = 5.0
+
+
 class Conclusion(enum.Enum):
     OK = 'proved!'
     PARTIAL = 'partially proved'
@@ -48,8 +51,13 @@ class Constraint(typing.NamedTuple):
 class Theorem:
     _func: astroid.FunctionDef
 
-    def __init__(self, node: astroid.FunctionDef) -> None:
+    def __init__(
+        self, *,
+        node: astroid.FunctionDef,
+        timeout: float = DEFAULT_TIMEOUT,
+    ) -> None:
         self._func = node
+        self._timeout = timeout
 
     @staticmethod
     def get_contracts(func: astroid.FunctionDef) -> typing.Iterator[Contract]:
@@ -61,16 +69,24 @@ class Theorem:
         raise NotImplementedError
 
     @classmethod
-    def from_text(cls, content: str) -> typing.Iterator['Theorem']:
+    def from_text(
+        cls,
+        content: str, *,
+        timeout: float = DEFAULT_TIMEOUT,
+    ) -> typing.Iterator['Theorem']:
         content = dedent(content)
         module = astroid.parse(content)
-        yield from cls.from_astroid(module)
+        yield from cls.from_astroid(module=module, timeout=timeout)
 
     @classmethod
-    def from_astroid(cls, module: astroid.Module) -> typing.Iterator['Theorem']:
+    def from_astroid(
+        cls, *,
+        module: astroid.Module,
+        timeout: float = DEFAULT_TIMEOUT,
+    ) -> typing.Iterator['Theorem']:
         for node in module.values():
             if isinstance(node, astroid.FunctionDef):
-                yield cls(node=node)
+                yield cls(node=node, timeout=timeout)
 
     @property
     def name(self) -> str:
@@ -149,6 +165,7 @@ class Theorem:
         )
         for constraint in self.constraints:
             solver = z3.Solver(ctx=self._z3_context)
+            solver.set('timeout', int(self._timeout * 1000))
             solver.add(constraint.condition)
             result = self._prove(solver=solver, descr=constraint.description)
             if result.conclusion == Conclusion.FAIL:
@@ -157,15 +174,7 @@ class Theorem:
 
     @staticmethod
     def _prove(solver: z3.Solver, descr: str) -> Proof:
-        try:
-            result = solver.check()
-        except UnsupportedError as exc:
-            return Proof(
-                conclusion=Conclusion.SKIP,
-                description=descr,
-                error=exc,
-                example=None,
-            )
+        result = solver.check()
 
         if result == z3.unsat:
             return Proof(
@@ -179,7 +188,7 @@ class Theorem:
             return Proof(
                 conclusion=Conclusion.SKIP,
                 description=descr,
-                error=ProveError('cannot validate theorem'),
+                error=ProveError(solver.reason_unknown()),
                 example=None,
             )
 

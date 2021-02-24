@@ -2,7 +2,7 @@
 """
 # app
 from ._eval_contracts import Contract
-from ._exceptions import UnsupportedError
+from ._exceptions import UnsupportedError, ProveError
 from ._theorem import Conclusion, Theorem, Proof
 
 
@@ -13,4 +13,5 @@ __all__ = [
     'Contract',
     'Proof',
     'UnsupportedError',
+    'ProveError',
 ]

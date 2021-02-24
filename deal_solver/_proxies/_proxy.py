@@ -7,7 +7,7 @@ import z3
 # app
 from .._exceptions import UnsupportedError
 from .._types import Z3Bool
-from ._funcs import unwrap
+from ._funcs import unwrap, wrap
 
 
 class ProxySort:
@@ -116,9 +116,8 @@ class ProxySort:
     # math binary operations
 
     def _math_op(self, other, handler) -> 'ProxySort':
-        cls = type(self)
         expr = self._binary_op(other=other, handler=handler)
-        return cls(expr=expr)
+        return wrap(expr=expr)  # type: ignore
 
     def __add__(self, other):
         return self._math_op(other=other, handler=operator.__add__)

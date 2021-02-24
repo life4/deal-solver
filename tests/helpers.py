@@ -21,8 +21,8 @@ class TestTheorem(Theorem):
             )
 
 
-def prove_f(text: str) -> Proof:
-    theorems = list(TestTheorem.from_text(text))
+def prove_f(text: str, **kwargs) -> Proof:
+    theorems = list(TestTheorem.from_text(text, **kwargs))
     theorem = theorems[-1]
     assert theorem.name == 'f'
     result = theorem.prove()
