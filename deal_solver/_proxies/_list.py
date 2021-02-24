@@ -59,7 +59,7 @@ class ListSort(ProxySort):
             start = z3.IntVal(0)
         unit = z3.Unit(unwrap(other))
         int_proxy = registry['int']
-        return int_proxy(expr=z3.IndexOf(self.expr, unit, start))
+        return int_proxy(expr=z3.IndexOf(self.expr, unit, unwrap(start)))
 
     @property
     def length(self):

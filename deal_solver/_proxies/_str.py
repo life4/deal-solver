@@ -12,20 +12,12 @@ from ._registry import registry
 class StrSort(ProxySort):
     type_name = 'str'
 
-    @staticmethod
-    def make_empty_expr(sort=None):
-        return z3.Empty(z3.StringSort())
-
     def _ensure(self, item, seq=False):
         pass
 
-    @classmethod
-    def make_empty(cls, sort: z3.SortRef = None) -> 'StrSort':
-        expr = cls.make_empty_expr(sort)
-        return cls(expr=expr)
-
     @property
     def as_int(self):
+        assert self.expr is not None
         int_proxy = registry['int']
         return int_proxy(expr=z3.StrToInt(self.expr))
 
@@ -35,6 +27,7 @@ class StrSort(ProxySort):
 
     @property
     def as_float(self):
+        assert self.expr is not None
         float_proxy = registry['float']
         if z3.is_string_value(self.expr):
             val = float(self.expr.as_string())
@@ -43,31 +36,31 @@ class StrSort(ProxySort):
 
     @property
     def as_bool(self):
+        assert self.expr is not None
         return self.expr != z3.Empty(z3.StringSort())
 
     def contains(self, item):
+        assert self.expr is not None
         self._ensure(item)
         return z3.Contains(self.expr, unwrap(item))
 
     def startswith(self, prefix):
-        if self.expr is None:
-            return z3.BoolVal(False)
+        assert self.expr is not None
         return z3.PrefixOf(unwrap(prefix), self.expr)
 
     def endswith(self, suffix):
-        if self.expr is None:
-            return z3.BoolVal(False)
+        assert self.expr is not None
         return z3.SuffixOf(unwrap(suffix), self.expr)
 
     def index(self, other, start=None):
+        assert self.expr is not None
         int_proxy = registry['int']
         if start is None:
             start = z3.IntVal(0)
-        return int_proxy(expr=z3.IndexOf(self.expr, unwrap(other), start))
+        return int_proxy(expr=z3.IndexOf(self.expr, unwrap(other), unwrap(start)))
 
     @property
     def length(self) -> z3.ArithRef:
+        assert self.expr is not None
         int_proxy = registry['int']
-        if self.expr is None:
-            return int_proxy(expr=z3.IntVal(0))
         return int_proxy(expr=z3.Length(self.expr))

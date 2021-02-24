@@ -51,7 +51,7 @@ class ProxySort:
 
     @property
     def as_bool(self) -> Z3Bool:
-        raise UnsupportedError('cannot convert {} to bool'.format(self.type_name))
+        raise NotImplementedError
 
     @property
     def as_int(self):

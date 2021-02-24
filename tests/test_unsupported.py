@@ -36,13 +36,27 @@ def test_timeout():
 
 
 @pytest.mark.parametrize('expr', [
-    'set()',
-    '[1,2,3,4][::2]',
+    # actual errors
     '[1,2,3,4].hello',
     'hello',
+    'hello.world',
     '[1,2,3](2)',
     '4[0]',
+    '4[:4]',
+    '4.1[0]',
+    '4.1[:4]',
+    '1.2 + "a"',
+    '4 / "a"',
+    'len(12)',
+
+    # temporary unsupported
+    '()',
+    '{}',
+    'dict()',
+    '[1,2,3,4][::2]',
     'str(12.34)',
+    '(4).bit_length()',
+    'min([], default=13)',
 ])
 def test_type_error(expr):
     with pytest.raises(UnsupportedError):

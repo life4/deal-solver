@@ -88,3 +88,12 @@ def test_int_two_args_fail_for_some():
             assert a != b
     """)
     assert theorem.conclusion is Conclusion.FAIL
+
+
+def test_no_effect_statements():
+    theorem = prove_f("""
+        def f():
+            print("hello")
+            pass
+    """)
+    assert theorem.conclusion is Conclusion.OK

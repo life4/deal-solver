@@ -45,6 +45,8 @@ from .helpers import prove_f
     '2.9 - 1.4 == 1.5',
     '7.0 % 3.0 == 1.0',
     '7.0 % 3.5 == 0.0',
+    '5.0 / 2.0 == 2.5',
+    '(1/2) / (4/3) == 0.375',
     '7.3 // 2.0 == 3.0',
     '7.3 // -2.0 == -4.0',
     '-7.3 // 2.0 == -4.0',
@@ -115,12 +117,14 @@ from .helpers import prove_f
     'max("ab", "cd") == "cd"',
     'max("cd", "ab") == "cd"',
     'len("abcd") == 4',
+    'str("abc") == "abc"',
     # 'float("12.3") == 12.3',
 
     # string methods
     '"abcd".startswith("ab")',
     '"abcd".endswith("cd")',
-    '"abcd".index("bc") == 1',
+    '"abcbcd".index("bc") == 1',
+    '"abcbcd".index("bc", 2) == 3',
 
     # float functions
     'bool(2.1) == True',
@@ -147,12 +151,14 @@ from .helpers import prove_f
     '[4, 5, 6, 7, 8][2:4] == [6, 7]',
     '[4, 5, 6, 7, 8][2:] == [6, 7, 8]',
     '[4, 5, 6, 7, 8][:4] == [4, 5, 6, 7]',
+    '[1, 2, 3][:] == [1, 2, 3]',
     '[1] + [2] == [1, 2]',
     '[1, 2] + [3, 4] == [1, 2, 3, 4]',
     '[] + [] == []',
 
     # list methods
-    '[7, 8, 9].index(8) == 1',
+    '[7, 8, 8, 9].index(8) == 1',
+    '[7, 8, 8, 9].index(8, 2) == 2',
     '[1, 2, 4, 6, 5, 6].count(6) == 2',
     '[1, 1, 1].count(1) == 3',
     '[1, 1, 1].count(2) == 0',
@@ -183,6 +189,7 @@ from .helpers import prove_f
     'len("") == 0',
     'set() == set()',
     '[] == []',
+    '[] + [] == [] + [] + []',
     '"" == ""',
 
     # sequences in sequences

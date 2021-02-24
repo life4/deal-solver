@@ -82,11 +82,9 @@ def eval_const(node: astroid.Const, ctx: Context):
 
 @eval_expr.register(astroid.BinOp)
 def eval_bin_op(node: astroid.BinOp, ctx: Context):
-    if not node.op:
-        raise UnsupportedError('missed operator', node)
+    assert node.op
     operation = BIN_OPERATIONS.get(node.op)
-    if not operation:
-        raise UnsupportedError('unsupported operator', node.op)
+    assert operation, 'unsupported binary operator'
     left = eval_expr(node=node.left, ctx=ctx)
     right = eval_expr(node=node.right, ctx=ctx)
     return wrap(operation(left, right))
@@ -96,11 +94,9 @@ def eval_bin_op(node: astroid.BinOp, ctx: Context):
 def eval_compare(node: astroid.Compare, ctx: Context):
     left = eval_expr(node=node.left, ctx=ctx)
     for op, right_node in node.ops:
-        if not op:
-            raise UnsupportedError(repr(node))
+        assert op, 'missed comparison operator'
         operation = COMAPARISON.get(op)
-        if not operation:
-            raise UnsupportedError('unsupported operation', op, repr(node))
+        assert operation, 'unsupported comparison operator'
 
         right = eval_expr(node=right_node, ctx=ctx)
         # TODO: proper chain
@@ -252,9 +248,6 @@ def eval_index(node: astroid.Index, ctx: Context):
 
 @eval_expr.register(astroid.Name)
 def eval_name(node: astroid.Name, ctx: Context):
-    if not isinstance(node, astroid.Name):
-        raise UnsupportedError(type(node))
-
     # resolve local vars
     value = ctx.scope.get(node.name)
     if value is not None:
