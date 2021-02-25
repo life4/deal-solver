@@ -42,6 +42,9 @@ class Proof(typing.NamedTuple):
             return 'red'
         return 'yellow'
 
+    def evolve(self, **kwargs) -> 'Proof':
+        return self._replace(**kwargs)
+
 
 class Constraint(typing.NamedTuple):
     condition: Z3Bool
@@ -154,18 +157,16 @@ class Theorem:
             )
 
     def prove(self) -> Proof:
-        result = Proof(
-            conclusion=Conclusion.OK,
-            description='nothing to prove',
-        )
+        proofs = []
         for constraint in self.constraints:
             solver = z3.Solver(ctx=self._z3_context)
             solver.set('timeout', int(self._timeout * 1000))
             solver.add(constraint.condition)
-            result = self._prove(solver=solver, descr=constraint.description)
-            if result.conclusion == Conclusion.FAIL:
-                return result
-        return result
+            proof = self._prove(solver=solver, descr=constraint.description)
+            if proof.conclusion == Conclusion.FAIL:
+                return proof
+            proofs.append(proof)
+        return self._select_proof(proofs=proofs)
 
     @staticmethod
     def _prove(solver: z3.Solver, descr: str) -> Proof:
@@ -196,3 +197,28 @@ class Theorem:
             )
 
         raise RuntimeError('unreachable')  # pragma: no cover
+
+    @staticmethod
+    def _select_proof(proofs: typing.List[Proof]) -> Proof:
+        assert all(proof.conclusion != Conclusion.FAIL for proof in proofs)
+        if not proofs:
+            return Proof(
+                conclusion=Conclusion.OK,
+                description='nothing to prove',
+            )
+        some_ok = any(proof.conclusion == Conclusion.OK for proof in proofs)
+        # if all proofs are skipped, just return the first one
+        if not some_ok:
+            return proofs[0]
+        # if some proofs are skipped but some are ok, it is a partial proof
+        for proof in proofs:
+            if proof.conclusion == Conclusion.SKIP:
+                return proof.evolve(conclusion=Conclusion.PARTIAL)
+        # if all proofs are ok, all is good
+        assert all(proof.conclusion == Conclusion.OK for proof in proofs)
+        return Proof(
+            conclusion=Conclusion.OK,
+            description=', '.join(p.description for p in proofs),
+            error=None,
+            example=None,
+        )
