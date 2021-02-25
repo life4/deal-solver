@@ -36,6 +36,10 @@ class Context(typing.NamedTuple):
     # It is used to mock recursive calls.
     trace: Trace
 
+    # exceptions occured during evaluation
+    skips: typing.List[Exception]
+
+    # the user-provided function to extract contracts from called functions
     get_contracts: typing.Callable[[typing.Any], typing.Iterator]
 
     @classmethod
@@ -48,6 +52,7 @@ class Context(typing.NamedTuple):
             exceptions=Layer(),
             returns=Layer(),
             trace=Trace(),
+            skips=[],
             get_contracts=get_contracts,
         )
         return obj.evolve(**kwargs)

@@ -36,8 +36,11 @@ def eval_func(node: astroid.FunctionDef, ctx: Context):
 
     # otherwise, try to execute it
     with ctx.trace.guard(node.name):
-        for statement in node.body:
-            eval_stmt(node=statement, ctx=ctx)
+        try:
+            for statement in node.body:
+                eval_stmt(node=statement, ctx=ctx)
+        except UnsupportedError as exc:
+            ctx.skips.append(exc)
 
 
 @eval_stmt.register(astroid.Assert)

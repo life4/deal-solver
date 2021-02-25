@@ -166,12 +166,18 @@ class Theorem:
             if proof.conclusion == Conclusion.FAIL:
                 return proof
             proofs.append(proof)
+        for exc in self._context.skips:
+            proofs.append(Proof(
+                conclusion=Conclusion.SKIP,
+                description='failed to interpret statement',
+                error=exc,
+                example=None,
+            ))
         return self._select_proof(proofs=proofs)
 
     @staticmethod
     def _prove(solver: z3.Solver, descr: str) -> Proof:
         result = solver.check()
-
         if result == z3.unsat:
             return Proof(
                 conclusion=Conclusion.OK,
@@ -179,7 +185,6 @@ class Theorem:
                 error=None,
                 example=None,
             )
-
         if result == z3.unknown:
             return Proof(
                 conclusion=Conclusion.SKIP,
@@ -187,7 +192,6 @@ class Theorem:
                 error=ProveError(solver.reason_unknown()),
                 example=None,
             )
-
         if result == z3.sat:
             return Proof(
                 conclusion=Conclusion.FAIL,
@@ -195,7 +199,6 @@ class Theorem:
                 error=None,
                 example=solver.model(),
             )
-
         raise RuntimeError('unreachable')  # pragma: no cover
 
     @staticmethod

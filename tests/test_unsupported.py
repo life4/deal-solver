@@ -59,11 +59,12 @@ def test_timeout():
     'min([], default=13)',
 ])
 def test_type_error(expr):
-    with pytest.raises(UnsupportedError):
-        prove_f(f"""
-            def f():
-                assert {expr}
-        """)
+    proof = prove_f(f"""
+        def f():
+            assert {expr}
+    """)
+    assert proof.conclusion == Conclusion.SKIP
+    assert type(proof.error) is UnsupportedError
 
 
 @pytest.mark.parametrize('expr', [
@@ -75,3 +76,14 @@ def test_sort_mismatch(expr):
             def f():
                 assert {expr}
         """)
+
+
+def test_partial_proof():
+    proof = prove_f("""
+        def f():
+            assert True
+            hello
+            assert False  # is not reached
+    """)
+    assert proof.conclusion == Conclusion.PARTIAL
+    assert type(proof.error) is UnsupportedError
