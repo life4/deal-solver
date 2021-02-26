@@ -87,7 +87,13 @@ def eval_bin_op(node: astroid.BinOp, ctx: Context):
     assert operation, 'unsupported binary operator'
     left = eval_expr(node=node.left, ctx=ctx)
     right = eval_expr(node=node.right, ctx=ctx)
-    return wrap(operation(left, right))
+    try:
+        result = operation(left, right)
+    except z3.Z3Exception as exc:
+        raise UnsupportedError(f'cannot perform {node.op} operation:', *exc.args)
+    except TypeError as exc:
+        raise UnsupportedError(f'cannot perform {node.op} operation:', *exc.args)
+    return wrap(result)
 
 
 @eval_expr.register(astroid.Compare)

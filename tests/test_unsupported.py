@@ -1,7 +1,6 @@
 from time import monotonic
 
 import pytest
-import z3
 
 # project
 from deal_solver import Conclusion, ProveError, UnsupportedError
@@ -44,10 +43,18 @@ def test_timeout():
     '4[0]',
     '4[:4]',
     '4.1[0]',
+    'True[0]',
     '4.1[:4]',
     '1.2 + "a"',
     '4 / "a"',
+    '"b" / "a"',
+    '"b" // "a"',
+    '"b" % "a"',
+    '1 @ 2',
     'len(12)',
+    '12 ** "hello"',
+    'int([])',
+    'float([])',
 
     # temporary unsupported
     '()',
@@ -65,17 +72,6 @@ def test_type_error(expr):
     """)
     assert proof.conclusion == Conclusion.SKIP
     assert type(proof.error) is UnsupportedError
-
-
-@pytest.mark.parametrize('expr', [
-    '12 ** "hello"',
-])
-def test_sort_mismatch(expr):
-    with pytest.raises(z3.Z3Exception, match='sort mismatch'):
-        prove_f(f"""
-            def f():
-                assert {expr}
-        """)
 
 
 def test_partial_proof():
