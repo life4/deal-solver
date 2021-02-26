@@ -55,6 +55,9 @@ def test_timeout():
     '12 ** "hello"',
     'int([])',
     'float([])',
+    '~"a"',
+    '~3.14',
+    '3.1 | 4.2',
 
     # temporary unsupported
     '()',

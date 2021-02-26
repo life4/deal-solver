@@ -109,9 +109,8 @@ class ProxySort:
         cls = type(self)
         return cls(expr=+self.expr)
 
-    def __inv__(self):
-        cls = type(self)
-        return cls(expr=~self.expr)
+    def __invert__(self):
+        raise UnsupportedError('{}.__invert__ is not defined'.format(self.type_name))
 
     # math binary operations
 
@@ -146,9 +145,7 @@ class ProxySort:
     # bitwise binary operations
 
     def _bitwise_op(self, other, handler):
-        cls = type(self)
-        expr = self._binary_op(other=other, handler=handler)
-        return cls(expr=expr)
+        raise UnsupportedError(self.type_name, 'does not support bitwise operations')
 
     def __and__(self, other):
         return self._bitwise_op(other=other, handler=operator.__and__)

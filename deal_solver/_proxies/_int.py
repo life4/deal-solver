@@ -3,9 +3,12 @@ import z3
 
 # app
 from .._exceptions import UnsupportedError
-from ._funcs import if_expr, wrap
+from ._funcs import if_expr, wrap, unwrap
 from ._proxy import ProxySort
 from ._registry import registry
+
+
+INT_BITS = 64
 
 
 @registry.add
@@ -106,3 +109,19 @@ class IntSort(ProxySort):
         if as_float:
             return result.as_float
         return result
+
+    def __invert__(self):
+        cls = type(self)
+        expr = z3.BV2Int(~z3.Int2BV(self.expr, INT_BITS))
+        zero = z3.IntVal(0)
+        modulo = z3.IntVal(2 ** INT_BITS)
+        expr = z3.If(self.expr >= zero, expr - modulo, expr)
+        return cls(expr=expr)
+
+    def _bitwise_op(self, other, handler):
+        cls = type(self)
+        expr = z3.BV2Int(handler(
+            z3.Int2BV(self.expr, INT_BITS),
+            z3.Int2BV(unwrap(other), INT_BITS),
+        ))
+        return cls(expr=expr)
