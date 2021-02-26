@@ -6,14 +6,14 @@ import z3
 
 # app
 from .._context import Context
-from .._proxies import FloatSort, IntSort, if_expr, wrap
+from .._proxies import BoolSort, FloatSort, IntSort, if_expr, wrap, ProxySort
 from ._registry import FUNCTIONS, register
 
 
 @register('math.isclose')
-def math_isclose(left, right, rel_tol=None, abs_tol=None, *, ctx: Context, **kwargs):
+def math_isclose(left, right, rel_tol=None, abs_tol=None, *, ctx: Context, **kwargs) -> BoolSort:
     if not isinstance(left, FloatSort) and not isinstance(right, FloatSort):
-        return left == right
+        return BoolSort(left == right)
 
     if isinstance(left, IntSort):
         left = left.as_float
@@ -37,31 +37,31 @@ def math_isclose(left, right, rel_tol=None, abs_tol=None, *, ctx: Context, **kwa
     delta = builtin_max(rel_tol * abs_max, abs_tol, ctx=ctx)
     return if_expr(
         z3.And(left.is_nan, right.is_nan),
-        z3.BoolVal(True, ctx=ctx.z3_ctx),
+        BoolSort.val(True),
         (left - right).abs <= delta,
     )
 
 
 @register('math.isinf')
-def math_isinf(x, ctx: Context, **kwargs):
+def math_isinf(x, ctx: Context, **kwargs) -> BoolSort:
     if not isinstance(x, FloatSort):
-        return z3.BoolVal(False)
+        return BoolSort.val(False)
     if not x.is_fp:
-        return z3.BoolVal(False)
+        return BoolSort.val(False)
     return z3.fpIsInf(x.expr)
 
 
 @register('math.isnan')
-def math_isnan(x, ctx: Context, **kwargs):
+def math_isnan(x, ctx: Context, **kwargs) -> BoolSort:
     if not isinstance(x, FloatSort):
-        return z3.BoolVal(False, ctx=ctx.z3_ctx)
+        return BoolSort.val(False)
     if not x.is_fp:
-        return z3.BoolVal(False, ctx=ctx.z3_ctx)
-    return z3.fpIsNaN(x.expr, ctx=ctx.z3_ctx)
+        return BoolSort.val(False)
+    return BoolSort(expr=z3.fpIsNaN(x.expr, ctx=ctx.z3_ctx))
 
 
 @register('math.sin')
-def math_sin(x, ctx: Context, **kwargs):
+def math_sin(x: ProxySort, ctx: Context, **kwargs) -> ProxySort:
     """Taylor's Series of sin x
     """
     if not isinstance(x, FloatSort):
@@ -74,7 +74,7 @@ def math_sin(x, ctx: Context, **kwargs):
         (True, 9),
         (False, 11),
     ]
-    result = x
+    result: ProxySort = x
     nominator = x
     for positive, pow in series:
         nominator = nominator * x * x
@@ -87,7 +87,7 @@ def math_sin(x, ctx: Context, **kwargs):
 
 
 @register('math.trunc')
-def math_trunc(x, ctx: Context, **kwargs):
+def math_trunc(x: ProxySort, ctx: Context, **kwargs) -> ProxySort:
     if not isinstance(x, FloatSort):
         return x.as_int
     return if_expr(

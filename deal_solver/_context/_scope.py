@@ -1,14 +1,14 @@
 # stdlib
 import typing
 
-# app
-from .._types import SortType
+if typing.TYPE_CHECKING:
+    from .._proxies import ProxySort
 
 
 class Scope:
     __slots__ = ['layer', 'parent']
 
-    layer: typing.Dict[str, SortType]
+    layer: typing.Dict[str, 'ProxySort']
     parent: typing.Optional['Scope']
 
     def __init__(self, parent: typing.Optional['Scope'], vars) -> None:
@@ -29,7 +29,7 @@ class Scope:
             vars=dict(),
         )
 
-    def get(self, name: str) -> typing.Optional[SortType]:
+    def get(self, name: str) -> typing.Optional['ProxySort']:
         var = self.layer.get(name)
         if var is not None:
             return var
@@ -37,7 +37,7 @@ class Scope:
             return self.parent.get(name=name)
         return None
 
-    def set(self, name: str, value: SortType) -> None:
+    def set(self, name: str, value: 'ProxySort') -> None:
         self.layer[name] = value
 
     def __repr__(self) -> str:

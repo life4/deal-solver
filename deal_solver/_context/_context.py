@@ -6,10 +6,13 @@ import typing
 import z3
 
 # app
-from .._types import Z3Bool
 from ._layer import Layer, ExceptionInfo, ReturnInfo
 from ._scope import Scope
 from ._trace import Trace
+
+
+if typing.TYPE_CHECKING:
+    from .._proxies import BoolSort
 
 
 class Context(typing.NamedTuple):
@@ -24,10 +27,10 @@ class Context(typing.NamedTuple):
 
     # Given are checks that we don't validate but assume them to be always true.
     # For example, post-conditions of all functions the current function calls.
-    given: Layer[Z3Bool]
+    given: Layer['BoolSort']
 
     # Expected are checks we do validate. For example, all `assert` statements.
-    expected: Layer[Z3Bool]
+    expected: Layer['BoolSort']
 
     exceptions: Layer[ExceptionInfo]    # all raised exceptions
     returns: Layer[ReturnInfo]          # all returned values
@@ -58,13 +61,14 @@ class Context(typing.NamedTuple):
         return obj.evolve(**kwargs)
 
     @property
-    def interrupted(self) -> Z3Bool:
+    def interrupted(self) -> 'BoolSort':
+        from .._proxies import BoolSort
         false = z3.BoolVal(False, ctx=self.z3_ctx)
-        return z3.Or(
+        return BoolSort(expr=z3.Or(
             false,
-            *[exc.cond for exc in self.exceptions],
-            *[ret.cond for ret in self.returns],
-        )
+            *[exc.cond.as_bool for exc in self.exceptions],
+            *[ret.cond.as_bool for ret in self.returns],
+        ))
 
     @property
     def return_value(self):

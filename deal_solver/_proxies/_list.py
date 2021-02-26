@@ -1,3 +1,5 @@
+import typing
+
 # external
 import z3
 
@@ -5,6 +7,11 @@ import z3
 from ._funcs import random_name, unwrap, wrap
 from ._proxy import ProxySort
 from ._registry import registry
+
+
+if typing.TYPE_CHECKING:
+    from ._bool import BoolSort
+    from ._int import IntSort
 
 
 @registry.add
@@ -24,23 +31,23 @@ class ListSort(ProxySort):
         return z3.Empty(z3.SeqSort(sort))
 
     @property
-    def as_bool(self):
+    def as_bool(self) -> 'BoolSort':
         if self.expr is None:
             return z3.BoolVal(False)
         return z3.Length(self.expr) != z3.IntVal(0)
 
-    def get_item(self, index):
+    def get_item(self, index: 'ProxySort') -> 'ProxySort':
         return wrap(self.expr[unwrap(index)])
 
-    def get_slice(self, start, stop):
+    def get_slice(self, start: 'ProxySort', stop: 'ProxySort') -> 'ProxySort':
         if self.expr is None:
             return self
-        start = unwrap(start)
-        stop = unwrap(stop)
+        start_expr = unwrap(start)
+        stop_expr = unwrap(stop)
         return wrap(z3.SubSeq(
             s=self.expr,
-            offset=start,
-            length=stop - start,
+            offset=start_expr,
+            length=stop_expr - start_expr,
         ))
 
     def append(self, item: z3.ExprRef) -> 'ListSort':
@@ -49,30 +56,27 @@ class ListSort(ProxySort):
         self._ensure(item)
         return cls(expr=self.expr + unit)
 
-    def contains(self, item):
+    def contains(self, item: 'ProxySort') -> 'BoolSort':
         self._ensure(item)
         unit = z3.Unit(unwrap(item))
-        return z3.Contains(self.expr, unit)
+        return registry.bool(expr=z3.Contains(self.expr, unit))
 
-    def index(self, other, start=None):
+    def index(self, other: 'ProxySort', start: 'ProxySort' = None) -> 'IntSort':
         if start is None:
             start = z3.IntVal(0)
         unit = z3.Unit(unwrap(other))
-        int_proxy = registry['int']
-        return int_proxy(expr=z3.IndexOf(self.expr, unit, unwrap(start)))
+        return registry.int(expr=z3.IndexOf(self.expr, unit, unwrap(start)))
 
     @property
-    def length(self):
-        int_proxy = registry['int']
+    def length(self) -> 'IntSort':
         if self.expr is None:
-            return int_proxy(expr=z3.IntVal(0))
-        return int_proxy(expr=z3.Length(self.expr))
+            return registry.int(expr=z3.IntVal(0))
+        return registry.int(expr=z3.Length(self.expr))
 
-    def count(self, item):
+    def count(self, item: 'ProxySort') -> 'IntSort':
         if self.expr is None:
-            int_proxy = registry['int']
-            return int_proxy(expr=z3.IntVal(0))
-        item = unwrap(item)
+            return registry.int(expr=z3.IntVal(0))
+        item_expr = unwrap(item)
         f = z3.RecFunction(
             random_name('list_count'),
             z3.IntSort(), z3.IntSort(),
@@ -83,7 +87,7 @@ class ListSort(ProxySort):
         z3.RecAddDefinition(f, i, z3.If(
             i < zero,
             zero,
-            f(i - one) + z3.If(self.expr[i] == item, one, zero),
+            f(i - one) + z3.If(self.expr[i] == item_expr, one, zero),
         ))
         result = f(z3.Length(self.expr) - one)
-        return wrap(result)
+        return registry.int(result)

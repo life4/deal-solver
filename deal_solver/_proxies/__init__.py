@@ -1,4 +1,5 @@
 # app
+from ._bool import BoolSort
 from ._float import FloatSort
 from ._funcs import if_expr, random_name, unwrap, wrap
 from ._int import IntSort
@@ -18,6 +19,7 @@ __all__ = [
     'LambdaSort',
     'ProxySort',
 
+    'BoolSort',
     'FloatSort',
     'IntSort',
     'ListSort',

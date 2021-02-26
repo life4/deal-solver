@@ -3,8 +3,8 @@ import typing
 
 import z3
 
-# app
-from .._types import Z3Bool
+if typing.TYPE_CHECKING:
+    from .._proxies import BoolSort
 
 
 T = typing.TypeVar('T')
@@ -12,12 +12,12 @@ T = typing.TypeVar('T')
 
 class ExceptionInfo(typing.NamedTuple):
     names: typing.Set[str]  # exception name and names of all its bases
-    cond: Z3Bool            # indicates if the exception is raised
+    cond: 'BoolSort'        # indicates if the exception is raised
 
 
 class ReturnInfo(typing.NamedTuple):
     value: typing.Any
-    cond: Z3Bool
+    cond: 'BoolSort'
 
     def merge(self, other: 'ReturnInfo') -> 'ReturnInfo':
         from .._proxies import if_expr

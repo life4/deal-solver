@@ -1,3 +1,5 @@
+import typing
+
 # external
 import z3
 
@@ -6,6 +8,11 @@ from .._exceptions import UnsupportedError
 from ._funcs import if_expr, wrap, unwrap
 from ._proxy import ProxySort
 from ._registry import registry
+
+if typing.TYPE_CHECKING:
+    from ._bool import BoolSort
+    from ._float import FloatSort, RealSort
+    from ._str import StrSort
 
 
 INT_BITS = 64
@@ -16,26 +23,25 @@ class IntSort(ProxySort):
     type_name = 'int'
 
     @classmethod
-    def sort(cls):
+    def sort(cls) -> z3.IntSort:
         return z3.IntSort()
 
     @classmethod
-    def val(cls, x):
+    def val(cls, x: int) -> 'IntSort':
         return z3.IntVal(x)
 
     @property
-    def as_int(self):
+    def as_int(self) -> 'IntSort':
         return self
 
     @property
-    def as_float(self):
+    def as_float(self) -> 'RealSort':
         # TODO: int to fp?
         return self.as_real
 
     @property
-    def as_real(self):
-        cls = registry['float']
-        return cls(expr=z3.ToReal(self.expr))
+    def as_real(self) -> 'RealSort':
+        return wrap(z3.ToReal(self.expr)).as_real
 
     @property
     def as_fp(self):
@@ -43,23 +49,20 @@ class IntSort(ProxySort):
         return wrap(expr).as_fp
 
     @property
-    def as_str(self):
-        cls = registry['str']
-        return cls(expr=z3.IntToStr(self.expr))
+    def as_str(self) -> 'StrSort':
+        return registry.str(expr=z3.IntToStr(self.expr))
 
     @property
-    def as_bool(self):
+    def as_bool(self) -> 'BoolSort':
         return self.expr != z3.IntVal(0)
 
     @property
-    def abs(self):
-        cls = type(self)
+    def abs(self) -> 'IntSort':
         expr = z3.If(self.expr >= z3.IntVal(0), self.expr, -self.expr)
-        return cls(expr=expr)
+        return type(self)(expr=expr)
 
-    def _math_op(self, other, handler):
-        float_proxy = registry['float']
-        as_float = isinstance(other, float_proxy)
+    def _math_op(self, other: ProxySort, handler: typing.Callable) -> ProxySort:
+        as_float = isinstance(other, registry.float)
         if as_float:
             other = other.as_int
         result = super()._math_op(other=other, handler=handler)
@@ -67,25 +70,23 @@ class IntSort(ProxySort):
             return result.as_float
         return result
 
-    def __truediv__(self, other):
-        cls = registry['float']
+    def __truediv__(self, other: ProxySort) -> 'FloatSort':
         real = z3.ToReal(self.expr)
         if isinstance(other, IntSort):
-            return cls(expr=real / other.as_real.expr)
-        if not isinstance(other, cls):
+            return registry.float(expr=real / other.as_real.expr)
+        if not isinstance(other, registry.float):
             raise UnsupportedError('unsupported denominator sort', other.sort())
         if other.is_real:
             expr = real / other.as_real.expr
         else:
             expr = self.as_fp.expr / other.as_fp.expr
-        return cls(expr=expr)
+        return registry.float(expr=expr)
 
-    def __floordiv__(self, other):
-        float_proxy = registry['float']
-        as_float = isinstance(other, float_proxy)
+    def __floordiv__(self, other: 'ProxySort') -> 'ProxySort':
+        as_float = isinstance(other, registry.float)
         if as_float:
             other = other.as_int
-        zero = self.val(0)
+        zero = self.val(0).expr
         result = if_expr(
             test=other.expr >= zero,
             val_then=self.expr / other.expr,
@@ -95,12 +96,11 @@ class IntSort(ProxySort):
             return result.as_float
         return result
 
-    def __mod__(self, other):
-        float_proxy = registry['float']
-        as_float = isinstance(other, float_proxy)
+    def __mod__(self, other: 'ProxySort') -> 'ProxySort':
+        as_float = isinstance(other, registry.float)
         if as_float:
             other = other.as_int
-        zero = self.val(0)
+        zero = self.val(0).expr
         result = if_expr(
             test=other.expr >= zero,
             val_then=self.expr % other.expr,
@@ -110,18 +110,16 @@ class IntSort(ProxySort):
             return result.as_float
         return result
 
-    def __invert__(self):
-        cls = type(self)
+    def __invert__(self) -> 'IntSort':
         expr = z3.BV2Int(~z3.Int2BV(self.expr, INT_BITS))
         zero = z3.IntVal(0)
         modulo = z3.IntVal(2 ** INT_BITS)
         expr = z3.If(self.expr >= zero, expr - modulo, expr)
-        return cls(expr=expr)
+        return type(self)(expr=expr)
 
-    def _bitwise_op(self, other, handler):
-        cls = type(self)
+    def _bitwise_op(self, other: 'ProxySort', handler: typing.Callable) -> 'IntSort':
         expr = z3.BV2Int(handler(
             z3.Int2BV(self.expr, INT_BITS),
             z3.Int2BV(unwrap(other), INT_BITS),
         ))
-        return cls(expr=expr)
+        return type(self)(expr=expr)

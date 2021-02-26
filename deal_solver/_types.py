@@ -15,9 +15,12 @@ class Z3Bool:
     def __getitem__(self, item):
         pass
 
+    def __sub__(self, item):
+        pass
+
 
 Z3Node = Z3Bool
 AstNode = typing.NewType('AstNode', object)      # astroid.node_classes.NodeNG
-SortType = typing.Union[Z3Bool, 'ProxySort']
-SortTypes = typing.Iterable[SortType]
-HandlerType = typing.Callable[[AstNode, 'Context'], SortType]
+SortType = typing.TypeVar('SortType', bound='ProxySort')
+SortTypes = typing.Iterable['ProxySort']
+HandlerType = typing.Callable[[AstNode, 'Context'], 'ProxySort']

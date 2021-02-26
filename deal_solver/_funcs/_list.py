@@ -1,17 +1,17 @@
 # app
 from .._context import Context
 from .._exceptions import UnsupportedError
-from .._proxies import IntSort, ListSort
+from .._proxies import IntSort, ListSort, ProxySort
 from ._registry import register
 
 
 @register('builtins.list.index')
-def list_index(items: ListSort, item, start=None, **kwargs):
+def list_index(items: ListSort, item: ProxySort, start: ProxySort = None, **kwargs):
     return items.index(item, start=start)
 
 
 @register('builtins.list.append')
-def list_append(items: ListSort, item, ctx: Context, var_name: str, **kwargs) -> None:
+def list_append(items: ListSort, item: ProxySort, ctx: Context, var_name: str, **kwargs) -> None:
     if not var_name.isidentifier():
         raise UnsupportedError(f'cannot append to {var_name}')
     ctx.scope.set(
