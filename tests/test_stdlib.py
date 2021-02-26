@@ -40,6 +40,12 @@ from .helpers import prove_f
     'math.isclose(math.sin(0), 0.0)',
     'math.isclose(math.sin(math.pi/2), 1, 1e-07)',
     'math.isclose(math.sin(-math.pi/2), -1, 1e-07)',
+
+    'math.trunc(12) == 12',
+    'math.trunc(-12) == -12',
+    'math.trunc(12.9) == 12',
+    'math.trunc(-12.9) == -12',
+    'math.trunc(-12.0) == -12',
 ])
 def test_math_module(check: str) -> None:
     text = """

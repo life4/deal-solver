@@ -84,3 +84,18 @@ def math_sin(x, ctx: Context, **kwargs):
         else:
             result -= nominator / denominator
     return result
+
+
+@register('math.trunc')
+def math_trunc(x, ctx: Context, **kwargs):
+    if not isinstance(x, FloatSort):
+        return x.as_int
+    return if_expr(
+        x.as_int.as_float == x,
+        x.as_int,
+        if_expr(
+            x > FloatSort.val(0, ctx=ctx.z3_ctx),
+            x.as_int,
+            x.as_int + IntSort.val(1),
+        ),
+    )
