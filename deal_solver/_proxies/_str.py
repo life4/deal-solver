@@ -20,6 +20,10 @@ if typing.TYPE_CHECKING:
 class StrSort(ProxySort):
     type_name = 'str'
 
+    def __init__(self, expr) -> None:
+        assert z3.is_string(expr)
+        self.expr = expr
+
     def _ensure(self, item, seq=False):
         pass
 
@@ -72,3 +76,7 @@ class StrSort(ProxySort):
     def length(self) -> 'IntSort':
         assert self.expr is not None
         return registry.int(expr=z3.Length(self.expr))
+
+    def _comp_op(self, other: 'ProxySort', handler: typing.Callable) -> 'BoolSort':
+        result = self._binary_op(other=other, handler=handler)
+        return registry.bool(expr=result.expr)

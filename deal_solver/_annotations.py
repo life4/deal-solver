@@ -7,8 +7,8 @@ import z3
 
 # app
 from ._ast import get_full_name, get_name, infer
-from ._proxies import FloatSort
-from ._types import AstNode, SortType
+from ._proxies import FloatSort, ProxySort
+from ._types import AstNode
 
 
 SIMPLE_SORTS = {
@@ -21,7 +21,7 @@ GENERIC_SORTS = {
     'list': z3.SeqSort,
     'set': z3.SetSort,
 }
-MaybeSort = typing.Optional[SortType]
+MaybeSort = typing.Optional[ProxySort]
 
 
 def ann2sort(node: AstNode, ctx: z3.Context) -> MaybeSort:

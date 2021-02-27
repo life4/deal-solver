@@ -14,8 +14,7 @@ from ._context import Context
 from ._eval_contracts import Contract, eval_contracts
 from ._eval_stmt import eval_stmt
 from ._exceptions import ProveError, UnsupportedError
-from ._proxies import wrap
-from ._types import Z3Bool
+from ._proxies import wrap, and_expr, not_expr, BoolSort
 
 
 DEFAULT_TIMEOUT = 5.0
@@ -47,7 +46,7 @@ class Proof(typing.NamedTuple):
 
 
 class Constraint(typing.NamedTuple):
-    condition: Z3Bool
+    condition: BoolSort
     description: str
 
 
@@ -129,19 +128,19 @@ class Theorem:
         for constraint in self._context.expected:
             yield Constraint(
                 description='assertion',
-                condition=z3.And(
+                condition=and_expr(
                     *contracts.pre,
                     *self._context.given,
-                    z3.Not(constraint),
+                    not_expr(constraint),
                 ),
             )
         for constraint in contracts.post:
             yield Constraint(
                 description='post-condition',
-                condition=z3.And(
+                condition=and_expr(
                     *contracts.pre,
                     *self._context.given,
-                    z3.Not(constraint),
+                    not_expr(constraint),
                 ),
             )
         for exc in self._context.exceptions:
@@ -149,7 +148,7 @@ class Theorem:
                 continue
             yield Constraint(
                 description=f'exception {exc.names}',
-                condition=z3.And(
+                condition=and_expr(
                     *contracts.pre,
                     *self._context.given,
                     exc.cond,
@@ -161,7 +160,7 @@ class Theorem:
         for constraint in self.constraints:
             solver = z3.Solver(ctx=self._z3_context)
             solver.set('timeout', int(self._timeout * 1000))
-            solver.add(constraint.condition)
+            solver.add(constraint.condition.expr)
             proof = self._prove(solver=solver, descr=constraint.description)
             if proof.conclusion == Conclusion.FAIL:
                 return proof

@@ -22,13 +22,17 @@ INT_BITS = 64
 class IntSort(ProxySort):
     type_name = 'int'
 
+    def __init__(self, expr) -> None:
+        assert z3.is_int(expr), f'expected int, given {type(expr)}'
+        self.expr = expr
+
     @classmethod
     def sort(cls) -> z3.IntSort:
         return z3.IntSort()
 
     @classmethod
     def val(cls, x: int) -> 'IntSort':
-        return z3.IntVal(x)
+        return cls(expr=z3.IntVal(x))
 
     @property
     def as_int(self) -> 'IntSort':
@@ -54,7 +58,7 @@ class IntSort(ProxySort):
 
     @property
     def as_bool(self) -> 'BoolSort':
-        return self.expr != z3.IntVal(0)
+        return registry.bool(expr=self.expr != z3.IntVal(0))
 
     @property
     def abs(self) -> 'IntSort':

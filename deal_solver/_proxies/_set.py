@@ -17,6 +17,10 @@ if typing.TYPE_CHECKING:
 class SetSort(ProxySort):
     type_name = 'set'
 
+    def __init__(self, expr) -> None:
+        # assert z3.is_array(expr)
+        self.expr = expr
+
     @staticmethod
     def make_empty_expr(sort):
         return z3.EmptySet(sort)

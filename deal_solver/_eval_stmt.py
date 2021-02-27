@@ -9,15 +9,15 @@ from ._ast import infer
 from ._context import Context, ExceptionInfo, ReturnInfo
 from ._eval_expr import eval_expr
 from ._exceptions import UnsupportedError
-from ._proxies import ProxySort, if_expr, unwrap
+from ._proxies import ProxySort, if_expr, unwrap, BoolSort, not_expr
 from ._registry import HandlersRegistry
 
 
-eval_stmt = HandlersRegistry()
+eval_stmt: HandlersRegistry[None] = HandlersRegistry()
 
 
 @eval_stmt.register(astroid.FunctionDef)
-def eval_func(node: astroid.FunctionDef, ctx: Context):
+def eval_func(node: astroid.FunctionDef, ctx: Context) -> None:
     # if it is a recursive call, fake the function
     if node.name in ctx.trace:
         args = [unwrap(v) for v in ctx.scope.layer.values()]
@@ -30,7 +30,7 @@ def eval_func(node: astroid.FunctionDef, ctx: Context):
         func = z3.Function(node.name, *sorts)
         ctx.returns.add(ReturnInfo(
             value=func(*args),
-            cond=z3.BoolVal(True, ctx=ctx.z3_ctx)
+            cond=BoolSort.val(True)
         ))
         return
 
@@ -44,23 +44,23 @@ def eval_func(node: astroid.FunctionDef, ctx: Context):
 
 
 @eval_stmt.register(astroid.Assert)
-def eval_assert(node: astroid.Assert, ctx: Context):
+def eval_assert(node: astroid.Assert, ctx: Context) -> None:
     assert node.test is not None, 'assert without condition'
     expr = eval_expr(node=node.test, ctx=ctx)
     if isinstance(expr, ProxySort):
         expr = expr.as_bool
-    true = z3.BoolVal(True, ctx=ctx.z3_ctx)
-    expr = z3.If(ctx.interrupted, true, expr, ctx=ctx.z3_ctx)
-    ctx.expected.add(expr)  # type: ignore
+    true = BoolSort.val(True)
+    expr = if_expr(ctx.interrupted, true, expr, ctx=ctx.z3_ctx)
+    ctx.expected.add(expr)
 
 
 @eval_stmt.register(astroid.Expr)
-def eval_expr_stmt(node: astroid.Expr, ctx: Context):
+def eval_expr_stmt(node: astroid.Expr, ctx: Context) -> None:
     eval_expr(node=node.value, ctx=ctx)
 
 
 @eval_stmt.register(astroid.Assign)
-def eval_assign(node: astroid.Assign, ctx: Context):
+def eval_assign(node: astroid.Assign, ctx: Context) -> None:
     if not node.targets:
         raise UnsupportedError('assignment to an empty target')
     if len(node.targets) > 1:
@@ -74,15 +74,15 @@ def eval_assign(node: astroid.Assign, ctx: Context):
 
 
 @eval_stmt.register(astroid.Return)
-def eval_return(node: astroid.Return, ctx: Context):
+def eval_return(node: astroid.Return, ctx: Context) -> None:
     ctx.returns.add(ReturnInfo(
         value=eval_expr(node=node.value, ctx=ctx),
-        cond=z3.Not(ctx.interrupted),
+        cond=not_expr(ctx.interrupted),
     ))
 
 
 @eval_stmt.register(astroid.If)
-def eval_if_else(node: astroid.If, ctx: Context):
+def eval_if_else(node: astroid.If, ctx: Context) -> None:
     assert node.test
     assert node.body
 
@@ -107,14 +107,14 @@ def eval_if_else(node: astroid.If, ctx: Context):
         ctx.scope.set(name=var_name, value=value)
 
     # update new assertions
-    true = z3.BoolVal(True, ctx=ctx.z3_ctx)
+    true = BoolSort.val(True)
     for constr in ctx_then.expected.layer:
         ctx.expected.add(if_expr(test_ref, constr, true))
     for constr in ctx_else.expected.layer:
         ctx.expected.add(if_expr(test_ref, true, constr))
 
     # update new exceptions
-    false = z3.BoolVal(False, ctx=ctx.z3_ctx)
+    false = BoolSort.val(False)
     for exc in ctx_then.exceptions.layer:
         ctx.exceptions.add(ExceptionInfo(
             names=exc.names,
@@ -127,7 +127,7 @@ def eval_if_else(node: astroid.If, ctx: Context):
         ))
 
     # update new return statements
-    false = z3.BoolVal(False, ctx=ctx.z3_ctx)
+    false = BoolSort.val(False)
     for ret in ctx_then.returns.layer:
         ctx.returns.add(ReturnInfo(
             value=ret.value,
@@ -141,7 +141,7 @@ def eval_if_else(node: astroid.If, ctx: Context):
 
 
 @eval_stmt.register(astroid.Raise)
-def eval_raise(node: astroid.Raise, ctx: Context):
+def eval_raise(node: astroid.Raise, ctx: Context) -> None:
     names: typing.Set[str] = set()
     for exc in (node.exc, node.cause):
         if exc is None:
@@ -149,7 +149,7 @@ def eval_raise(node: astroid.Raise, ctx: Context):
         names.update(_get_all_bases(exc))
     ctx.exceptions.add(ExceptionInfo(
         names=names,
-        cond=z3.Not(ctx.interrupted),
+        cond=not_expr(ctx.interrupted),
     ))
 
 
@@ -173,5 +173,5 @@ def _get_all_bases(node) -> typing.Iterator[str]:
 @eval_stmt.register(astroid.ImportFrom)
 @eval_stmt.register(astroid.Import)
 @eval_stmt.register(astroid.Pass)
-def eval_skip(node, ctx: Context):
+def eval_skip(node, ctx: Context) -> None:
     pass

@@ -3,12 +3,12 @@ import typing
 
 # external
 import astroid
-import z3
 
 # app
 from ._context import Context, Scope
 from ._eval_expr import eval_expr
 from ._goal import Goal
+from ._proxies import or_expr, not_expr, BoolSort
 from ._types import AstNode
 
 
@@ -42,8 +42,6 @@ def eval_contracts(func: astroid.FunctionDef, ctx: Context) -> Contracts:
             goals.pre.add(value)
         if contract.name == 'post':
             for value in _eval_post(ctx=ctx, args=contract.args):
-                if value is None:
-                    continue
                 goals.post.add(value)
         if contract.name == 'raises':
             values = _eval_raises(ctx=ctx, args=contract.args)
@@ -51,16 +49,16 @@ def eval_contracts(func: astroid.FunctionDef, ctx: Context) -> Contracts:
     return goals
 
 
-def _eval_pre(ctx: Context, args: list):
+def _eval_pre(ctx: Context, args: list) -> typing.Optional[BoolSort]:
     contract = args[0]
     if not isinstance(contract, astroid.Lambda):
-        return
+        return None
     if not contract.args:
-        return
-    return eval_expr(node=contract.body, ctx=ctx)
+        return None
+    return eval_expr(node=contract.body, ctx=ctx).as_bool
 
 
-def _eval_post(ctx: Context, args: list):
+def _eval_post(ctx: Context, args: list) -> typing.Iterator[BoolSort]:
     contract = args[0]
     if not isinstance(contract, astroid.Lambda):
         return
@@ -75,13 +73,13 @@ def _eval_post(ctx: Context, args: list):
         )
         # The contract is valid if the return value is not reached
         # or it passed the pos-condition test.
-        yield z3.Or(
-            z3.Not(ret.cond),
+        yield or_expr(
+            not_expr(ret.cond),
             eval_expr(node=contract.body, ctx=ctx),
         )
 
 
-def _eval_raises(ctx: Context, args: list):
+def _eval_raises(ctx: Context, args: list) -> typing.Iterator[str]:
     for arg in args:
         if isinstance(arg, astroid.Name):
             yield arg.name

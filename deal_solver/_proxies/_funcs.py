@@ -55,18 +55,13 @@ def wrap(expr) -> 'ProxySort':
 
 
 def if_expr(
-    test: 'BoolSort',
+    test: typing.Any,
     val_then: T,
     val_else: T,
     ctx: typing.Optional[z3.Context] = None,
 ) -> T:
-    # app
-    from ._proxy import ProxySort
-
-    if isinstance(test, ProxySort):
-        test = test.as_bool
     expr = z3.If(
-        test,
+        wrap(test).as_bool.expr,
         unwrap(val_then),
         unwrap(val_else),
         ctx=ctx,
@@ -87,4 +82,12 @@ def switch(*cases: typing.Tuple[typing.Any, T], default) -> T:
 
 
 def and_expr(*args: 'ProxySort') -> 'BoolSort':
-    return registry.bool(z3.And(*[arg.as_bool for arg in args]))
+    return registry.bool(z3.And(*[arg.as_bool.expr for arg in args]))
+
+
+def or_expr(*args: 'ProxySort') -> 'BoolSort':
+    return registry.bool(z3.Or(*[wrap(arg).as_bool.expr for arg in args]))
+
+
+def not_expr(cond: 'ProxySort') -> 'BoolSort':
+    return registry.bool(z3.Not(wrap(cond).as_bool.expr))

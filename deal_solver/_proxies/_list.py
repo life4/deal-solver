@@ -19,6 +19,11 @@ class ListSort(ProxySort):
     expr: z3.SeqRef
     type_name = 'list'
 
+    def __init__(self, expr) -> None:
+        # assert z3.is_seq(expr)
+        assert not z3.is_string(expr)
+        self.expr = expr
+
     @classmethod
     def make_empty(cls, sort: z3.SortRef = None) -> 'ListSort':
         expr = None
@@ -33,8 +38,9 @@ class ListSort(ProxySort):
     @property
     def as_bool(self) -> 'BoolSort':
         if self.expr is None:
-            return z3.BoolVal(False)
-        return z3.Length(self.expr) != z3.IntVal(0)
+            return registry.bool.val(False)
+        expr = z3.Length(self.expr) != z3.IntVal(0)
+        return registry.bool(expr=expr)
 
     def get_item(self, index: 'ProxySort') -> 'ProxySort':
         return wrap(self.expr[unwrap(index)])

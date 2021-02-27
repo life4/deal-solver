@@ -6,7 +6,7 @@ import typing
 import z3
 
 # app
-from ._funcs import switch
+from ._funcs import switch, wrap, and_expr
 from .._exceptions import UnsupportedError
 from ._proxy import ProxySort
 from ._registry import registry
@@ -78,8 +78,8 @@ class FloatSort(ProxySort):
             (z3.fpIsInf(self.expr), nan),
             (z3.Not(z3.fpIsInf(other.expr)), (self / other).as_int.as_fp),
             (z3.fpIsZero(self.expr), zero),
-            (z3.And(self < zero, other < zero), zero),
-            (z3.And(self > zero, other > zero), zero),
+            (and_expr(self < zero, other < zero), zero),
+            (and_expr(self > zero, other > zero), zero),
             default=-one,
         )
 
@@ -88,6 +88,10 @@ class FloatSort(ProxySort):
 
 class RealSort(FloatSort):
     expr: z3.RatNumRef
+
+    def __init__(self, expr) -> None:
+        assert z3.is_real(expr), f'expected real, given {type(expr)}'
+        self.expr = expr
 
     @classmethod
     def sort(cls, ctx: z3.Context = None):
@@ -99,7 +103,7 @@ class RealSort(FloatSort):
 
     @classmethod
     def _as_fp(cls, x):
-        return z3.fpRealToFP(z3.RNE(), x, cls.fp_sort())
+        return z3.fpRealToFP(z3.RNE(), x, FPSort.sort())
 
     @property
     def as_real(self) -> 'RealSort':
@@ -128,14 +132,14 @@ class RealSort(FloatSort):
 
     def _binary_op(self, other: ProxySort, handler: typing.Callable) -> ProxySort:
         if isinstance(other, registry.int):
-            return handler(self.expr, other.as_real.expr)
+            return wrap(handler(self.expr, other.as_real.expr))
         if not isinstance(other, FloatSort):
             raise UnsupportedError('cannot combine float and', type(other))
         if other.is_real:
-            return handler(self.expr, other.expr)
+            return wrap(handler(self.expr, other.expr))
         if self.prefer_real:
-            return handler(self.expr, other.as_real.expr)
-        return handler(self.as_fp.expr, other.expr)
+            return wrap(handler(self.expr, other.as_real.expr))
+        return wrap(handler(self.as_fp.expr, other.expr))
 
     def __truediv__(self, other: ProxySort) -> FloatSort:
         if isinstance(other, registry.int):
@@ -149,6 +153,10 @@ class RealSort(FloatSort):
 
 
 class FPSort(FloatSort):
+
+    def __init__(self, expr) -> None:
+        assert z3.is_fp(expr), f'expected FPSort, given {type(expr)}'
+        self.expr = expr
 
     @staticmethod
     def sort(ctx: z3.Context = None):
@@ -190,14 +198,14 @@ class FPSort(FloatSort):
 
     def _binary_op(self, other: ProxySort, handler: typing.Callable) -> ProxySort:
         if isinstance(other, registry.int):
-            return handler(self.expr, other.as_fp.expr)
+            return wrap(handler(self.expr, other.as_fp.expr))
         if not isinstance(other, FloatSort):
             raise UnsupportedError('cannot combine float and', type(other))
         if other.is_fp:
-            return handler(self.expr, other.expr)
+            return wrap(handler(self.expr, other.expr))
         if self.prefer_real:
-            return handler(self.as_real.expr, other.expr)
-        return handler(self.expr, other.as_fp.expr)
+            return wrap(handler(self.as_real.expr, other.expr))
+        return wrap(handler(self.expr, other.as_fp.expr))
 
     def __truediv__(self, other: ProxySort) -> 'FloatSort':
         if isinstance(other, registry.int):

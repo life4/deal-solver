@@ -1,8 +1,16 @@
-from typing import Iterator
-import z3
+from typing import Iterator, List
+
+from ._proxies import BoolSort
 
 
-class Goal(z3.Goal):
-    def __iter__(self) -> Iterator[z3.BoolRef]:
-        for i in range(len(self)):
-            yield self[i]
+class Goal:
+    _items: List[BoolSort]
+
+    def __init__(self) -> None:
+        self._items = []
+
+    def add(self, item: BoolSort) -> None:
+        self._items.append(item)
+
+    def __iter__(self) -> Iterator[BoolSort]:
+        yield from self._items

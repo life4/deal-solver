@@ -62,13 +62,13 @@ class Context(typing.NamedTuple):
 
     @property
     def interrupted(self) -> 'BoolSort':
-        from .._proxies import BoolSort
-        false = z3.BoolVal(False, ctx=self.z3_ctx)
-        return BoolSort(expr=z3.Or(
+        from .._proxies import BoolSort, or_expr
+        false = BoolSort.val(False)
+        return or_expr(
             false,
             *[exc.cond.as_bool for exc in self.exceptions],
             *[ret.cond.as_bool for ret in self.returns],
-        ))
+        )
 
     @property
     def return_value(self):

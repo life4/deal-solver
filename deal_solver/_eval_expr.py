@@ -14,15 +14,14 @@ from ._exceptions import UnsupportedError
 from ._funcs import FUNCTIONS
 from ._proxies import (
     FloatSort, LambdaSort, ListSort, ProxySort,
-    SetSort, if_expr, random_name, unwrap, wrap,
+    SetSort, if_expr, random_name, unwrap, wrap, and_expr, or_expr, not_expr
 )
 from ._registry import HandlersRegistry
-from ._types import SortType
 
 
-eval_expr = HandlersRegistry()
+eval_expr: HandlersRegistry[ProxySort] = HandlersRegistry()
 
-CONSTS: typing.Mapping[type, typing.Callable[..., SortType]]
+CONSTS: typing.Mapping[type, typing.Callable[..., ProxySort]]
 CONSTS = {
     bool: z3.BoolVal,
     int: z3.IntVal,
@@ -44,6 +43,7 @@ UNARY_OPERATIONS = {
     '-': operator.neg,
     '+': operator.pos,
     '~': operator.inv,
+    'not': not_expr,
 }
 BIN_OPERATIONS: typing.Mapping[str, typing.Callable]
 BIN_OPERATIONS = {
@@ -64,15 +64,15 @@ BIN_OPERATIONS = {
     '<<': operator.lshift,
     '>>': operator.rshift,
 }
-BOOL_OPERATIONS: typing.Mapping[str, typing.Callable]
+BOOL_OPERATIONS: typing.Mapping[str, typing.Callable[..., ProxySort]]
 BOOL_OPERATIONS = {
-    'and': z3.And,
-    'or': z3.Or,
+    'and': and_expr,
+    'or': or_expr,
 }
 
 
 @eval_expr.register(astroid.Const)
-def eval_const(node: astroid.Const, ctx: Context):
+def eval_const(node: astroid.Const, ctx: Context) -> ProxySort:
     t = type(node.value)
     converter = CONSTS.get(t)
     if not converter:
@@ -81,7 +81,7 @@ def eval_const(node: astroid.Const, ctx: Context):
 
 
 @eval_expr.register(astroid.BinOp)
-def eval_bin_op(node: astroid.BinOp, ctx: Context):
+def eval_bin_op(node: astroid.BinOp, ctx: Context) -> ProxySort:
     assert node.op
     operation = BIN_OPERATIONS.get(node.op)
     assert operation, 'unsupported binary operator'
@@ -97,7 +97,7 @@ def eval_bin_op(node: astroid.BinOp, ctx: Context):
 
 
 @eval_expr.register(astroid.Compare)
-def eval_compare(node: astroid.Compare, ctx: Context):
+def eval_compare(node: astroid.Compare, ctx: Context) -> ProxySort:
     left = eval_expr(node=node.left, ctx=ctx)
     for op, right_node in node.ops:
         assert op, 'missed comparison operator'
@@ -107,10 +107,11 @@ def eval_compare(node: astroid.Compare, ctx: Context):
         right = eval_expr(node=right_node, ctx=ctx)
         # TODO: proper chain
         return operation(left, right)
+    raise RuntimeError('unreachable')  # pragma: no cover
 
 
 @eval_expr.register(astroid.BoolOp)
-def eval_bool_op(node: astroid.BoolOp, ctx: Context):
+def eval_bool_op(node: astroid.BoolOp, ctx: Context) -> ProxySort:
     assert node.op
     operation = BOOL_OPERATIONS.get(node.op)
     assert operation, 'unsupported binary boolean operation'
@@ -126,7 +127,7 @@ def eval_bool_op(node: astroid.BoolOp, ctx: Context):
 
 
 @eval_expr.register(astroid.List)
-def eval_list(node: astroid.List, ctx: Context):
+def eval_list(node: astroid.List, ctx: Context) -> ProxySort:
     container = ListSort.make_empty()
     for subnode in node.elts:
         item = eval_expr(node=subnode, ctx=ctx)
@@ -135,7 +136,7 @@ def eval_list(node: astroid.List, ctx: Context):
 
 
 @eval_expr.register(astroid.Set)
-def eval_set(node: astroid.Set, ctx: Context):
+def eval_set(node: astroid.Set, ctx: Context) -> ProxySort:
     container = SetSort.make_empty()
     for subnode in node.elts:
         item = eval_expr(node=subnode, ctx=ctx)
@@ -144,7 +145,7 @@ def eval_set(node: astroid.Set, ctx: Context):
 
 
 @eval_expr.register(astroid.ListComp)
-def eval_list_comp(node: astroid.ListComp, ctx: Context):
+def eval_list_comp(node: astroid.ListComp, ctx: Context) -> ProxySort:
     if len(node.generators) > 1:
         raise UnsupportedError('to many loops inside list compr')
 
@@ -176,8 +177,8 @@ def _compr_apply_ifs(
 
     conds = []
     for cond_node in comp.ifs:
-        cond = unwrap(eval_expr(node=cond_node, ctx=body_ctx))
-        conds.append(cond)
+        cond = eval_expr(node=cond_node, ctx=body_ctx)
+        conds.append(cond.as_bool.expr)
 
     f = z3.RecFunction(
         random_name('compr_cond'),
@@ -225,7 +226,7 @@ def _compr_apply_body(
 
 
 @eval_expr.register(astroid.Subscript)
-def eval_getitem(node: astroid.Subscript, ctx: Context):
+def eval_getitem(node: astroid.Subscript, ctx: Context) -> ProxySort:
     value_ref = eval_expr(node=node.value, ctx=ctx)
     if not isinstance(value_ref, ListSort):
         raise UnsupportedError('cannot get item from', type(value_ref))
@@ -248,12 +249,12 @@ def eval_getitem(node: astroid.Subscript, ctx: Context):
 
 
 @eval_expr.register(astroid.Index)
-def eval_index(node: astroid.Index, ctx: Context):
+def eval_index(node: astroid.Index, ctx: Context) -> ProxySort:
     return eval_expr(node=node.value, ctx=ctx)
 
 
 @eval_expr.register(astroid.Name)
-def eval_name(node: astroid.Name, ctx: Context):
+def eval_name(node: astroid.Name, ctx: Context) -> ProxySort:
     # resolve local vars
     value = ctx.scope.get(node.name)
     if value is not None:
@@ -305,21 +306,15 @@ def eval_attr(node: astroid.Attribute, ctx: Context):
 
 
 @eval_expr.register(astroid.UnaryOp)
-def eval_unary_op(node: astroid.UnaryOp, ctx: Context):
+def eval_unary_op(node: astroid.UnaryOp, ctx: Context) -> ProxySort:
     value_ref = eval_expr(node=node.operand, ctx=ctx)
-
-    if node.op == 'not':
-        if isinstance(value_ref, ProxySort):
-            value_ref = value_ref.as_bool
-        return z3.Not(value_ref, ctx=ctx.z3_ctx)
-
     operation = UNARY_OPERATIONS.get(node.op)
     assert operation is not None, 'unsupported unary operation'
     return operation(value_ref)
 
 
 @eval_expr.register(astroid.IfExp)
-def eval_ternary_op(node: astroid.IfExp, ctx: Context):
+def eval_ternary_op(node: astroid.IfExp, ctx: Context) -> ProxySort:
     assert node.test is not None
     assert node.body is not None
     assert node.orelse is not None
@@ -333,7 +328,7 @@ def eval_ternary_op(node: astroid.IfExp, ctx: Context):
 
 
 @eval_expr.register(astroid.Call)
-def eval_call(node: astroid.Call, ctx: Context):
+def eval_call(node: astroid.Call, ctx: Context) -> ProxySort:
     if node.keywords:
         raise UnsupportedError('keyword function arguments are unsupported')
 
@@ -375,8 +370,8 @@ def _call_function(node: astroid.FunctionDef, ctx: Context, call_args=typing.Lis
     # we ask pre-conditions to be true
     # and promise post-condition to be true
     contracts = eval_contracts(func=node, ctx=func_ctx)
-    ctx.expected.add(contracts.pre.as_expr())
-    ctx.given.add(contracts.post.as_expr())
+    ctx.expected.add(and_expr(*contracts.pre))
+    ctx.given.add(and_expr(*contracts.post))
 
     return result
 

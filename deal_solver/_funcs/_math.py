@@ -6,14 +6,14 @@ import z3
 
 # app
 from .._context import Context
-from .._proxies import BoolSort, FloatSort, IntSort, if_expr, wrap, ProxySort
+from .._proxies import BoolSort, FloatSort, IntSort, if_expr, and_expr, wrap, ProxySort
 from ._registry import FUNCTIONS, register
 
 
 @register('math.isclose')
 def math_isclose(left, right, rel_tol=None, abs_tol=None, *, ctx: Context, **kwargs) -> BoolSort:
     if not isinstance(left, FloatSort) and not isinstance(right, FloatSort):
-        return BoolSort(left == right)
+        return left == right
 
     if isinstance(left, IntSort):
         left = left.as_float
@@ -36,7 +36,7 @@ def math_isclose(left, right, rel_tol=None, abs_tol=None, *, ctx: Context, **kwa
     abs_max = builtin_max(left.abs, right.abs, ctx=ctx)
     delta = builtin_max(rel_tol * abs_max, abs_tol, ctx=ctx)
     return if_expr(
-        z3.And(left.is_nan, right.is_nan),
+        and_expr(left.is_nan, right.is_nan),
         BoolSort.val(True),
         (left - right).abs <= delta,
     )
