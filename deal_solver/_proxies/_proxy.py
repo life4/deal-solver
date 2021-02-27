@@ -105,14 +105,16 @@ class ProxySort:
     def sort(self):
         return self.expr.sort()
 
-    def _binary_op(self, other: 'ProxySort', handler: typing.Callable) -> 'ProxySort':
+    def _binary_op(self, other: 'ProxySort', handler: typing.Callable):
         self._ensure(other, seq=True)
-        return wrap(expr=handler(self.expr, unwrap(other)))
+        return handler(self.expr, unwrap(other))
 
     # comparison
 
-    def _comp_op(self, other: 'ProxySort', handler: typing.Callable):
-        return self._binary_op(other=other, handler=handler)
+    def _comp_op(self, other: 'ProxySort', handler: typing.Callable) -> 'BoolSort':
+        from ._bool import BoolSort
+        expr = self._binary_op(other=other, handler=handler)
+        return BoolSort(expr=expr)
 
     def __eq__(self, other: 'ProxySort') -> 'BoolSort':  # type: ignore
         return self._comp_op(other=other, handler=operator.__eq__)
@@ -148,7 +150,7 @@ class ProxySort:
     # math binary operations
 
     def _math_op(self, other: 'ProxySort', handler: typing.Callable) -> 'ProxySort':
-        return self._binary_op(other=other, handler=handler)
+        return wrap(self._binary_op(other=other, handler=handler))
 
     def __add__(self, other: 'ProxySort') -> 'ProxySort':
         return self._math_op(other=other, handler=operator.__add__)

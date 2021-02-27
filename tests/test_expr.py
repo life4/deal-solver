@@ -150,6 +150,8 @@ from .helpers import prove_f
     # bool functions
     'int(True) == 1',
     'int(False) == 0',
+    'float(True) == 1.0',
+    'float(False) == 0.0',
     'bool(True)',
     'not bool(False)',
 
@@ -165,6 +167,7 @@ from .helpers import prove_f
     '[1] + [2] == [1, 2]',
     '[1, 2] + [3, 4] == [1, 2, 3, 4]',
     '[] + [] == []',
+    '([] + [True] + [False])[0] == True',
 
     # list methods
     '[7, 8, 8, 9].index(8) == 1',

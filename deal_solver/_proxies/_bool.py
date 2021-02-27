@@ -10,6 +10,7 @@ from ._funcs import if_expr
 
 
 if typing.TYPE_CHECKING:
+    from ._int import FloatSort
     from ._int import IntSort
 
 
@@ -21,11 +22,11 @@ class BoolSort(ProxySort):
     type_name = 'bool'
 
     def __init__(self, expr) -> None:
-        # assert z3.is_bool(expr), f'expected bool, given {type(expr)}'
+        assert z3.is_bool(expr) or z3.is_seq(expr), f'expected bool, given {type(expr)}'
         self.expr = expr
 
     @classmethod
-    def sort(cls):
+    def sort(cls) -> z3.BoolSortRef:
         return z3.BoolSort()
 
     @classmethod
@@ -41,5 +42,5 @@ class BoolSort(ProxySort):
         return if_expr(self, registry.int.val(1), registry.int.val(0))
 
     @property
-    def as_float(self):
+    def as_float(self) -> 'FloatSort':
         return self.as_int.as_float

@@ -1,12 +1,14 @@
 # stdlib
 from sys import float_info
 import typing
+import math
+import operator
 
 # external
 import z3
 
 # app
-from ._funcs import switch, wrap, and_expr
+from ._funcs import switch, and_expr
 from .._exceptions import UnsupportedError
 from ._proxy import ProxySort
 from ._registry import registry
@@ -14,6 +16,16 @@ from ._registry import registry
 if typing.TYPE_CHECKING:
     from ._bool import BoolSort
     from ._int import IntSort
+
+
+FP_HANDLERS = {
+    operator.__eq__: z3.fpEQ,
+    operator.__ne__: z3.fpNEQ,
+    operator.__gt__: z3.fpGT,
+    operator.__ge__: z3.fpGEQ,
+    operator.__lt__: z3.fpLT,
+    operator.__le__: z3.fpLEQ,
+}
 
 
 @registry.add
@@ -28,9 +40,6 @@ class FloatSort(ProxySort):
             return RealSort.__new__(RealSort)
         return FPSort.__new__(FPSort)
 
-    def __init__(self, expr) -> None:
-        self.expr = expr
-
     @classmethod
     def sort(cls, ctx: z3.Context = None):
         if cls.prefer_real:
@@ -39,6 +48,8 @@ class FloatSort(ProxySort):
 
     @classmethod
     def val(cls, x: float, ctx: z3.Context = None) -> 'FloatSort':
+        if not math.isfinite(x):
+            return FPSort.val(x, ctx=ctx)
         if cls.prefer_real:
             return RealSort.val(x, ctx=ctx)
         return FPSort.val(x, ctx=ctx)
@@ -130,16 +141,16 @@ class RealSort(FloatSort):
     def is_nan(self) -> 'BoolSort':
         return registry.bool.val(False)
 
-    def _binary_op(self, other: ProxySort, handler: typing.Callable) -> ProxySort:
+    def _binary_op(self, other: ProxySort, handler: typing.Callable):
         if isinstance(other, registry.int):
-            return wrap(handler(self.expr, other.as_real.expr))
+            return handler(self.expr, other.as_real.expr)
         if not isinstance(other, FloatSort):
             raise UnsupportedError('cannot combine float and', type(other))
         if other.is_real:
-            return wrap(handler(self.expr, other.expr))
+            return handler(self.expr, other.expr)
         if self.prefer_real:
-            return wrap(handler(self.expr, other.as_real.expr))
-        return wrap(handler(self.as_fp.expr, other.expr))
+            return handler(self.expr, other.as_real.expr)
+        return handler(self.as_fp.expr, other.expr)
 
     def __truediv__(self, other: ProxySort) -> FloatSort:
         if isinstance(other, registry.int):
@@ -196,16 +207,18 @@ class FPSort(FloatSort):
     def abs(self) -> 'FPSort':
         return FPSort(expr=z3.fpAbs(self.expr))
 
-    def _binary_op(self, other: ProxySort, handler: typing.Callable) -> ProxySort:
+    def _binary_op(self, other: ProxySort, handler: typing.Callable):
+        real_handler = handler
+        fp_handler = FP_HANDLERS.get(handler, handler)
         if isinstance(other, registry.int):
-            return wrap(handler(self.expr, other.as_fp.expr))
+            return fp_handler(self.expr, other.as_fp.expr)
         if not isinstance(other, FloatSort):
             raise UnsupportedError('cannot combine float and', type(other))
         if other.is_fp:
-            return wrap(handler(self.expr, other.expr))
+            return fp_handler(self.expr, other.expr)
         if self.prefer_real:
-            return wrap(handler(self.as_real.expr, other.expr))
-        return wrap(handler(self.expr, other.as_fp.expr))
+            return real_handler(self.as_real.expr, other.expr)
+        return fp_handler(self.expr, other.as_fp.expr)
 
     def __truediv__(self, other: ProxySort) -> 'FloatSort':
         if isinstance(other, registry.int):
@@ -216,21 +229,3 @@ class FPSort(FloatSort):
         if self.prefer_real:
             return RealSort(expr=self.as_real.expr / other.as_real.expr)
         return type(self)(expr=self.expr / other.as_fp.expr)
-
-    def __eq__(self, other) -> 'BoolSort':  # type: ignore
-        return self._comp_op(other=other, handler=z3.fpEQ)
-
-    def __ne__(self, other) -> 'BoolSort':  # type: ignore
-        return self._comp_op(other=other, handler=z3.fpNEQ)
-
-    def __gt__(self, other) -> 'BoolSort':
-        return self._comp_op(other=other, handler=z3.fpGT)
-
-    def __ge__(self, other) -> 'BoolSort':
-        return self._comp_op(other=other, handler=z3.fpGEQ)
-
-    def __lt__(self, other) -> 'BoolSort':
-        return self._comp_op(other=other, handler=z3.fpLT)
-
-    def __le__(self, other) -> 'BoolSort':
-        return self._comp_op(other=other, handler=z3.fpLEQ)
