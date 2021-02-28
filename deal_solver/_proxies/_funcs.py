@@ -7,7 +7,6 @@ from string import ascii_letters
 import z3
 
 # app
-from .._types import Z3Node
 from ._registry import registry
 
 if typing.TYPE_CHECKING:
@@ -18,7 +17,7 @@ if typing.TYPE_CHECKING:
 T = typing.TypeVar('T', bound='ProxySort')
 
 
-def unwrap(obj: 'ProxySort') -> Z3Node:
+def unwrap(obj: 'ProxySort') -> z3.Z3PPObject:
     # app
     from ._proxy import ProxySort
 
