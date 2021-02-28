@@ -1,19 +1,21 @@
 # stdlib
-from sys import float_info
-import typing
 import math
 import operator
+import typing
+from sys import float_info
 
 # external
 import z3
 
 # app
-from ._funcs import switch, and_expr
 from .._exceptions import UnsupportedError
+from ._funcs import and_expr, switch
 from ._proxy import ProxySort
 from ._registry import registry
 
+
 if typing.TYPE_CHECKING:
+    # app
     from ._bool import BoolSort
     from ._int import IntSort
 

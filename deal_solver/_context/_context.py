@@ -6,12 +6,13 @@ import typing
 import z3
 
 # app
-from ._layer import Layer, ExceptionInfo, ReturnInfo
+from ._layer import ExceptionInfo, Layer, ReturnInfo
 from ._scope import Scope
 from ._trace import Trace
 
 
 if typing.TYPE_CHECKING:
+    # app
     from .._proxies import BoolSort
 
 
@@ -62,6 +63,7 @@ class Context(typing.NamedTuple):
 
     @property
     def interrupted(self) -> 'BoolSort':
+        # app
         from .._proxies import BoolSort, or_expr
         false = BoolSort.val(False)
         return or_expr(

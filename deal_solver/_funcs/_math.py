@@ -6,7 +6,7 @@ import z3
 
 # app
 from .._context import Context
-from .._proxies import BoolSort, FloatSort, IntSort, if_expr, and_expr, wrap, ProxySort
+from .._proxies import BoolSort, FloatSort, IntSort, ProxySort, and_expr, if_expr, wrap
 from ._registry import FUNCTIONS, register
 
 

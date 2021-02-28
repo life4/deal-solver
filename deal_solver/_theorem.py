@@ -14,7 +14,7 @@ from ._context import Context
 from ._eval_contracts import Contract, eval_contracts
 from ._eval_stmt import eval_stmt
 from ._exceptions import ProveError, UnsupportedError
-from ._proxies import wrap, and_expr, not_expr, BoolSort
+from ._proxies import BoolSort, and_expr, not_expr, wrap
 
 
 DEFAULT_TIMEOUT = 5.0

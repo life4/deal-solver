@@ -1,9 +1,12 @@
 # stdlib
 import typing
 
+# external
 import z3
 
+
 if typing.TYPE_CHECKING:
+    # app
     from .._proxies import BoolSort
 
 
@@ -20,6 +23,7 @@ class ReturnInfo(typing.NamedTuple):
     cond: 'BoolSort'
 
     def merge(self, other: 'ReturnInfo') -> 'ReturnInfo':
+        # app
         from .._proxies import if_expr
 
         true = z3.BoolVal(True)

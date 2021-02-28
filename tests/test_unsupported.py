@@ -1,5 +1,7 @@
+# stdlib
 from time import monotonic
 
+# external
 import pytest
 
 # project

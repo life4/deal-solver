@@ -4,8 +4,7 @@ import z3
 # app
 from .._context import Context
 from .._proxies import (
-    BoolSort, ProxySort, SetSort,
-    IntSort, StrSort, if_expr, random_name, unwrap, wrap,
+    BoolSort, IntSort, ProxySort, SetSort, StrSort, if_expr, random_name, unwrap, wrap,
 )
 from ._registry import register
 

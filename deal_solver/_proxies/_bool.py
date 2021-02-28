@@ -1,17 +1,18 @@
+# stdlib
 import typing
 
 # external
 import z3
 
 # app
+from ._funcs import if_expr
 from ._proxy import ProxySort
 from ._registry import registry
-from ._funcs import if_expr
 
 
 if typing.TYPE_CHECKING:
-    from ._int import FloatSort
-    from ._int import IntSort
+    # app
+    from ._int import FloatSort, IntSort
 
 
 INT_BITS = 64

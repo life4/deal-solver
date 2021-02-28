@@ -8,7 +8,7 @@ import astroid
 from ._context import Context, Scope
 from ._eval_expr import eval_expr
 from ._goal import Goal
-from ._proxies import or_expr, not_expr, BoolSort
+from ._proxies import BoolSort, not_expr, or_expr
 from ._types import AstNode
 
 

@@ -11,8 +11,9 @@ from ._funcs import unwrap, wrap
 
 
 if typing.TYPE_CHECKING:
+    # app
     from ._bool import BoolSort
-    from ._float import FloatSort, RealSort, FPSort
+    from ._float import FloatSort, FPSort, RealSort
     from ._int import IntSort
     from ._str import StrSort
 
@@ -112,6 +113,7 @@ class ProxySort:
     # comparison
 
     def _comp_op(self, other: 'ProxySort', handler: typing.Callable) -> 'BoolSort':
+        # app
         from ._bool import BoolSort
         expr = self._binary_op(other=other, handler=handler)
         return BoolSort(expr=expr)

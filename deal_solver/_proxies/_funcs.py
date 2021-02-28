@@ -9,7 +9,9 @@ import z3
 # app
 from ._registry import registry
 
+
 if typing.TYPE_CHECKING:
+    # app
     from ._bool import BoolSort
     from ._proxy import ProxySort
 

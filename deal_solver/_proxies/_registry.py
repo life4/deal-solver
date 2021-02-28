@@ -3,9 +3,10 @@ import typing
 
 
 if typing.TYPE_CHECKING:
+    # app
     from ._bool import BoolSort
-    from ._int import IntSort
     from ._float import FloatSort
+    from ._int import IntSort
     from ._list import ListSort
     from ._proxy import ProxySort
     from ._set import SetSort

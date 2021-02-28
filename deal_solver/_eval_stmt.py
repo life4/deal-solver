@@ -1,5 +1,7 @@
-# external
+# stdlib
 import typing
+
+# external
 import astroid
 import z3
 
@@ -9,7 +11,7 @@ from ._ast import infer
 from ._context import Context, ExceptionInfo, ReturnInfo
 from ._eval_expr import eval_expr
 from ._exceptions import UnsupportedError
-from ._proxies import ProxySort, if_expr, unwrap, BoolSort, not_expr
+from ._proxies import BoolSort, ProxySort, if_expr, not_expr, unwrap
 from ._registry import HandlersRegistry
 
 

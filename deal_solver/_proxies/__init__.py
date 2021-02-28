@@ -1,7 +1,7 @@
 # app
 from ._bool import BoolSort
 from ._float import FloatSort
-from ._funcs import if_expr, random_name, unwrap, wrap, and_expr, or_expr, not_expr
+from ._funcs import and_expr, if_expr, not_expr, or_expr, random_name, unwrap, wrap
 from ._int import IntSort
 from ._lambda import LambdaSort
 from ._list import ListSort

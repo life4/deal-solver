@@ -1,3 +1,4 @@
+# stdlib
 import typing
 
 # external
@@ -5,11 +6,13 @@ import z3
 
 # app
 from .._exceptions import UnsupportedError
-from ._funcs import if_expr, wrap, unwrap
+from ._funcs import if_expr, unwrap, wrap
 from ._proxy import ProxySort
 from ._registry import registry
 
+
 if typing.TYPE_CHECKING:
+    # app
     from ._bool import BoolSort
     from ._float import FloatSort, RealSort
     from ._str import StrSort

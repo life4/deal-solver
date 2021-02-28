@@ -13,8 +13,8 @@ from ._context import Context
 from ._exceptions import UnsupportedError
 from ._funcs import FUNCTIONS
 from ._proxies import (
-    FloatSort, LambdaSort, ListSort, ProxySort,
-    SetSort, if_expr, random_name, unwrap, wrap, and_expr, or_expr, not_expr
+    FloatSort, LambdaSort, ListSort, ProxySort, SetSort, and_expr,
+    if_expr, not_expr, or_expr, random_name, unwrap, wrap,
 )
 from ._registry import HandlersRegistry
 
