@@ -89,10 +89,10 @@ def eval_bin_op(node: astroid.BinOp, ctx: Context) -> ProxySort:
     right = eval_expr(node=node.right, ctx=ctx)
     try:
         result = operation(left, right)
-    except z3.Z3Exception as exc:
-        raise UnsupportedError(f'cannot perform {node.op} operation:', *exc.args)
-    except TypeError as exc:
-        raise UnsupportedError(f'cannot perform {node.op} operation:', *exc.args)
+    except z3.Z3Exception:
+        raise UnsupportedError(f'cannot perform operation: {left.type_name}{node.op}{right.type_name}')
+    except TypeError:
+        raise UnsupportedError(f'cannot perform operation: {left.type_name}{node.op}{right.type_name}')
     return wrap(result)
 
 
@@ -229,7 +229,7 @@ def _compr_apply_body(
 def eval_getitem(node: astroid.Subscript, ctx: Context) -> ProxySort:
     value_ref = eval_expr(node=node.value, ctx=ctx)
     if not isinstance(value_ref, ListSort):
-        raise UnsupportedError('cannot get item from', type(value_ref))
+        raise UnsupportedError(value_ref.type_name, 'object is not subscriptable')
 
     if not isinstance(node.slice, astroid.Slice):
         item_ref = eval_expr(node=node.slice, ctx=ctx)

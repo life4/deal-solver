@@ -82,7 +82,7 @@ class IntSort(ProxySort):
         if isinstance(other, IntSort):
             return registry.float(expr=real / other.as_real.expr)
         if not isinstance(other, registry.float):
-            raise UnsupportedError('unsupported denominator sort', other.sort())
+            raise UnsupportedError('unsupported denominator type', other.type_name)
         if other.is_real:
             expr = real / other.as_real.expr
         else:

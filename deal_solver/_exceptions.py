@@ -1,6 +1,7 @@
 
 class UnsupportedError(Exception):
-    pass
+    def __str__(self):
+        return ' '.join(self.args)
 
 
 class ProveError(Exception):

@@ -36,47 +36,48 @@ def test_timeout():
     assert theorem.error.args[0] == 'timeout'
 
 
-@pytest.mark.parametrize('expr', [
+@pytest.mark.parametrize('expr, err', [
     # actual errors
-    '[1,2,3,4].hello',
-    'hello',
-    'hello.world',
-    '[1,2,3](2)',
-    '4[0]',
-    '4[:4]',
-    '4.1[0]',
-    'True[0]',
-    '4.1[:4]',
-    '1.2 + "a"',
-    '4 / "a"',
-    '"b" / "a"',
-    '"b" // "a"',
-    '"b" % "a"',
-    '1 @ 2',
-    'len(12)',
-    '12 ** "hello"',
-    'int([])',
-    'float([])',
-    '~"a"',
-    '~3.14',
-    '3.1 | 4.2',
+    ('[1,2,3,4].hello', 'no definition for builtins.list.hello'),
+    ('hello',           'cannot resolve name hello'),
+    ('hello.world',     'cannot resolve attribute hello.world'),
+    ('[1,2,3](2)',      'the object is not callable  [1, 2, 3]'),
+    ('4[0]',            'int object is not subscriptable'),
+    ('4[:4]',           'int object is not subscriptable'),
+    ('4.1[0]',          'float object is not subscriptable'),
+    ('True[0]',         'bool object is not subscriptable'),
+    ('4.1[:4]',         'float object is not subscriptable'),
+    ('1.2 + "a"',       'cannot combine float and str'),
+    ('4 / "a"',         'unsupported denominator type str'),
+    ('"b" / "a"',       'cannot perform operation: str/str'),
+    ('"b" // "a"',      'cannot perform operation: str//str'),
+    ('"b" % "a"',       'cannot perform operation: str%str'),
+    ('1 @ 2',           'cannot perform operation: int@int'),
+    ('len(12)',         'int.__len__ is not defined'),
+    ('12 ** "hello"',   'cannot perform operation: int**str'),
+    ('int([])',         'cannot convert list to int'),
+    ('float([])',       'cannot convert list to float'),
+    ('~"a"',            'str.__invert__ is not defined'),
+    ('~3.14',           'float.__invert__ is not defined'),
+    ('3.1 | 4.2',       'float does not support bitwise operations'),
 
     # temporary unsupported
-    '()',
-    '{}',
-    'dict()',
-    '[1,2,3,4][::2]',
-    'str(12.34)',
-    '(4).bit_length()',
-    'min([], default=13)',
+    ('()',                  'unsupported ast node Tuple'),
+    ('{}',                  'unsupported ast node Dict'),
+    ('dict()',              'cannot resolve name dict'),
+    ('[1,2,3,4][::2]',      'slice step is not supported'),
+    ('str(12.34)',          'cannot convert float to str'),
+    ('(4).bit_length()',    'no definition for builtins.int.bit_length'),
+    ('min([], default=13)', 'keyword function arguments are unsupported'),
 ])
-def test_type_error(expr):
+def test_type_error(expr, err):
     proof = prove_f(f"""
         def f():
             assert {expr}
     """)
     assert proof.conclusion == Conclusion.SKIP
     assert type(proof.error) is UnsupportedError
+    assert str(proof.error) == err
 
 
 def test_partial_proof():

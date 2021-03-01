@@ -147,7 +147,7 @@ class RealSort(FloatSort):
         if isinstance(other, registry.int):
             return handler(self.expr, other.as_real.expr)
         if not isinstance(other, FloatSort):
-            raise UnsupportedError('cannot combine float and', type(other))
+            raise UnsupportedError('cannot combine float and', other.type_name)
         if other.is_real:
             return handler(self.expr, other.expr)
         if self.prefer_real:
@@ -215,7 +215,7 @@ class FPSort(FloatSort):
         if isinstance(other, registry.int):
             return fp_handler(self.expr, other.as_fp.expr)
         if not isinstance(other, FloatSort):
-            raise UnsupportedError('cannot combine float and', type(other))
+            raise UnsupportedError('cannot combine float and', other.type_name)
         if other.is_fp:
             return fp_handler(self.expr, other.expr)
         if self.prefer_real:
