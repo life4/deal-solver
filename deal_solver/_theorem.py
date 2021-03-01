@@ -14,6 +14,7 @@ from ._context import Context
 from ._eval_contracts import Contract, eval_contracts
 from ._eval_stmt import eval_stmt
 from ._exceptions import ProveError, UnsupportedError
+from ._model import Model
 from ._proxies import BoolSort, and_expr, not_expr, wrap
 
 
@@ -31,7 +32,7 @@ class Proof(typing.NamedTuple):
     conclusion: Conclusion
     description: str
     error: typing.Optional[Exception] = None
-    example: typing.Optional[z3.ModelRef] = None
+    example: typing.Optional[Model] = None
 
     @property
     def color(self) -> str:
@@ -196,7 +197,7 @@ class Theorem:
                 conclusion=Conclusion.FAIL,
                 description=descr,
                 error=None,
-                example=solver.model(),
+                example=Model(solver.model()),
             )
         raise RuntimeError('unreachable')  # pragma: no cover
 

@@ -341,7 +341,7 @@ def eval_call(node: astroid.Call, ctx: Context) -> ProxySort:
     if isinstance(value, astroid.FunctionDef):
         return _call_function(node=value, ctx=ctx, call_args=call_args)
     if not callable(value):
-        raise UnsupportedError('the object is not callable ', node.func.as_string())
+        raise UnsupportedError(value.type_name, 'object is not callable')
 
     if isinstance(node.func, astroid.Attribute):
         var_name = node.func.expr.as_string()

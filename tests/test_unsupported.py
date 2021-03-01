@@ -41,7 +41,7 @@ def test_timeout():
     ('[1,2,3,4].hello', 'no definition for builtins.list.hello'),
     ('hello',           'cannot resolve name hello'),
     ('hello.world',     'cannot resolve attribute hello.world'),
-    ('[1,2,3](2)',      'the object is not callable  [1, 2, 3]'),
+    ('[1,2,3](2)',      'list object is not callable'),
     ('4[0]',            'int object is not subscriptable'),
     ('4[:4]',           'int object is not subscriptable'),
     ('4.1[0]',          'float object is not subscriptable'),
