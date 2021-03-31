@@ -90,6 +90,15 @@ class Theorem:
         for node in module.values():
             if isinstance(node, astroid.FunctionDef):
                 yield cls(node=node, timeout=timeout)
+                continue
+
+            if isinstance(node, astroid.ClassDef):
+                for subnode in node.body:
+                    if not isinstance(subnode, astroid.FunctionDef):
+                        continue
+                    if not subnode.type == "staticmethod":
+                        continue
+                    yield cls(node=subnode, timeout=timeout)
 
     @property
     def name(self) -> str:
