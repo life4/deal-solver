@@ -80,6 +80,10 @@ class FloatSort(ProxySort):
     def as_str(self):
         raise UnsupportedError('cannot convert float to str')
 
+    @property
+    def is_nan(self) -> 'BoolSort':
+        raise UnsupportedError
+
     def __floordiv__(self, other: ProxySort) -> 'FloatSort':
         if self.is_real and other.is_real:
             return (self / other).as_int.as_float
@@ -92,8 +96,8 @@ class FloatSort(ProxySort):
         if other.is_fp:
             result = switch(
                 (z3.Not(z3.fpIsInf(other.expr)), result),
-                (and_expr(self < zero, other < zero), zero),
-                (and_expr(self > zero, other > zero), zero),
+                (and_expr(self.is_lt(zero), other.is_lt(zero)), zero),
+                (and_expr(self.is_gt(zero), other.is_gt(zero)), zero),
                 default=-one,
             )
         if self.is_fp:

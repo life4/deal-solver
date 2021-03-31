@@ -11,9 +11,13 @@ from ._registry import FUNCTIONS, register
 
 
 @register('math.isclose')
-def math_isclose(left, right, rel_tol=None, abs_tol=None, *, ctx: Context, **kwargs) -> BoolSort:
+def math_isclose(
+    left: ProxySort, right: ProxySort,
+    rel_tol=None, abs_tol=None,
+    *, ctx: Context, **kwargs,
+) -> BoolSort:
     if not isinstance(left, FloatSort) and not isinstance(right, FloatSort):
-        return left == right
+        return left.is_eq(right)
 
     if isinstance(left, IntSort):
         left = left.as_float
@@ -38,7 +42,7 @@ def math_isclose(left, right, rel_tol=None, abs_tol=None, *, ctx: Context, **kwa
     return if_expr(
         and_expr(left.is_nan, right.is_nan),
         BoolSort.val(True),
-        (left - right).abs <= delta,
+        (left - right).abs.is_le(delta),
     )
 
 
@@ -91,10 +95,10 @@ def math_trunc(x: ProxySort, ctx: Context, **kwargs) -> ProxySort:
     if not isinstance(x, FloatSort):
         return x.as_int
     return if_expr(
-        x.as_int.as_float == x,
+        x.as_int.as_float.is_eq(x),
         x.as_int,
         if_expr(
-            x > FloatSort.val(0, ctx=ctx.z3_ctx),
+            x.is_gt(FloatSort.val(0, ctx=ctx.z3_ctx)),
             x.as_int,
             x.as_int + IntSort.val(1),
         ),

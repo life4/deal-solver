@@ -11,16 +11,16 @@ from ._registry import register
 @register('random.Random.randint')
 def random_randint(a, b, ctx: Context, **kwargs):
     result = wrap(z3.Int(random_name('randint')))
-    ctx.given.add(result >= a)
-    ctx.given.add(result <= b)
+    ctx.given.add(result.is_ge(a))
+    ctx.given.add(result.is_le(b))
     return result
 
 
 @register('random.Random.randrange')
 def random_randrange(start, stop, ctx: Context, **kwargs):
     result = wrap(z3.Int(random_name('randrange')))
-    ctx.given.add(result >= start)
-    ctx.given.add(result < stop)
+    ctx.given.add(result.is_ge(start))
+    ctx.given.add(result.is_lt(stop))
     return result
 
 
@@ -46,6 +46,6 @@ def random_random(ctx: Context, **kwargs):
         name=random_name('random'),
         sort=FloatSort.sort(),
     ))
-    ctx.given.add(result >= zero)
-    ctx.given.add(result <= one)
+    ctx.given.add(result.is_ge(zero))
+    ctx.given.add(result.is_le(one))
     return result

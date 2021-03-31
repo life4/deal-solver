@@ -60,6 +60,7 @@ def test_timeout():
     ('~"a"',            'str.__invert__ is not defined'),
     ('~3.14',           'float.__invert__ is not defined'),
     ('3.1 | 4.2',       'float does not support bitwise operations'),
+    ('13 in 123',       'int.__contains__ is not defined'),
 
     # temporary unsupported
     ('()',                  'unsupported ast node Tuple'),

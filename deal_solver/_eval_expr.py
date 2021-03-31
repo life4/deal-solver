@@ -28,15 +28,15 @@ CONSTS = {
     float: FloatSort.val,
     str: z3.StringVal,
 }
-COMAPARISON: typing.Mapping[str, typing.Callable]
+COMAPARISON: typing.Mapping[str, str]
 COMAPARISON = {
-    '<': operator.lt,
-    '<=': operator.le,
-    '>': operator.gt,
-    '>=': operator.ge,
-    '==': operator.eq,
-    '!=': operator.ne,
-    'in': lambda item, items: items.contains(item),
+    '<':  'is_lt',
+    '<=': 'is_le',
+    '>':  'is_gt',
+    '>=': 'is_ge',
+    '==': 'is_eq',
+    '!=': 'is_ne',
+    'in': 'is_in',
 }
 UNARY_OPERATIONS: typing.Mapping[str, typing.Callable]
 UNARY_OPERATIONS = {
@@ -98,15 +98,16 @@ def eval_bin_op(node: astroid.BinOp, ctx: Context) -> ProxySort:
 
 @eval_expr.register(astroid.Compare)
 def eval_compare(node: astroid.Compare, ctx: Context) -> ProxySort:
-    left = eval_expr(node=node.left, ctx=ctx)
+    left = wrap(eval_expr(node=node.left, ctx=ctx))
     for op, right_node in node.ops:
         assert op, 'missed comparison operator'
-        operation = COMAPARISON.get(op)
-        assert operation, 'unsupported comparison operator'
+        op_name = COMAPARISON.get(op)
+        assert op_name, 'unsupported comparison operator'
 
-        right = eval_expr(node=right_node, ctx=ctx)
+        right = wrap(eval_expr(node=right_node, ctx=ctx))
         # TODO: proper chain
-        return operation(left, right)
+        method = getattr(left, op_name)
+        return method(right)
     raise RuntimeError('unreachable')  # pragma: no cover
 
 

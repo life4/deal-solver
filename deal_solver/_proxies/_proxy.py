@@ -103,6 +103,9 @@ class ProxySort:
     def get_item(self, item) -> 'ProxySort':
         raise UnsupportedError('{}.__getitem__ is not defined'.format(self.type_name))
 
+    def contains(self, item) -> 'BoolSort':
+        raise UnsupportedError('{}.__contains__ is not defined'.format(self.type_name))
+
     def sort(self):
         return self.expr.sort()
 
@@ -118,23 +121,26 @@ class ProxySort:
         expr = self._binary_op(other=other, handler=handler)
         return BoolSort(expr=expr)
 
-    def __eq__(self, other: 'ProxySort') -> 'BoolSort':  # type: ignore
+    def is_eq(self, other: 'ProxySort') -> 'BoolSort':
         return self._comp_op(other=other, handler=operator.__eq__)
 
-    def __ne__(self, other: 'ProxySort') -> 'BoolSort':  # type: ignore
+    def is_ne(self, other: 'ProxySort') -> 'BoolSort':
         return self._comp_op(other=other, handler=operator.__ne__)
 
-    def __lt__(self, other: 'ProxySort') -> 'BoolSort':
+    def is_lt(self, other: 'ProxySort') -> 'BoolSort':
         return self._comp_op(other=other, handler=operator.__lt__)
 
-    def __le__(self, other: 'ProxySort') -> 'BoolSort':
+    def is_le(self, other: 'ProxySort') -> 'BoolSort':
         return self._comp_op(other=other, handler=operator.__le__)
 
-    def __gt__(self, other: 'ProxySort') -> 'BoolSort':
+    def is_gt(self, other: 'ProxySort') -> 'BoolSort':
         return self._comp_op(other=other, handler=operator.__gt__)
 
-    def __ge__(self, other: 'ProxySort') -> 'BoolSort':
+    def is_ge(self, other: 'ProxySort') -> 'BoolSort':
         return self._comp_op(other=other, handler=operator.__ge__)
+
+    def is_in(self, other: 'ProxySort') -> 'BoolSort':
+        return other.contains(self)
 
     # unary operations
 
