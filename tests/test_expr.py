@@ -8,6 +8,7 @@ import pytest
 
 # project
 from deal_solver import Conclusion
+from deal_solver._proxies import FloatSort
 
 # app
 from .helpers import prove_f
@@ -333,6 +334,36 @@ def test_list_extend():
             assert a == [1, 2, 2]
     """)
     assert theorem.conclusion is Conclusion.OK
+
+
+@pytest.mark.parametrize('prefer_real', [True, False])
+@pytest.mark.parametrize('expr', [
+    '1.2 + 3.4',
+    '1.2 - 3.4',
+    '1.2 * 3.4',
+    '1.2 // 3.4',
+    '1.2 / 3.4',
+    '4.3 % 2.1',
+    '3.5 + 3',
+    '3.5 - 3',
+    '3.5 * 3',
+    '3.5 / 3',
+    '3.5 // 3',
+    '3.5 % 3',
+])
+def test_float(prefer_real: bool, expr: str):
+    expected = eval(expr)
+    old_prefer_real = FloatSort.prefer_real
+    FloatSort.prefer_real = prefer_real
+    try:
+        theorem = prove_f(f"""
+            import math
+            def f():
+                assert math.isclose({expr}, {expected})
+        """)
+        assert theorem.conclusion is Conclusion.OK
+    finally:
+        FloatSort.prefer_real = old_prefer_real
 
 
 @hypothesis.settings(report_multiple_bugs=False)

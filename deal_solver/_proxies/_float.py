@@ -9,7 +9,7 @@ import z3
 
 # app
 from .._exceptions import UnsupportedError
-from ._funcs import and_expr, switch
+from ._funcs import and_expr, switch, if_expr
 from ._proxy import ProxySort
 from ._registry import registry
 
@@ -84,17 +84,24 @@ class FloatSort(ProxySort):
         if self.is_real and other.is_real:
             return (self / other).as_int.as_float
 
+        if self.is_fp:
+            other = other.as_fp
         zero = self.val(0.0)
         one = self.val(1.0)
-        nan = z3.fpNaN(self.sort())
-        return switch(  # type: ignore
-            (z3.fpIsInf(self.expr), nan),
-            (z3.Not(z3.fpIsInf(other.expr)), (self / other).as_int.as_fp),
-            (z3.fpIsZero(self.expr), zero),
-            (and_expr(self < zero, other < zero), zero),
-            (and_expr(self > zero, other > zero), zero),
-            default=-one,
-        )
+        result = (self / other).as_int.as_fp
+        if other.is_fp:
+            result = switch(
+                (z3.Not(z3.fpIsInf(other.expr)), result),
+                (and_expr(self < zero, other < zero), zero),
+                (and_expr(self > zero, other > zero), zero),
+                default=-one,
+            )
+        if self.is_fp:
+            nan = z3.fpNaN(self.sort())
+            result = if_expr(z3.fpIsInf(self.expr), nan, result)
+            result = if_expr(z3.fpIsZero(self.expr), zero, result)
+
+        return result
 
     __mul__: typing.Callable[['FloatSort', ProxySort], 'FloatSort']
 
@@ -153,6 +160,13 @@ class RealSort(FloatSort):
         if self.prefer_real:
             return handler(self.expr, other.as_real.expr)
         return handler(self.as_fp.expr, other.expr)
+
+    def __mod__(self, other: ProxySort) -> ProxySort:
+        if isinstance(other, FloatSort):
+            return self.as_fp % other.as_fp
+        if isinstance(other, registry.int):
+            return self.as_fp % other
+        return RealSort(expr=self.expr % other.expr)
 
     def __truediv__(self, other: ProxySort) -> FloatSort:
         if isinstance(other, registry.int):
