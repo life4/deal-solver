@@ -16,6 +16,7 @@ if typing.TYPE_CHECKING:
     from ._float import FloatSort, FPSort, RealSort
     from ._int import IntSort
     from ._str import StrSort
+    from .._context import Context
 
 
 T = typing.TypeVar('T', bound='ProxySort')
@@ -125,117 +126,143 @@ class ProxySort:
     def sort(self):
         return self.expr.sort()
 
-    def _binary_op(self, other: 'ProxySort', handler: typing.Callable):
+    def _binary_op(self, other: 'ProxySort', handler: typing.Callable, ctx: 'Context'):
         self._ensure(other, seq=True)
         return handler(self.expr, unwrap(other))
 
     # comparison
 
-    def _comp_op(self, other: 'ProxySort', handler: typing.Callable) -> 'BoolSort':
+    def _comp_op(self, other: 'ProxySort', handler: typing.Callable, ctx: 'Context') -> 'BoolSort':
         # app
         from ._bool import BoolSort
-        expr = self._binary_op(other=other, handler=handler)
+        expr = self._binary_op(other=other, handler=handler, ctx=ctx)
         return BoolSort(expr=expr)
 
-    def is_eq(self, other: 'ProxySort') -> 'BoolSort':
+    def is_eq(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         """self == other
         """
-        return self._comp_op(other=other, handler=operator.__eq__)
+        return self._comp_op(other=other, handler=operator.__eq__, ctx=ctx)
 
-    def is_ne(self, other: 'ProxySort') -> 'BoolSort':
+    def is_ne(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         """self != other
         """
-        return self._comp_op(other=other, handler=operator.__ne__)
+        return self._comp_op(other=other, handler=operator.__ne__, ctx=ctx)
 
-    def is_lt(self, other: 'ProxySort') -> 'BoolSort':
+    def is_lt(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         """self < other
         """
-        return self._comp_op(other=other, handler=operator.__lt__)
+        return self._comp_op(other=other, handler=operator.__lt__, ctx=ctx)
 
-    def is_le(self, other: 'ProxySort') -> 'BoolSort':
+    def is_le(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         """self <= other
         """
-        return self._comp_op(other=other, handler=operator.__le__)
+        return self._comp_op(other=other, handler=operator.__le__, ctx=ctx)
 
-    def is_gt(self, other: 'ProxySort') -> 'BoolSort':
+    def is_gt(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         """self > other
         """
-        return self._comp_op(other=other, handler=operator.__gt__)
+        return self._comp_op(other=other, handler=operator.__gt__, ctx=ctx)
 
-    def is_ge(self, other: 'ProxySort') -> 'BoolSort':
+    def is_ge(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         """self >= other
         """
-        return self._comp_op(other=other, handler=operator.__ge__)
+        return self._comp_op(other=other, handler=operator.__ge__, ctx=ctx)
 
-    def is_in(self, other: 'ProxySort') -> 'BoolSort':
+    def is_in(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         """self in other
         """
         return other.contains(self)
 
     # unary operations
 
-    def as_negative(self: T) -> T:
+    def as_negative(self: T, ctx: 'Context') -> T:
         """-self
         """
         cls = type(self)
         return cls(expr=-self.expr)
 
-    def as_positive(self: T) -> T:
+    def as_positive(self: T, ctx: 'Context') -> T:
         """+self
         """
         cls = type(self)
         return cls(expr=+self.expr)
 
-    def as_inverted(self: T) -> T:
+    def as_inverted(self: T, ctx: 'Context') -> T:
         """~self
         """
         raise UnsupportedError('{}.__invert__ is not defined'.format(self.type_name))
 
     # math binary operations
 
-    def _math_op(self, other: 'ProxySort', handler: typing.Callable) -> 'ProxySort':
-        return wrap(self._binary_op(other=other, handler=handler))
+    def _math_op(self, other: 'ProxySort', handler: typing.Callable, ctx: 'Context') -> 'ProxySort':
+        return wrap(self._binary_op(other=other, handler=handler, ctx=ctx))
 
-    def op_add(self, other: 'ProxySort') -> 'ProxySort':
-        return self._math_op(other=other, handler=operator.__add__)
+    def op_add(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
+        """self + other
+        """
+        return self._math_op(other=other, handler=operator.__add__, ctx=ctx)
 
-    def op_sub(self, other: 'ProxySort') -> 'ProxySort':
-        return self._math_op(other=other, handler=operator.__sub__)
+    def op_sub(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
+        """self - other
+        """
+        return self._math_op(other=other, handler=operator.__sub__, ctx=ctx)
 
-    def op_mul(self, other: 'ProxySort') -> 'ProxySort':
-        return self._math_op(other=other, handler=operator.__mul__)
+    def op_mul(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
+        """self * other
+        """
+        return self._math_op(other=other, handler=operator.__mul__, ctx=ctx)
 
-    def op_div(self, other: 'ProxySort') -> 'ProxySort':
-        return self._math_op(other=other, handler=operator.__truediv__)
+    def op_div(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
+        """self / other
+        """
+        return self._math_op(other=other, handler=operator.__truediv__, ctx=ctx)
 
-    def op_floor_div(self, other: 'ProxySort') -> 'ProxySort':
-        return self._math_op(other=other, handler=operator.__floordiv__)
+    def op_floor_div(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
+        """self // other
+        """
+        return self._math_op(other=other, handler=operator.__floordiv__, ctx=ctx)
 
-    def op_mod(self, other: 'ProxySort') -> 'ProxySort':
-        return self._math_op(other=other, handler=operator.__mod__)
+    def op_mod(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
+        """self % other
+        """
+        return self._math_op(other=other, handler=operator.__mod__, ctx=ctx)
 
-    def op_pow(self, other: 'ProxySort') -> 'ProxySort':
-        return self._math_op(other=other, handler=operator.__pow__)
+    def op_pow(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
+        """self ** other
+        """
+        return self._math_op(other=other, handler=operator.__pow__, ctx=ctx)
 
-    def op_mat_mul(self, other: 'ProxySort') -> 'ProxySort':
-        return self._math_op(other=other, handler=operator.__matmul__)
+    def op_mat_mul(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
+        """self @ other
+        """
+        return self._math_op(other=other, handler=operator.__matmul__, ctx=ctx)
 
     # bitwise binary operations
 
-    def _bitwise_op(self: T, other: 'ProxySort', handler: typing.Callable):
+    def _bitwise_op(self: T, other: 'ProxySort', handler: typing.Callable, ctx: 'Context'):
         raise UnsupportedError(self.type_name, 'does not support bitwise operations')
 
-    def bit_and(self: T, other: 'ProxySort') -> T:
-        return self._bitwise_op(other=other, handler=operator.__and__)
+    def bit_and(self: T, other: 'ProxySort', ctx: 'Context') -> T:
+        """self & other
+        """
+        return self._bitwise_op(other=other, handler=operator.__and__, ctx=ctx)
 
-    def bit_or(self: T, other: 'ProxySort') -> T:
-        return self._bitwise_op(other=other, handler=operator.__or__)
+    def bit_or(self: T, other: 'ProxySort', ctx: 'Context') -> T:
+        """self | other
+        """
+        return self._bitwise_op(other=other, handler=operator.__or__, ctx=ctx)
 
-    def bit_xor(self: T, other: 'ProxySort') -> T:
-        return self._bitwise_op(other=other, handler=operator.__xor__)
+    def bit_xor(self: T, other: 'ProxySort', ctx: 'Context') -> T:
+        """self ^ other
+        """
+        return self._bitwise_op(other=other, handler=operator.__xor__, ctx=ctx)
 
-    def bit_lshift(self: T, other: 'ProxySort') -> T:
-        return self._bitwise_op(other=other, handler=operator.__lshift__)
+    def bit_lshift(self: T, other: 'ProxySort', ctx: 'Context') -> T:
+        """self << other
+        """
+        return self._bitwise_op(other=other, handler=operator.__lshift__, ctx=ctx)
 
-    def bit_rshift(self: T, other: 'ProxySort') -> T:
-        return self._bitwise_op(other=other, handler=operator.__rshift__)
+    def bit_rshift(self: T, other: 'ProxySort', ctx: 'Context') -> T:
+        """self >> other
+        """
+        return self._bitwise_op(other=other, handler=operator.__rshift__, ctx=ctx)

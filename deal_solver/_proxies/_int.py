@@ -16,6 +16,7 @@ if typing.TYPE_CHECKING:
     from ._bool import BoolSort
     from ._float import FloatSort, RealSort
     from ._str import StrSort
+    from .._context import Context
 
 
 INT_BITS = 64
@@ -68,16 +69,16 @@ class IntSort(ProxySort):
         expr = z3.If(self.expr >= z3.IntVal(0), self.expr, -self.expr)
         return type(self)(expr=expr)
 
-    def _math_op(self, other: ProxySort, handler: typing.Callable) -> ProxySort:
+    def _math_op(self, other: ProxySort, handler: typing.Callable, ctx: 'Context') -> ProxySort:
         as_float = isinstance(other, registry.float)
         if as_float:
             other = other.as_int
-        result = super()._math_op(other=other, handler=handler)
+        result = super()._math_op(other=other, handler=handler, ctx=ctx)
         if as_float:
             return result.as_float
         return result
 
-    def op_div(self, other: ProxySort) -> 'FloatSort':
+    def op_div(self, other: ProxySort, ctx: 'Context') -> 'FloatSort':
         real = z3.ToReal(self.expr)
         if isinstance(other, IntSort):
             return registry.float(expr=real / other.as_real.expr)
@@ -89,7 +90,7 @@ class IntSort(ProxySort):
             expr = self.as_fp.expr / other.as_fp.expr
         return registry.float(expr=expr)
 
-    def op_floor_div(self, other: 'ProxySort') -> 'ProxySort':
+    def op_floor_div(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         as_float = isinstance(other, registry.float)
         if as_float:
             other = other.as_int
@@ -103,7 +104,7 @@ class IntSort(ProxySort):
             return result.as_float
         return result
 
-    def op_mod(self, other: 'ProxySort') -> 'ProxySort':
+    def op_mod(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         as_float = isinstance(other, registry.float)
         if as_float:
             other = other.as_int
@@ -117,14 +118,14 @@ class IntSort(ProxySort):
             return result.as_float
         return result
 
-    def as_inverted(self) -> 'IntSort':
+    def as_inverted(self, ctx: 'Context') -> 'IntSort':
         expr = z3.BV2Int(~z3.Int2BV(self.expr, INT_BITS))
         zero = z3.IntVal(0)
         modulo = z3.IntVal(2 ** INT_BITS)
         expr = z3.If(self.expr >= zero, expr - modulo, expr)
         return type(self)(expr=expr)
 
-    def _bitwise_op(self, other: 'ProxySort', handler: typing.Callable) -> 'IntSort':
+    def _bitwise_op(self, other: 'ProxySort', handler: typing.Callable, ctx: 'Context') -> 'IntSort':
         expr = z3.BV2Int(handler(
             z3.Int2BV(self.expr, INT_BITS),
             z3.Int2BV(unwrap(other), INT_BITS),

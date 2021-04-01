@@ -81,7 +81,7 @@ def eval_bin_op(node: astroid.BinOp, ctx: Context) -> ProxySort:
     right = eval_expr(node=node.right, ctx=ctx)
     operation = getattr(left, op_name)
     try:
-        result = operation(right)
+        result = operation(right, ctx=ctx)
     except z3.Z3Exception:
         raise UnsupportedError(f'cannot perform operation: {left.type_name}{node.op}{right.type_name}')
     except TypeError:
@@ -100,7 +100,7 @@ def eval_compare(node: astroid.Compare, ctx: Context) -> ProxySort:
         right = wrap(eval_expr(node=right_node, ctx=ctx))
         # TODO: proper chain
         method = getattr(left, op_name)
-        return method(right)
+        return method(right, ctx=ctx)
     raise RuntimeError('unreachable')  # pragma: no cover
 
 
@@ -303,11 +303,11 @@ def eval_attr(node: astroid.Attribute, ctx: Context):
 def eval_unary_op(node: astroid.UnaryOp, ctx: Context) -> ProxySort:
     value_ref = eval_expr(node=node.operand, ctx=ctx)
     if node.op == '+':
-        return value_ref.as_positive()
+        return value_ref.as_positive(ctx=ctx)
     if node.op == '-':
-        return value_ref.as_negative()
+        return value_ref.as_negative(ctx=ctx)
     if node.op == '~':
-        return value_ref.as_inverted()
+        return value_ref.as_inverted(ctx=ctx)
     if node.op == 'not':
         return not_expr(value_ref)
     raise RuntimeError('unsupported unary operation')

@@ -11,16 +11,16 @@ from ._registry import register
 @register('random.Random.randint')
 def random_randint(a, b, ctx: Context, **kwargs):
     result = wrap(z3.Int(random_name('randint')))
-    ctx.given.add(result.is_ge(a))
-    ctx.given.add(result.is_le(b))
+    ctx.given.add(result.is_ge(a, ctx=ctx))
+    ctx.given.add(result.is_le(b, ctx=ctx))
     return result
 
 
 @register('random.Random.randrange')
 def random_randrange(start, stop, ctx: Context, **kwargs):
     result = wrap(z3.Int(random_name('randrange')))
-    ctx.given.add(result.is_ge(start))
-    ctx.given.add(result.is_lt(stop))
+    ctx.given.add(result.is_ge(start, ctx=ctx))
+    ctx.given.add(result.is_lt(stop, ctx=ctx))
     return result
 
 
@@ -32,7 +32,7 @@ def random_choice(seq, ctx: Context, **kwargs):
         raise UnsupportedError("bad argument type for random.choice")
     index = random_randint(
         a=zero,
-        b=seq.length.op_sub(one),
+        b=seq.length.op_sub(one, ctx=ctx),
         ctx=ctx,
     )
     return seq.get_item(index)
@@ -46,6 +46,6 @@ def random_random(ctx: Context, **kwargs):
         name=random_name('random'),
         sort=FloatSort.sort(),
     ))
-    ctx.given.add(result.is_ge(zero))
-    ctx.given.add(result.is_le(one))
+    ctx.given.add(result.is_ge(zero, ctx=ctx))
+    ctx.given.add(result.is_le(one, ctx=ctx))
     return result
