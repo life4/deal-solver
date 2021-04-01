@@ -100,3 +100,27 @@ class ListSort(ProxySort):
         ))
         result = f(z3.Length(self.expr) - one)
         return registry.int(result)
+
+    def op_sub(self, other: 'ProxySort', ctx: 'Context') -> 'ListSort':
+        return self._bad_bin_op(other, op='-', ctx=ctx)
+
+    def op_div(self, other: 'ProxySort', ctx: 'Context') -> 'ListSort':
+        return self._bad_bin_op(other, op='/', ctx=ctx)
+
+    def op_floor_div(self, other: 'ProxySort', ctx: 'Context') -> 'ListSort':
+        return self._bad_bin_op(other, op='//', ctx=ctx)
+
+    def op_mod(self, other: 'ProxySort', ctx: 'Context') -> 'ListSort':
+        return self._bad_bin_op(other, op='%', ctx=ctx)
+
+    def op_pow(self, other: 'ProxySort', ctx: 'Context') -> 'ListSort':
+        return self._bad_bin_op(other, op='**', ctx=ctx)
+
+    def as_positive(self, ctx: 'Context') -> 'ListSort':
+        return self._bad_un_op(op='+', ctx=ctx)
+
+    def as_negative(self, ctx: 'Context') -> 'ListSort':
+        return self._bad_un_op(op='-', ctx=ctx)
+
+    def as_inverted(self, ctx: 'Context') -> 'ListSort':
+        return self._bad_un_op(op='~', ctx=ctx)

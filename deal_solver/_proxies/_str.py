@@ -16,6 +16,7 @@ if typing.TYPE_CHECKING:
     from ._bool import BoolSort
     from ._float import FloatSort
     from ._int import IntSort
+    from .._context import Context
 
 
 @registry.add
@@ -78,3 +79,27 @@ class StrSort(ProxySort):
     def length(self) -> 'IntSort':
         assert self.expr is not None
         return registry.int(expr=z3.Length(self.expr))
+
+    def op_sub(self, other: 'ProxySort', ctx: 'Context') -> 'StrSort':
+        return self._bad_bin_op(other, op='-', ctx=ctx)
+
+    def op_div(self, other: 'ProxySort', ctx: 'Context') -> 'StrSort':
+        return self._bad_bin_op(other, op='/', ctx=ctx)
+
+    def op_floor_div(self, other: 'ProxySort', ctx: 'Context') -> 'StrSort':
+        return self._bad_bin_op(other, op='//', ctx=ctx)
+
+    def op_mod(self, other: 'ProxySort', ctx: 'Context') -> 'StrSort':
+        return self._bad_bin_op(other, op='%', ctx=ctx)
+
+    def op_pow(self, other: 'ProxySort', ctx: 'Context') -> 'StrSort':
+        return self._bad_bin_op(other, op='**', ctx=ctx)
+
+    def as_positive(self, ctx: 'Context') -> 'StrSort':
+        return self._bad_un_op(op='+', ctx=ctx)
+
+    def as_negative(self, ctx: 'Context') -> 'StrSort':
+        return self._bad_un_op(op='-', ctx=ctx)
+
+    def as_inverted(self, ctx: 'Context') -> 'StrSort':
+        return self._bad_un_op(op='~', ctx=ctx)

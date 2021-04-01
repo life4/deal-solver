@@ -5,7 +5,6 @@ import typing
 import z3
 
 # app
-from .._exceptions import UnsupportedError
 from ._funcs import if_expr, unwrap, wrap
 from ._proxy import ProxySort
 from ._registry import registry
@@ -83,7 +82,8 @@ class IntSort(ProxySort):
         if isinstance(other, IntSort):
             return registry.float(expr=real / other.as_real.expr)
         if not isinstance(other, registry.float):
-            raise UnsupportedError('unsupported denominator type', other.type_name)
+            self._bad_bin_op(other, op='/', ctx=ctx)
+            return self.as_float
         if other.is_real:
             expr = real / other.as_real.expr
         else:

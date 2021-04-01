@@ -83,7 +83,7 @@ class FloatSort(ProxySort):
 
     @property
     def is_nan(self) -> 'BoolSort':
-        raise UnsupportedError
+        raise NotImplementedError
 
     def op_floor_div(self, other: ProxySort, ctx: 'Context') -> 'FloatSort':
         if self.is_real and other.is_real:
@@ -160,7 +160,11 @@ class RealSort(FloatSort):
         if isinstance(other, registry.int):
             return handler(self.expr, other.as_real.expr)
         if not isinstance(other, FloatSort):
-            raise UnsupportedError('cannot combine float and', other.type_name)
+            msg = "unsupported operand type(s) for binary operation: '{}' and '{}'"
+            msg = msg.format(self.type_name, other.type_name)
+            ctx.add_exception(TypeError, msg)
+            return self
+
         if other.is_real:
             return handler(self.expr, other.expr)
         if self.prefer_real:
@@ -235,7 +239,11 @@ class FPSort(FloatSort):
         if isinstance(other, registry.int):
             return fp_handler(self.expr, other.as_fp.expr)
         if not isinstance(other, FloatSort):
-            raise UnsupportedError('cannot combine float and', other.type_name)
+            msg = "unsupported operand type(s) for binary operation: '{}' and '{}'"
+            msg = msg.format(self.type_name, other.type_name)
+            ctx.add_exception(TypeError, msg)
+            return self
+
         if other.is_fp:
             return fp_handler(self.expr, other.expr)
         if self.prefer_real:

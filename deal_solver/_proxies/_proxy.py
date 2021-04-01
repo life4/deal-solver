@@ -249,15 +249,13 @@ class ProxySort:
     def op_mat_mul(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         """self @ other
         """
-        return self._math_op(other=other, handler=operator.__matmul__, ctx=ctx)
+        # __matmul__ is not defined for anything in stdlib
+        return self._bad_bin_op(other, op='@', ctx=ctx)
 
     # bitwise binary operations
 
     def _bitwise_op(self: T, other: 'ProxySort', handler: typing.Callable, ctx: 'Context') -> T:
-        msg = "unsupported operand type(s) for bitwise operation: '{}' and '{}'"
-        msg = msg.format(self.type_name, other.type_name)
-        ctx.add_exception(TypeError, msg)
-        return self
+        return self._bad_bin_op(other, op='bitwise operation', ctx=ctx)
 
     def bit_and(self: T, other: 'ProxySort', ctx: 'Context') -> T:
         """self & other
@@ -283,3 +281,17 @@ class ProxySort:
         """self >> other
         """
         return self._bitwise_op(other=other, handler=operator.__rshift__, ctx=ctx)
+
+    # helpers for error messages in operations
+
+    def _bad_bin_op(self: T, other: 'ProxySort', op: str, ctx: 'Context') -> T:
+        msg = "unsupported operand type(s) for {}: '{}' and '{}'"
+        msg = msg.format(op, self.type_name, other.type_name)
+        ctx.add_exception(TypeError, msg)
+        return self
+
+    def _bad_un_op(self: T, op: str, ctx: 'Context') -> T:
+        msg = "bad operand type for unary {}: '{}'"
+        msg = msg.format(op, self.type_name)
+        ctx.add_exception(TypeError, msg)
+        return self

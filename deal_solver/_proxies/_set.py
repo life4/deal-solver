@@ -13,6 +13,7 @@ from ._registry import registry
 if typing.TYPE_CHECKING:
     # app
     from ._bool import BoolSort
+    from .._context import Context
 
 
 @registry.add
@@ -44,3 +45,27 @@ class SetSort(ProxySort):
     def contains(self, item: 'ProxySort') -> 'BoolSort':
         self._ensure(item)
         return registry.bool(expr=z3.IsMember(e=unwrap(item), s=self.expr))
+
+    def op_sub(self, other: 'ProxySort', ctx: 'Context') -> 'SetSort':
+        return self._bad_bin_op(other, op='-', ctx=ctx)
+
+    def op_div(self, other: 'ProxySort', ctx: 'Context') -> 'SetSort':
+        return self._bad_bin_op(other, op='/', ctx=ctx)
+
+    def op_floor_div(self, other: 'ProxySort', ctx: 'Context') -> 'SetSort':
+        return self._bad_bin_op(other, op='//', ctx=ctx)
+
+    def op_mod(self, other: 'ProxySort', ctx: 'Context') -> 'SetSort':
+        return self._bad_bin_op(other, op='%', ctx=ctx)
+
+    def op_pow(self, other: 'ProxySort', ctx: 'Context') -> 'SetSort':
+        return self._bad_bin_op(other, op='**', ctx=ctx)
+
+    def as_positive(self, ctx: 'Context') -> 'SetSort':
+        return self._bad_un_op(op='+', ctx=ctx)
+
+    def as_negative(self, ctx: 'Context') -> 'SetSort':
+        return self._bad_un_op(op='-', ctx=ctx)
+
+    def as_inverted(self, ctx: 'Context') -> 'SetSort':
+        return self._bad_un_op(op='~', ctx=ctx)
