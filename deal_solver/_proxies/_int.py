@@ -117,7 +117,7 @@ class IntSort(ProxySort):
             return result.as_float
         return result
 
-    def __invert__(self) -> 'IntSort':
+    def as_inverted(self) -> 'IntSort':
         expr = z3.BV2Int(~z3.Int2BV(self.expr, INT_BITS))
         zero = z3.IntVal(0)
         modulo = z3.IntVal(2 ** INT_BITS)

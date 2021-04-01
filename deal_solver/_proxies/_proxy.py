@@ -70,22 +70,32 @@ class ProxySort:
 
     @property
     def as_bool(self) -> 'BoolSort':
+        """bool(self)
+        """
         raise NotImplementedError
 
     @property
     def abs(self) -> 'ProxySort':
+        """abs(self)
+        """
         raise UnsupportedError('{}.__abs__ is not defined'.format(self.type_name))
 
     @property
     def as_int(self) -> 'IntSort':
+        """int(self)
+        """
         raise UnsupportedError('cannot convert {} to int'.format(self.type_name))
 
     @property
     def as_str(self) -> 'StrSort':
+        """str(self)
+        """
         raise UnsupportedError('cannot convert {} to str'.format(self.type_name))
 
     @property
     def as_float(self) -> 'FloatSort':
+        """float(self)
+        """
         raise UnsupportedError('cannot convert {} to float'.format(self.type_name))
 
     @property
@@ -98,12 +108,18 @@ class ProxySort:
 
     @property
     def length(self) -> 'IntSort':
+        """len(self)
+        """
         raise UnsupportedError('{}.__len__ is not defined'.format(self.type_name))
 
     def get_item(self, item) -> 'ProxySort':
+        """self[item]
+        """
         raise UnsupportedError('{}.__getitem__ is not defined'.format(self.type_name))
 
     def contains(self, item) -> 'BoolSort':
+        """item in self
+        """
         raise UnsupportedError('{}.__contains__ is not defined'.format(self.type_name))
 
     def sort(self):
@@ -122,37 +138,57 @@ class ProxySort:
         return BoolSort(expr=expr)
 
     def is_eq(self, other: 'ProxySort') -> 'BoolSort':
+        """self == other
+        """
         return self._comp_op(other=other, handler=operator.__eq__)
 
     def is_ne(self, other: 'ProxySort') -> 'BoolSort':
+        """self != other
+        """
         return self._comp_op(other=other, handler=operator.__ne__)
 
     def is_lt(self, other: 'ProxySort') -> 'BoolSort':
+        """self < other
+        """
         return self._comp_op(other=other, handler=operator.__lt__)
 
     def is_le(self, other: 'ProxySort') -> 'BoolSort':
+        """self <= other
+        """
         return self._comp_op(other=other, handler=operator.__le__)
 
     def is_gt(self, other: 'ProxySort') -> 'BoolSort':
+        """self > other
+        """
         return self._comp_op(other=other, handler=operator.__gt__)
 
     def is_ge(self, other: 'ProxySort') -> 'BoolSort':
+        """self >= other
+        """
         return self._comp_op(other=other, handler=operator.__ge__)
 
     def is_in(self, other: 'ProxySort') -> 'BoolSort':
+        """self in other
+        """
         return other.contains(self)
 
     # unary operations
 
-    def __neg__(self: T) -> T:
+    def as_negative(self: T) -> T:
+        """-self
+        """
         cls = type(self)
         return cls(expr=-self.expr)
 
-    def __pos__(self: T) -> T:
+    def as_positive(self: T) -> T:
+        """+self
+        """
         cls = type(self)
         return cls(expr=+self.expr)
 
-    def __invert__(self: T) -> T:
+    def as_inverted(self: T) -> T:
+        """~self
+        """
         raise UnsupportedError('{}.__invert__ is not defined'.format(self.type_name))
 
     # math binary operations

@@ -39,12 +39,6 @@ COMAPARISON = {
     'in': 'is_in',
 }
 UNARY_OPERATIONS: typing.Mapping[str, typing.Callable]
-UNARY_OPERATIONS = {
-    '-': operator.neg,
-    '+': operator.pos,
-    '~': operator.inv,
-    'not': not_expr,
-}
 BIN_OPERATIONS: typing.Mapping[str, typing.Callable]
 BIN_OPERATIONS = {
     # math
@@ -309,9 +303,15 @@ def eval_attr(node: astroid.Attribute, ctx: Context):
 @eval_expr.register(astroid.UnaryOp)
 def eval_unary_op(node: astroid.UnaryOp, ctx: Context) -> ProxySort:
     value_ref = eval_expr(node=node.operand, ctx=ctx)
-    operation = UNARY_OPERATIONS.get(node.op)
-    assert operation is not None, 'unsupported unary operation'
-    return operation(value_ref)
+    if node.op == '+':
+        return value_ref.as_positive()
+    if node.op == '-':
+        return value_ref.as_negative()
+    if node.op == '~':
+        return value_ref.as_inverted()
+    if node.op == 'not':
+        return not_expr(value_ref)
+    raise RuntimeError('unsupported unary operation')
 
 
 @eval_expr.register(astroid.IfExp)

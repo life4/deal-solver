@@ -91,14 +91,14 @@ class FloatSort(ProxySort):
         if self.is_fp:
             other = other.as_fp
         zero = self.val(0.0)
-        one = self.val(1.0)
+        minus_one = self.val(-1.0)
         result = (self / other).as_int.as_fp
         if other.is_fp:
             result = switch(
                 (z3.Not(z3.fpIsInf(other.expr)), result),
                 (and_expr(self.is_lt(zero), other.is_lt(zero)), zero),
                 (and_expr(self.is_gt(zero), other.is_gt(zero)), zero),
-                default=-one,
+                default=minus_one,
             )
         if self.is_fp:
             nan = z3.fpNaN(self.sort())
