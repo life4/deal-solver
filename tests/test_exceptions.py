@@ -1,4 +1,5 @@
 # project
+import pytest
 from deal_solver import Conclusion
 
 # app
@@ -180,3 +181,23 @@ def test_raise_not_shadow_return():
             return 123
     """)
     assert theorem.conclusion is Conclusion.OK
+
+
+@pytest.mark.parametrize('expr, err', [
+    ('~"a"',      "bad operand type for unary ~: 'str'"),
+    ('~3.14',     "bad operand type for unary ~: 'float'"),
+    ('~[]',       "bad operand type for unary ~: 'list'"),
+    ('3.1 | 4.2', "unsupported operand type(s) for bitwise operation: 'float' and 'float'"),
+    ('4[0]',      "'int' object is not subscriptable"),
+    ('4[:4]',     "'int' object is not subscriptable"),
+    ('4.1[0]',    "'float' object is not subscriptable"),
+    ('True[0]',   "'bool' object is not subscriptable"),
+    ('4.1[:4]',   "'float' object is not subscriptable"),
+])
+def test_type_error(expr, err):
+    proof = prove_f(f"""
+        def f():
+            {expr}
+    """)
+    assert proof.conclusion == Conclusion.FAIL
+    assert proof.description == f'TypeError: {err}'

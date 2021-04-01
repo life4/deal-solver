@@ -72,6 +72,16 @@ class Context(typing.NamedTuple):
             *[ret.cond.as_bool for ret in self.returns],
         )
 
+    def add_exception(self, exc: type, msg: str) -> None:
+        from .._proxies import BoolSort
+
+        self.exceptions.add(ExceptionInfo(
+            name=exc.__name__,
+            names={base.__name__ for base in exc.mro()[:-1]},
+            cond=BoolSort.val(True),
+            message=msg,
+        ))
+
     @property
     def return_value(self):
         returns = list(self.returns)

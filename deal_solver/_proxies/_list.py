@@ -14,6 +14,7 @@ if typing.TYPE_CHECKING:
     # app
     from ._bool import BoolSort
     from ._int import IntSort
+    from .._context import Context
 
 
 @registry.add
@@ -44,10 +45,10 @@ class ListSort(ProxySort):
         expr = z3.Length(self.expr) != z3.IntVal(0)
         return registry.bool(expr=expr)
 
-    def get_item(self, index: 'ProxySort') -> 'ProxySort':
+    def get_item(self, index: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         return wrap(self.expr[unwrap(index)])
 
-    def get_slice(self, start: 'ProxySort', stop: 'ProxySort') -> 'ProxySort':
+    def get_slice(self, start: 'ProxySort', stop: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         if self.expr is None:
             return self
         start_expr = unwrap(start)

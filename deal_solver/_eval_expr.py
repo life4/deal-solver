@@ -222,12 +222,10 @@ def _compr_apply_body(
 @eval_expr.register(astroid.Subscript)
 def eval_getitem(node: astroid.Subscript, ctx: Context) -> ProxySort:
     value_ref = eval_expr(node=node.value, ctx=ctx)
-    if not isinstance(value_ref, ListSort):
-        raise UnsupportedError(value_ref.type_name, 'object is not subscriptable')
 
     if not isinstance(node.slice, astroid.Slice):
         item_ref = eval_expr(node=node.slice, ctx=ctx)
-        return value_ref.get_item(item_ref)
+        return value_ref.get_item(item_ref, ctx=ctx)
 
     if node.slice.step:
         raise UnsupportedError('slice step is not supported')
@@ -239,7 +237,7 @@ def eval_getitem(node: astroid.Subscript, ctx: Context) -> ProxySort:
         upper_ref = eval_expr(node=node.slice.upper, ctx=ctx)
     else:
         upper_ref = value_ref.length
-    return value_ref.get_slice(start=lower_ref, stop=upper_ref)
+    return value_ref.get_slice(start=lower_ref, stop=upper_ref, ctx=ctx)
 
 
 @eval_expr.register(astroid.Index)

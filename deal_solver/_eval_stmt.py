@@ -119,13 +119,17 @@ def eval_if_else(node: astroid.If, ctx: Context) -> None:
     false = BoolSort.val(False)
     for exc in ctx_then.exceptions.layer:
         ctx.exceptions.add(ExceptionInfo(
+            name=exc.name,
             names=exc.names,
             cond=if_expr(test_ref, exc.cond, false),
+            message=exc.message,
         ))
     for exc in ctx_else.exceptions.layer:
         ctx.exceptions.add(ExceptionInfo(
+            name=exc.name,
             names=exc.names,
             cond=if_expr(test_ref, false, exc.cond),
+            message=exc.message,
         ))
 
     # update new return statements
@@ -150,6 +154,7 @@ def eval_raise(node: astroid.Raise, ctx: Context) -> None:
             continue
         names.update(_get_all_bases(exc))
     ctx.exceptions.add(ExceptionInfo(
+        name=next(_get_all_bases(node.exc)),
         names=names,
         cond=not_expr(ctx.interrupted),
     ))

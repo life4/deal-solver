@@ -14,8 +14,10 @@ T = typing.TypeVar('T')
 
 
 class ExceptionInfo(typing.NamedTuple):
+    name: str               # exception name
     names: typing.Set[str]  # exception name and names of all its bases
     cond: 'BoolSort'        # indicates if the exception is raised
+    message: str = ''
 
 
 class ReturnInfo(typing.NamedTuple):

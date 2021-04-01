@@ -113,10 +113,21 @@ class ProxySort:
         """
         raise UnsupportedError('{}.__len__ is not defined'.format(self.type_name))
 
-    def get_item(self, item) -> 'ProxySort':
+    def get_item(self, item, ctx: 'Context') -> 'ProxySort':
         """self[item]
         """
-        raise UnsupportedError('{}.__getitem__ is not defined'.format(self.type_name))
+        msg = "'{}' object is not subscriptable"
+        msg = msg.format(self.type_name)
+        ctx.add_exception(TypeError, msg)
+        return self
+
+    def get_slice(self, start, stop, ctx: 'Context') -> 'ProxySort':
+        """self[start:stop]
+        """
+        msg = "'{}' object is not subscriptable"
+        msg = msg.format(self.type_name)
+        ctx.add_exception(TypeError, msg)
+        return self
 
     def contains(self, item) -> 'BoolSort':
         """item in self
@@ -190,7 +201,10 @@ class ProxySort:
     def as_inverted(self: T, ctx: 'Context') -> T:
         """~self
         """
-        raise UnsupportedError('{}.__invert__ is not defined'.format(self.type_name))
+        msg = "bad operand type for unary ~: '{}'"
+        msg = msg.format(self.type_name)
+        ctx.add_exception(TypeError, msg)
+        return self
 
     # math binary operations
 
@@ -239,8 +253,11 @@ class ProxySort:
 
     # bitwise binary operations
 
-    def _bitwise_op(self: T, other: 'ProxySort', handler: typing.Callable, ctx: 'Context'):
-        raise UnsupportedError(self.type_name, 'does not support bitwise operations')
+    def _bitwise_op(self: T, other: 'ProxySort', handler: typing.Callable, ctx: 'Context') -> T:
+        msg = "unsupported operand type(s) for bitwise operation: '{}' and '{}'"
+        msg = msg.format(self.type_name, other.type_name)
+        ctx.add_exception(TypeError, msg)
+        return self
 
     def bit_and(self: T, other: 'ProxySort', ctx: 'Context') -> T:
         """self & other

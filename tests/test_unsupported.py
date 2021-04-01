@@ -42,11 +42,6 @@ def test_timeout():
     ('hello',           'cannot resolve name hello'),
     ('hello.world',     'cannot resolve attribute hello.world'),
     ('[1,2,3](2)',      'list object is not callable'),
-    ('4[0]',            'int object is not subscriptable'),
-    ('4[:4]',           'int object is not subscriptable'),
-    ('4.1[0]',          'float object is not subscriptable'),
-    ('True[0]',         'bool object is not subscriptable'),
-    ('4.1[:4]',         'float object is not subscriptable'),
     ('1.2 + "a"',       'cannot combine float and str'),
     ('4 / "a"',         'unsupported denominator type str'),
     ('"b" / "a"',       'cannot perform operation: str/str'),
@@ -57,9 +52,6 @@ def test_timeout():
     ('12 ** "hello"',   'cannot perform operation: int**str'),
     ('int([])',         'cannot convert list to int'),
     ('float([])',       'cannot convert list to float'),
-    ('~"a"',            'str.__invert__ is not defined'),
-    ('~3.14',           'float.__invert__ is not defined'),
-    ('3.1 | 4.2',       'float does not support bitwise operations'),
     ('13 in 123',       'int.__contains__ is not defined'),
 
     # temporary unsupported
@@ -71,7 +63,7 @@ def test_timeout():
     ('(4).bit_length()',    'no definition for builtins.int.bit_length'),
     ('min([], default=13)', 'keyword function arguments are unsupported'),
 ])
-def test_type_error(expr, err):
+def test_unsupported(expr, err):
     proof = prove_f(f"""
         def f():
             assert {expr}

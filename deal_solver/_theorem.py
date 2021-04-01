@@ -156,8 +156,11 @@ class Theorem:
         for exc in self._context.exceptions:
             if exc.names & contracts.raises:
                 continue
+            descr = exc.name
+            if exc.message:
+                descr += ': {}'.format(exc.message)
             yield Constraint(
-                description=f'exception {exc.names}',
+                description=descr,
                 condition=and_expr(
                     *contracts.pre,
                     *self._context.given,
