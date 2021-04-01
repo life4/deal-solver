@@ -186,19 +186,19 @@ class ProxySort:
 
     # unary operations
 
-    def as_negative(self: T, ctx: 'Context') -> T:
+    def as_negative(self, ctx: 'Context') -> 'ProxySort':
         """-self
         """
         cls = type(self)
         return cls(expr=-self.expr)
 
-    def as_positive(self: T, ctx: 'Context') -> T:
+    def as_positive(self, ctx: 'Context') -> 'ProxySort':
         """+self
         """
         cls = type(self)
         return cls(expr=+self.expr)
 
-    def as_inverted(self: T, ctx: 'Context') -> T:
+    def as_inverted(self, ctx: 'Context') -> 'ProxySort':
         """~self
         """
         msg = "bad operand type for unary ~: '{}'"

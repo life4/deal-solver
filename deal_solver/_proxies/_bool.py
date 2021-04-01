@@ -12,7 +12,9 @@ from ._registry import registry
 
 if typing.TYPE_CHECKING:
     # app
-    from ._int import FloatSort, IntSort
+    from ._float import FPSort, FloatSort, RealSort
+    from ._int import IntSort
+    from .._context import Context
 
 
 INT_BITS = 64
@@ -45,3 +47,29 @@ class BoolSort(ProxySort):
     @property
     def as_float(self) -> 'FloatSort':
         return self.as_int.as_float
+
+    @property
+    def as_real(self) -> 'RealSort':
+        return self.as_int.as_real
+
+    @property
+    def as_fp(self) -> 'FPSort':
+        return self.as_int.as_fp
+
+    def _math_op(self, other: ProxySort, handler: typing.Callable, ctx: 'Context') -> ProxySort:
+        return self.as_int._math_op(other=other, handler=handler, ctx=ctx)
+
+    def op_div(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
+        return self.as_int.op_div(other, ctx=ctx)
+
+    def op_floor_div(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
+        return self.as_int.op_floor_div(other, ctx=ctx)
+
+    def as_negative(self, ctx: 'Context') -> 'ProxySort':
+        return self.as_int.as_negative(ctx=ctx)
+
+    def as_positive(self, ctx: 'Context') -> 'ProxySort':
+        return self.as_int.as_positive(ctx=ctx)
+
+    def as_inverted(self, ctx: 'Context') -> 'ProxySort':
+        return self.as_int.as_inverted(ctx=ctx)

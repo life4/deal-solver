@@ -88,6 +88,16 @@ from .helpers import prove_f
     '3 * 5 * 2 == 30',
     '3 + 5 * 2 == 13',
 
+    # math for bool
+    'True + True == 2',
+    'True - True == 0',
+    'True * True == 1',
+    'True / True == 1.0',
+    'True // True == 1',
+    'True % True == 0',
+    '2 / True == 2.0',
+    '~True == -2',
+
     # comparison
     '1 != 2',
     '2 == 2',
