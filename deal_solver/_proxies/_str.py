@@ -97,9 +97,6 @@ class StrSort(ProxySort):
     def op_mod(self, other: 'ProxySort', ctx: 'Context') -> 'StrSort':
         return self._bad_bin_op(other, op='%', ctx=ctx)
 
-    def op_pow(self, other: 'ProxySort', ctx: 'Context') -> 'StrSort':
-        return self._bad_bin_op(other, op='**', ctx=ctx)
-
     def as_positive(self, ctx: 'Context') -> 'StrSort':
         return self._bad_un_op(op='+', ctx=ctx)
 

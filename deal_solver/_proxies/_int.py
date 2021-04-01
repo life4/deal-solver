@@ -1,4 +1,5 @@
 # stdlib
+import operator
 import typing
 
 # external
@@ -76,6 +77,27 @@ class IntSort(ProxySort):
         if as_float:
             return result.as_float
         return result
+
+    def op_add(self, other: ProxySort, ctx: 'Context') -> 'ProxySort':
+        if isinstance(other, registry.bool):
+            other = other.as_int
+        if not isinstance(other, (registry.int, registry.float)):
+            return self._bad_bin_op(other, op='+', ctx=ctx)
+        return self._math_op(other=other, handler=operator.__add__, ctx=ctx)
+
+    def op_sub(self, other: ProxySort, ctx: 'Context') -> 'ProxySort':
+        if isinstance(other, registry.bool):
+            other = other.as_int
+        if not isinstance(other, (registry.int, registry.float)):
+            return self._bad_bin_op(other, op='-', ctx=ctx)
+        return self._math_op(other=other, handler=operator.__sub__, ctx=ctx)
+
+    def op_pow(self, other: ProxySort, ctx: 'Context') -> 'ProxySort':
+        if isinstance(other, registry.bool):
+            other = other.as_int
+        if not isinstance(other, (registry.int, registry.float)):
+            return self._bad_bin_op(other, op='**', ctx=ctx)
+        return self._math_op(other=other, handler=operator.__pow__, ctx=ctx)
 
     def op_div(self, other: ProxySort, ctx: 'Context') -> 'FloatSort':
         real = z3.ToReal(self.expr)

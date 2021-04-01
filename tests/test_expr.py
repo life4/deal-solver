@@ -56,6 +56,7 @@ from .helpers import prove_f
     '2.9 - 1.4 == 1.5',
     '7.0 % 3.0 == 1.0',
     '7.0 % 3.5 == 0.0',
+    # 'math.isclose(4.5 ** 2, 20.25)',
     '5.0 / 2.0 == 2.5',
     '(1/2) / (4/3) == 0.375',
     '7.3 // 2.0 == 3.0',
@@ -95,8 +96,13 @@ from .helpers import prove_f
     'True / True == 1.0',
     'True // True == 1',
     'True % True == 0',
-    '2 / True == 2.0',
     '~True == -2',
+
+    # implicit bool to int
+    '2 + True == 3',
+    '2 - True == 1',
+    '2 * True == 2',
+    '2 / True == 2.0',
 
     # comparison
     '1 != 2',

@@ -244,7 +244,7 @@ class ProxySort:
     def op_pow(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         """self ** other
         """
-        return self._math_op(other=other, handler=operator.__pow__, ctx=ctx)
+        return self._bad_bin_op(other, op='**', ctx=ctx)
 
     def op_mat_mul(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         """self @ other

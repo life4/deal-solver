@@ -25,6 +25,9 @@ from .helpers import prove_f
     ('4 / "a"',   "unsupported operand type(s) for /: 'int' and 'str'"),
     # ('4 // "a"',   "unsupported operand type(s) for //: 'int' and 'str'"),
     ('3 @ 3',     "unsupported operand type(s) for @: 'int' and 'int'"),
+    ('3 + ""',    "unsupported operand type(s) for +: 'int' and 'str'"),
+    ('3 - ""',    "unsupported operand type(s) for -: 'int' and 'str'"),
+    ('3 ** ""',   "unsupported operand type(s) for **: 'int' and 'str'"),
 
     # binary operations for str
     ('"a" + 3',   "unsupported operand type(s) for +: 'str' and 'int'"),

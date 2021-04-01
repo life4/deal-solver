@@ -85,6 +85,13 @@ class FloatSort(ProxySort):
     def is_nan(self) -> 'BoolSort':
         raise NotImplementedError
 
+    def op_pow(self, other: ProxySort, ctx: 'Context') -> 'ProxySort':
+        if isinstance(other, registry.bool):
+            other = other.as_int
+        if not isinstance(other, (registry.int, registry.float)):
+            return self._bad_bin_op(other, op='**', ctx=ctx)
+        return self._math_op(other=other, handler=operator.__pow__, ctx=ctx)
+
     def op_floor_div(self, other: ProxySort, ctx: 'Context') -> 'FloatSort':
         if self.is_real and other.is_real:
             return self.op_div(other, ctx=ctx).as_int.as_float
