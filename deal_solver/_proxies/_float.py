@@ -84,15 +84,15 @@ class FloatSort(ProxySort):
     def is_nan(self) -> 'BoolSort':
         raise UnsupportedError
 
-    def __floordiv__(self, other: ProxySort) -> 'FloatSort':
+    def op_floor_div(self, other: ProxySort) -> 'FloatSort':
         if self.is_real and other.is_real:
-            return (self / other).as_int.as_float
+            return self.op_div(other).as_int.as_float
 
         if self.is_fp:
             other = other.as_fp
         zero = self.val(0.0)
         minus_one = self.val(-1.0)
-        result = (self / other).as_int.as_fp
+        result = self.op_div(other).as_int.as_fp
         if other.is_fp:
             result = switch(
                 (z3.Not(z3.fpIsInf(other.expr)), result),
@@ -107,7 +107,8 @@ class FloatSort(ProxySort):
 
         return result
 
-    __mul__: typing.Callable[['FloatSort', ProxySort], 'FloatSort']
+    def op_mul(self, other: 'ProxySort') -> 'FloatSort':
+        return self._math_op(other=other, handler=operator.__mul__)  # type: ignore
 
 
 class RealSort(FloatSort):
@@ -165,14 +166,14 @@ class RealSort(FloatSort):
             return handler(self.expr, other.as_real.expr)
         return handler(self.as_fp.expr, other.expr)
 
-    def __mod__(self, other: ProxySort) -> ProxySort:
+    def op_mod(self, other: ProxySort) -> ProxySort:
         if isinstance(other, FloatSort):
-            return self.as_fp % other.as_fp
+            return self.as_fp.op_mod(other.as_fp)
         if isinstance(other, registry.int):
-            return self.as_fp % other
+            return self.as_fp.op_mod(other)
         return RealSort(expr=self.expr % other.expr)
 
-    def __truediv__(self, other: ProxySort) -> FloatSort:
+    def op_div(self, other: ProxySort) -> FloatSort:
         if isinstance(other, registry.int):
             return RealSort(expr=self.as_real.expr / other.as_real.expr)
 
@@ -240,7 +241,7 @@ class FPSort(FloatSort):
             return real_handler(self.as_real.expr, other.expr)
         return fp_handler(self.expr, other.as_fp.expr)
 
-    def __truediv__(self, other: ProxySort) -> 'FloatSort':
+    def op_div(self, other: ProxySort) -> 'FloatSort':
         if isinstance(other, registry.int):
             return type(self)(expr=self.as_fp.expr / other.as_fp.expr)
 

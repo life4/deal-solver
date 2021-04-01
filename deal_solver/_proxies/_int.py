@@ -77,7 +77,7 @@ class IntSort(ProxySort):
             return result.as_float
         return result
 
-    def __truediv__(self, other: ProxySort) -> 'FloatSort':
+    def op_div(self, other: ProxySort) -> 'FloatSort':
         real = z3.ToReal(self.expr)
         if isinstance(other, IntSort):
             return registry.float(expr=real / other.as_real.expr)
@@ -89,7 +89,7 @@ class IntSort(ProxySort):
             expr = self.as_fp.expr / other.as_fp.expr
         return registry.float(expr=expr)
 
-    def __floordiv__(self, other: 'ProxySort') -> 'ProxySort':
+    def op_floor_div(self, other: 'ProxySort') -> 'ProxySort':
         as_float = isinstance(other, registry.float)
         if as_float:
             other = other.as_int
@@ -103,7 +103,7 @@ class IntSort(ProxySort):
             return result.as_float
         return result
 
-    def __mod__(self, other: 'ProxySort') -> 'ProxySort':
+    def op_mod(self, other: 'ProxySort') -> 'ProxySort':
         as_float = isinstance(other, registry.float)
         if as_float:
             other = other.as_int

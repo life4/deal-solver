@@ -26,8 +26,10 @@ def math_isclose(
 
     if rel_tol is None:
         rel_tol = FloatSort.val(1e-09)
+    rel_tol = rel_tol.as_float
     if abs_tol is None:
         abs_tol = FloatSort.val(0.0)
+    abs_tol = abs_tol.as_float
 
     if FloatSort.prefer_real:
         left = left.as_real
@@ -38,11 +40,11 @@ def math_isclose(
 
     builtin_max = FUNCTIONS['builtins.max']
     abs_max = builtin_max(left.abs, right.abs, ctx=ctx)
-    delta = builtin_max(rel_tol * abs_max, abs_tol, ctx=ctx)
+    delta = builtin_max(rel_tol.op_mul(abs_max), abs_tol, ctx=ctx)
     return if_expr(
         and_expr(left.is_nan, right.is_nan),
         BoolSort.val(True),
-        (left - right).abs.is_le(delta),
+        left.op_sub(right).abs.is_le(delta),
     )
 
 
@@ -79,14 +81,15 @@ def math_sin(x: ProxySort, ctx: Context, **kwargs) -> ProxySort:
         (False, 11),
     ]
     result: ProxySort = x
-    nominator = x
+    nominator: FloatSort = x
     for positive, pow in series:
-        nominator = nominator * x * x
+        nominator = nominator.op_mul(x).op_mul(x)
         denominator = wrap(z3.IntVal(math.factorial(pow), ctx=ctx.z3_ctx))
+        diff = nominator.op_div(denominator)
         if positive:
-            result += nominator / denominator
+            result = result.op_add(diff)
         else:
-            result -= nominator / denominator
+            result = result.op_sub(diff)
     return result
 
 
@@ -100,6 +103,6 @@ def math_trunc(x: ProxySort, ctx: Context, **kwargs) -> ProxySort:
         if_expr(
             x.is_gt(FloatSort.val(0, ctx=ctx.z3_ctx)),
             x.as_int,
-            x.as_int + IntSort.val(1),
+            x.as_int.op_add(IntSort.val(1)),
         ),
     )

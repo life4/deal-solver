@@ -196,28 +196,28 @@ class ProxySort:
     def _math_op(self, other: 'ProxySort', handler: typing.Callable) -> 'ProxySort':
         return wrap(self._binary_op(other=other, handler=handler))
 
-    def __add__(self, other: 'ProxySort') -> 'ProxySort':
+    def op_add(self, other: 'ProxySort') -> 'ProxySort':
         return self._math_op(other=other, handler=operator.__add__)
 
-    def __sub__(self, other: 'ProxySort') -> 'ProxySort':
+    def op_sub(self, other: 'ProxySort') -> 'ProxySort':
         return self._math_op(other=other, handler=operator.__sub__)
 
-    def __mul__(self, other: 'ProxySort') -> 'ProxySort':
+    def op_mul(self, other: 'ProxySort') -> 'ProxySort':
         return self._math_op(other=other, handler=operator.__mul__)
 
-    def __truediv__(self, other: 'ProxySort') -> 'ProxySort':
+    def op_div(self, other: 'ProxySort') -> 'ProxySort':
         return self._math_op(other=other, handler=operator.__truediv__)
 
-    def __floordiv__(self, other: 'ProxySort') -> 'ProxySort':
+    def op_floor_div(self, other: 'ProxySort') -> 'ProxySort':
         return self._math_op(other=other, handler=operator.__floordiv__)
 
-    def __mod__(self, other: 'ProxySort') -> 'ProxySort':
+    def op_mod(self, other: 'ProxySort') -> 'ProxySort':
         return self._math_op(other=other, handler=operator.__mod__)
 
-    def __pow__(self, other: 'ProxySort') -> 'ProxySort':
+    def op_pow(self, other: 'ProxySort') -> 'ProxySort':
         return self._math_op(other=other, handler=operator.__pow__)
 
-    def __matmul__(self, other: 'ProxySort') -> 'ProxySort':
+    def op_mat_mul(self, other: 'ProxySort') -> 'ProxySort':
         return self._math_op(other=other, handler=operator.__matmul__)
 
     # bitwise binary operations
@@ -225,17 +225,17 @@ class ProxySort:
     def _bitwise_op(self: T, other: 'ProxySort', handler: typing.Callable):
         raise UnsupportedError(self.type_name, 'does not support bitwise operations')
 
-    def __and__(self: T, other: 'ProxySort') -> T:
+    def bit_and(self: T, other: 'ProxySort') -> T:
         return self._bitwise_op(other=other, handler=operator.__and__)
 
-    def __or__(self: T, other: 'ProxySort') -> T:
+    def bit_or(self: T, other: 'ProxySort') -> T:
         return self._bitwise_op(other=other, handler=operator.__or__)
 
-    def __xor__(self: T, other: 'ProxySort') -> T:
+    def bit_xor(self: T, other: 'ProxySort') -> T:
         return self._bitwise_op(other=other, handler=operator.__xor__)
 
-    def __lshift__(self: T, other: 'ProxySort') -> T:
+    def bit_lshift(self: T, other: 'ProxySort') -> T:
         return self._bitwise_op(other=other, handler=operator.__lshift__)
 
-    def __rshift__(self: T, other: 'ProxySort') -> T:
+    def bit_rshift(self: T, other: 'ProxySort') -> T:
         return self._bitwise_op(other=other, handler=operator.__rshift__)

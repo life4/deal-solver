@@ -1,5 +1,4 @@
 # stdlib
-import operator
 import typing
 from functools import partial
 
@@ -38,25 +37,24 @@ COMAPARISON = {
     '!=': 'is_ne',
     'in': 'is_in',
 }
-UNARY_OPERATIONS: typing.Mapping[str, typing.Callable]
-BIN_OPERATIONS: typing.Mapping[str, typing.Callable]
+BIN_OPERATIONS: typing.Mapping[str, str]
 BIN_OPERATIONS = {
     # math
-    '+': operator.add,
-    '-': operator.sub,
-    '*': operator.mul,
-    '/': operator.truediv,
-    '//': operator.floordiv,
-    '**': operator.pow,
-    '%': operator.mod,
-    '@': operator.matmul,
+    '+':  'op_add',
+    '-':  'op_sub',
+    '*':  'op_mul',
+    '/':  'op_div',
+    '//': 'op_floor_div',
+    '**': 'op_pow',
+    '%':  'op_mod',
+    '@':  'op_mat_mul',
 
     # bitwise
-    '&': operator.and_,
-    '|': operator.or_,
-    '^': operator.xor,
-    '<<': operator.lshift,
-    '>>': operator.rshift,
+    '&':  'bit_and',
+    '|':  'bit_or',
+    '^':  'bit_xor',
+    '<<': 'bit_lshift',
+    '>>': 'bit_rshift',
 }
 BOOL_OPERATIONS: typing.Mapping[str, typing.Callable[..., ProxySort]]
 BOOL_OPERATIONS = {
@@ -77,12 +75,13 @@ def eval_const(node: astroid.Const, ctx: Context) -> ProxySort:
 @eval_expr.register(astroid.BinOp)
 def eval_bin_op(node: astroid.BinOp, ctx: Context) -> ProxySort:
     assert node.op
-    operation = BIN_OPERATIONS.get(node.op)
-    assert operation, 'unsupported binary operator'
+    op_name = BIN_OPERATIONS.get(node.op)
+    assert op_name, 'unsupported binary operator'
     left = eval_expr(node=node.left, ctx=ctx)
     right = eval_expr(node=node.right, ctx=ctx)
+    operation = getattr(left, op_name)
     try:
-        result = operation(left, right)
+        result = operation(right)
     except z3.Z3Exception:
         raise UnsupportedError(f'cannot perform operation: {left.type_name}{node.op}{right.type_name}')
     except TypeError:

@@ -32,7 +32,7 @@ def random_choice(seq, ctx: Context, **kwargs):
         raise UnsupportedError("bad argument type for random.choice")
     index = random_randint(
         a=zero,
-        b=seq.length - one,
+        b=seq.length.op_sub(one),
         ctx=ctx,
     )
     return seq.get_item(index)
