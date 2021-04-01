@@ -84,8 +84,6 @@ def eval_bin_op(node: astroid.BinOp, ctx: Context) -> ProxySort:
         result = operation(right, ctx=ctx)
     except z3.Z3Exception:
         raise UnsupportedError(f'cannot perform operation: {left.type_name}{node.op}{right.type_name}')
-    except TypeError:
-        raise UnsupportedError(f'cannot perform operation: {left.type_name}{node.op}{right.type_name}')
     return wrap(result)
 
 

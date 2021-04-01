@@ -49,6 +49,7 @@ def test_timeout():
     ('13 in 123',       'int.__contains__ is not defined'),
 
     # temporary unsupported
+    ('None',                'unsupported constant None'),
     ('()',                  'unsupported ast node Tuple'),
     ('{}',                  'unsupported ast node Dict'),
     ('dict()',              'cannot resolve name dict'),

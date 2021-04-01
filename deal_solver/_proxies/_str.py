@@ -1,4 +1,5 @@
 # stdlib
+import operator
 import typing
 
 # external
@@ -79,6 +80,16 @@ class StrSort(ProxySort):
     def length(self) -> 'IntSort':
         assert self.expr is not None
         return registry.int(expr=z3.Length(self.expr))
+
+    def op_add(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
+        if not isinstance(other, registry.str):
+            return self._bad_bin_op(other, op='+', ctx=ctx)
+        return self._math_op(other=other, handler=operator.__add__, ctx=ctx)
+
+    def op_mul(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
+        if not isinstance(other, registry.int):
+            return self._bad_bin_op(other, op='*', ctx=ctx)
+        return self._math_op(other=other, handler=operator.__mul__, ctx=ctx)
 
     def op_sub(self, other: 'ProxySort', ctx: 'Context') -> 'StrSort':
         return self._bad_bin_op(other, op='-', ctx=ctx)

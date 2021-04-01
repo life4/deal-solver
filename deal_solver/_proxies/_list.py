@@ -1,4 +1,5 @@
 # stdlib
+import operator
 import typing
 
 # external
@@ -100,6 +101,19 @@ class ListSort(ProxySort):
         ))
         result = f(z3.Length(self.expr) - one)
         return registry.int(result)
+
+    def op_add(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
+        if not isinstance(other, registry.list):
+            msg = 'can only concatenate {s} (not "{o}") to {s}'
+            msg = msg.format(s=self.type_name, o=other.type_name)
+            ctx.add_exception(TypeError, msg)
+            return self
+        return self._math_op(other=other, handler=operator.__add__, ctx=ctx)
+
+    def op_mul(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
+        if not isinstance(other, registry.int):
+            return self._bad_bin_op(other, op='*', ctx=ctx)
+        return self._math_op(other=other, handler=operator.__mul__, ctx=ctx)
 
     def op_sub(self, other: 'ProxySort', ctx: 'Context') -> 'ListSort':
         return self._bad_bin_op(other, op='-', ctx=ctx)
