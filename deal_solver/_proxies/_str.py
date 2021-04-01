@@ -94,12 +94,6 @@ class StrSort(ProxySort):
     def op_sub(self, other: 'ProxySort', ctx: 'Context') -> 'StrSort':
         return self._bad_bin_op(other, op='-', ctx=ctx)
 
-    def op_div(self, other: 'ProxySort', ctx: 'Context') -> 'StrSort':
-        return self._bad_bin_op(other, op='/', ctx=ctx)
-
-    def op_floor_div(self, other: 'ProxySort', ctx: 'Context') -> 'StrSort':
-        return self._bad_bin_op(other, op='//', ctx=ctx)
-
     def op_mod(self, other: 'ProxySort', ctx: 'Context') -> 'StrSort':
         return self._bad_bin_op(other, op='%', ctx=ctx)
 

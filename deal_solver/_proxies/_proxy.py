@@ -229,12 +229,12 @@ class ProxySort:
     def op_div(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         """self / other
         """
-        return self._math_op(other=other, handler=operator.__truediv__, ctx=ctx)
+        return self._bad_bin_op(other, op='/', ctx=ctx)
 
     def op_floor_div(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         """self // other
         """
-        return self._math_op(other=other, handler=operator.__floordiv__, ctx=ctx)
+        return self._bad_bin_op(other, op='//', ctx=ctx)
 
     def op_mod(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         """self % other
@@ -249,7 +249,6 @@ class ProxySort:
     def op_mat_mul(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         """self @ other
         """
-        # __matmul__ is not defined for anything in stdlib
         return self._bad_bin_op(other, op='@', ctx=ctx)
 
     # bitwise binary operations

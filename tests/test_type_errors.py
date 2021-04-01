@@ -56,6 +56,8 @@ from .helpers import prove_f
     ('~[]', "bad operand type for unary ~: 'list'"),
 
     # binary operations for set
+    ('{1} + 3',   "unsupported operand type(s) for +: 'set' and 'int'"),
+    ('{1} * 3',   "unsupported operand type(s) for *: 'set' and 'int'"),
     ('{1} - 3',   "unsupported operand type(s) for -: 'set' and 'int'"),
     ('{1} / 3',   "unsupported operand type(s) for /: 'set' and 'int'"),
     ('{1} // 3',  "unsupported operand type(s) for //: 'set' and 'int'"),
@@ -82,7 +84,7 @@ def test_type_error__table(expr, err):
 
 @hypothesis.settings(report_multiple_bugs=False)
 @hypothesis.given(
-    left=hypothesis.strategies.sampled_from(['""', '[]']),
+    left=hypothesis.strategies.sampled_from(['""', '[]', 'set()']),
     right=hypothesis.strategies.sampled_from(['""', '[]', 'set()', '1', '1.2', 'True']),
     op=hypothesis.strategies.sampled_from([
         '+', '-', '*', '**', '/', '//', '%',

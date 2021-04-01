@@ -46,14 +46,14 @@ class SetSort(ProxySort):
         self._ensure(item)
         return registry.bool(expr=z3.IsMember(e=unwrap(item), s=self.expr))
 
+    def op_add(self, other: 'ProxySort', ctx: 'Context') -> 'SetSort':
+        return self._bad_bin_op(other, op='+', ctx=ctx)
+
     def op_sub(self, other: 'ProxySort', ctx: 'Context') -> 'SetSort':
         return self._bad_bin_op(other, op='-', ctx=ctx)
 
-    def op_div(self, other: 'ProxySort', ctx: 'Context') -> 'SetSort':
-        return self._bad_bin_op(other, op='/', ctx=ctx)
-
-    def op_floor_div(self, other: 'ProxySort', ctx: 'Context') -> 'SetSort':
-        return self._bad_bin_op(other, op='//', ctx=ctx)
+    def op_mul(self, other: 'ProxySort', ctx: 'Context') -> 'SetSort':
+        return self._bad_bin_op(other, op='*', ctx=ctx)
 
     def op_mod(self, other: 'ProxySort', ctx: 'Context') -> 'SetSort':
         return self._bad_bin_op(other, op='%', ctx=ctx)
