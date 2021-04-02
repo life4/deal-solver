@@ -149,56 +149,56 @@ class ProxySort:
         expr = self._binary_op(other=other, handler=handler, ctx=ctx)
         return BoolSort(expr=expr)
 
-    def is_eq(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
+    def m_eq(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         """self == other
         """
         return self._comp_op(other=other, handler=operator.__eq__, ctx=ctx)
 
-    def is_ne(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
+    def m_ne(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         """self != other
         """
         return self._comp_op(other=other, handler=operator.__ne__, ctx=ctx)
 
-    def is_lt(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
+    def m_lt(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         """self < other
         """
         return self._comp_op(other=other, handler=operator.__lt__, ctx=ctx)
 
-    def is_le(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
+    def m_le(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         """self <= other
         """
         return self._comp_op(other=other, handler=operator.__le__, ctx=ctx)
 
-    def is_gt(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
+    def m_gt(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         """self > other
         """
         return self._comp_op(other=other, handler=operator.__gt__, ctx=ctx)
 
-    def is_ge(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
+    def m_ge(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         """self >= other
         """
         return self._comp_op(other=other, handler=operator.__ge__, ctx=ctx)
 
-    def is_in(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
+    def m_in(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         """self in other
         """
         return other.contains(self)
 
     # unary operations
 
-    def as_negative(self, ctx: 'Context') -> 'ProxySort':
+    def m_neg(self, ctx: 'Context') -> 'ProxySort':
         """-self
         """
         cls = type(self)
         return cls(expr=-self.expr)
 
-    def as_positive(self, ctx: 'Context') -> 'ProxySort':
+    def m_pos(self, ctx: 'Context') -> 'ProxySort':
         """+self
         """
         cls = type(self)
         return cls(expr=+self.expr)
 
-    def as_inverted(self, ctx: 'Context') -> 'ProxySort':
+    def m_inv(self, ctx: 'Context') -> 'ProxySort':
         """~self
         """
         msg = "bad operand type for unary ~: '{}'"
@@ -211,42 +211,42 @@ class ProxySort:
     def _math_op(self, other: 'ProxySort', handler: typing.Callable, ctx: 'Context') -> 'ProxySort':
         return wrap(self._binary_op(other=other, handler=handler, ctx=ctx))
 
-    def op_add(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
+    def m_add(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         """self + other
         """
         return self._bad_bin_op(other, op='+', ctx=ctx)
 
-    def op_sub(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
+    def m_sub(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         """self - other
         """
         return self._bad_bin_op(other, op='-', ctx=ctx)
 
-    def op_mul(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
+    def m_mul(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         """self * other
         """
         return self._bad_bin_op(other, op='*', ctx=ctx)
 
-    def op_div(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
+    def m_truediv(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         """self / other
         """
         return self._bad_bin_op(other, op='/', ctx=ctx)
 
-    def op_floor_div(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
+    def m_floordiv(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         """self // other
         """
         return self._bad_bin_op(other, op='//', ctx=ctx)
 
-    def op_mod(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
+    def m_mod(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         """self % other
         """
         return self._bad_bin_op(other, op='%', ctx=ctx)
 
-    def op_pow(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
+    def m_pow(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         """self ** other
         """
         return self._bad_bin_op(other, op='**', ctx=ctx)
 
-    def op_mat_mul(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
+    def m_matmul(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         """self @ other
         """
         return self._bad_bin_op(other, op='@', ctx=ctx)
@@ -256,27 +256,27 @@ class ProxySort:
     def _bitwise_op(self: T, other: 'ProxySort', handler: typing.Callable, ctx: 'Context') -> T:
         return self._bad_bin_op(other, op='bitwise operation', ctx=ctx)
 
-    def bit_and(self: T, other: 'ProxySort', ctx: 'Context') -> T:
+    def m_and(self: T, other: 'ProxySort', ctx: 'Context') -> T:
         """self & other
         """
         return self._bitwise_op(other=other, handler=operator.__and__, ctx=ctx)
 
-    def bit_or(self: T, other: 'ProxySort', ctx: 'Context') -> T:
+    def m_or(self: T, other: 'ProxySort', ctx: 'Context') -> T:
         """self | other
         """
         return self._bitwise_op(other=other, handler=operator.__or__, ctx=ctx)
 
-    def bit_xor(self: T, other: 'ProxySort', ctx: 'Context') -> T:
+    def m_xor(self: T, other: 'ProxySort', ctx: 'Context') -> T:
         """self ^ other
         """
         return self._bitwise_op(other=other, handler=operator.__xor__, ctx=ctx)
 
-    def bit_lshift(self: T, other: 'ProxySort', ctx: 'Context') -> T:
+    def m_lshift(self: T, other: 'ProxySort', ctx: 'Context') -> T:
         """self << other
         """
         return self._bitwise_op(other=other, handler=operator.__lshift__, ctx=ctx)
 
-    def bit_rshift(self: T, other: 'ProxySort', ctx: 'Context') -> T:
+    def m_rshift(self: T, other: 'ProxySort', ctx: 'Context') -> T:
         """self >> other
         """
         return self._bitwise_op(other=other, handler=operator.__rshift__, ctx=ctx)

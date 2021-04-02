@@ -54,7 +54,7 @@ def test_timeout():
     ('dict()',              'cannot resolve name dict'),
     ('[1,2,3,4][::2]',      'slice step is not supported'),
     ('str(12.34)',          'cannot convert float to str'),
-    ('(4).bit_length()',    'no definition for builtins.int.bit_length'),
+    ('(4).m_length()',    'no definition for builtins.int.m_length'),
     ('min([], default=13)', 'keyword function arguments are unsupported'),
 ])
 def test_unsupported(expr, err):

@@ -26,7 +26,7 @@ def list_extend(items: ListSort, other, ctx: Context, var_name: str, **kwargs) -
         raise UnsupportedError(f'cannot extend {var_name}')
     ctx.scope.set(
         name=var_name,
-        value=items.op_add(other, ctx=ctx),
+        value=items.m_add(other, ctx=ctx),
     )
 
 

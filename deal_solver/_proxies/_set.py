@@ -46,11 +46,11 @@ class SetSort(ProxySort):
         self._ensure(item)
         return registry.bool(expr=z3.IsMember(e=unwrap(item), s=self.expr))
 
-    def as_positive(self, ctx: 'Context') -> 'SetSort':
+    def m_pos(self, ctx: 'Context') -> 'SetSort':
         return self._bad_un_op(op='+', ctx=ctx)
 
-    def as_negative(self, ctx: 'Context') -> 'SetSort':
+    def m_neg(self, ctx: 'Context') -> 'SetSort':
         return self._bad_un_op(op='-', ctx=ctx)
 
-    def as_inverted(self, ctx: 'Context') -> 'SetSort':
+    def m_inv(self, ctx: 'Context') -> 'SetSort':
         return self._bad_un_op(op='~', ctx=ctx)

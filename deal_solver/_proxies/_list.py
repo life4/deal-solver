@@ -103,7 +103,7 @@ class ListSort(ProxySort):
         result = f(z3.Length(self.expr) - one)
         return registry.int(result)
 
-    def op_add(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
+    def m_add(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         if not isinstance(other, registry.list):
             msg = 'can only concatenate {s} (not "{o}") to {s}'
             msg = msg.format(s=self.type_name, o=other.type_name)
@@ -111,16 +111,16 @@ class ListSort(ProxySort):
             return self
         return self._math_op(other=other, handler=operator.__add__, ctx=ctx)
 
-    def op_mul(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
+    def m_mul(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         if not isinstance(other, registry.int):
             return self._bad_bin_op(other, op='*', ctx=ctx)
         raise UnsupportedError('cannot multiply list')
 
-    def as_positive(self, ctx: 'Context') -> 'ListSort':
+    def m_pos(self, ctx: 'Context') -> 'ListSort':
         return self._bad_un_op(op='+', ctx=ctx)
 
-    def as_negative(self, ctx: 'Context') -> 'ListSort':
+    def m_neg(self, ctx: 'Context') -> 'ListSort':
         return self._bad_un_op(op='-', ctx=ctx)
 
-    def as_inverted(self, ctx: 'Context') -> 'ListSort':
+    def m_inv(self, ctx: 'Context') -> 'ListSort':
         return self._bad_un_op(op='~', ctx=ctx)

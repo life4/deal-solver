@@ -81,24 +81,24 @@ class StrSort(ProxySort):
         assert self.expr is not None
         return registry.int(expr=z3.Length(self.expr))
 
-    def op_add(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
+    def m_add(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         if not isinstance(other, registry.str):
             return self._bad_bin_op(other, op='+', ctx=ctx)
         return self._math_op(other=other, handler=operator.__add__, ctx=ctx)
 
-    def op_mul(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
+    def m_mul(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         if not isinstance(other, registry.int):
             return self._bad_bin_op(other, op='*', ctx=ctx)
         raise UnsupportedError('cannot multiply str')
 
-    def op_sub(self, other: 'ProxySort', ctx: 'Context') -> 'StrSort':
+    def m_sub(self, other: 'ProxySort', ctx: 'Context') -> 'StrSort':
         return self._bad_bin_op(other, op='-', ctx=ctx)
 
-    def as_positive(self, ctx: 'Context') -> 'StrSort':
+    def m_pos(self, ctx: 'Context') -> 'StrSort':
         return self._bad_un_op(op='+', ctx=ctx)
 
-    def as_negative(self, ctx: 'Context') -> 'StrSort':
+    def m_neg(self, ctx: 'Context') -> 'StrSort':
         return self._bad_un_op(op='-', ctx=ctx)
 
-    def as_inverted(self, ctx: 'Context') -> 'StrSort':
+    def m_inv(self, ctx: 'Context') -> 'StrSort':
         return self._bad_un_op(op='~', ctx=ctx)

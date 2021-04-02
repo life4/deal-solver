@@ -38,7 +38,7 @@ def builtins_sum(items, ctx: Context, **kwargs) -> ProxySort:
 @register('builtins.min')
 def builtins_min(a: ProxySort, b: ProxySort = None, *, ctx: Context, **kwargs) -> ProxySort:
     if b is not None:
-        return if_expr(a.is_lt(b, ctx=ctx), a, b)
+        return if_expr(a.m_lt(b, ctx=ctx), a, b)
 
     items = unwrap(a)
     f = z3.RecFunction(
@@ -66,7 +66,7 @@ def builtins_min(a: ProxySort, b: ProxySort = None, *, ctx: Context, **kwargs) -
 @register('builtins.max')
 def builtins_max(a: ProxySort, b: ProxySort = None, *, ctx: Context, **kwargs) -> ProxySort:
     if b is not None:
-        return if_expr(a.is_gt(b, ctx=ctx), a, b, ctx=ctx.z3_ctx,)
+        return if_expr(a.m_gt(b, ctx=ctx), a, b, ctx=ctx.z3_ctx,)
 
     items = unwrap(a)
     f = z3.RecFunction(

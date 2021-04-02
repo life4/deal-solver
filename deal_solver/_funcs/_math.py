@@ -17,7 +17,7 @@ def math_isclose(
     *, ctx: Context, **kwargs,
 ) -> BoolSort:
     if not isinstance(left, FloatSort) and not isinstance(right, FloatSort):
-        return left.is_eq(right, ctx=ctx)
+        return left.m_eq(right, ctx=ctx)
 
     if isinstance(left, IntSort):
         left = left.as_float
@@ -40,11 +40,11 @@ def math_isclose(
 
     builtin_max = FUNCTIONS['builtins.max']
     abs_max = builtin_max(left.abs, right.abs, ctx=ctx)
-    delta = builtin_max(rel_tol.op_mul(abs_max, ctx=ctx), abs_tol, ctx=ctx)
+    delta = builtin_max(rel_tol.m_mul(abs_max, ctx=ctx), abs_tol, ctx=ctx)
     return if_expr(
         and_expr(left.is_nan, right.is_nan),
         BoolSort.val(True),
-        left.op_sub(right, ctx=ctx).abs.is_le(delta, ctx=ctx),
+        left.m_sub(right, ctx=ctx).abs.m_le(delta, ctx=ctx),
     )
 
 
@@ -83,13 +83,13 @@ def math_sin(x: ProxySort, ctx: Context, **kwargs) -> ProxySort:
     result: ProxySort = x
     nominator: FloatSort = x
     for positive, pow in series:
-        nominator = nominator.op_mul(x, ctx=ctx).op_mul(x, ctx=ctx)
+        nominator = nominator.m_mul(x, ctx=ctx).m_mul(x, ctx=ctx)
         denominator = wrap(z3.IntVal(math.factorial(pow), ctx=ctx.z3_ctx))
-        diff = nominator.op_div(denominator, ctx=ctx)
+        diff = nominator.m_truediv(denominator, ctx=ctx)
         if positive:
-            result = result.op_add(diff, ctx=ctx)
+            result = result.m_add(diff, ctx=ctx)
         else:
-            result = result.op_sub(diff, ctx=ctx)
+            result = result.m_sub(diff, ctx=ctx)
     return result
 
 
@@ -98,11 +98,11 @@ def math_trunc(x: ProxySort, ctx: Context, **kwargs) -> ProxySort:
     if not isinstance(x, FloatSort):
         return x.as_int
     return if_expr(
-        x.as_int.as_float.is_eq(x, ctx=ctx),
+        x.as_int.as_float.m_eq(x, ctx=ctx),
         x.as_int,
         if_expr(
-            x.is_gt(FloatSort.val(0, ctx=ctx.z3_ctx), ctx=ctx),
+            x.m_gt(FloatSort.val(0, ctx=ctx.z3_ctx), ctx=ctx),
             x.as_int,
-            x.as_int.op_add(IntSort.val(1), ctx=ctx),
+            x.as_int.m_add(IntSort.val(1), ctx=ctx),
         ),
     )

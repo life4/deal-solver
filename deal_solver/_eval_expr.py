@@ -29,32 +29,32 @@ CONSTS = {
 }
 COMAPARISON: typing.Mapping[str, str]
 COMAPARISON = {
-    '<':  'is_lt',
-    '<=': 'is_le',
-    '>':  'is_gt',
-    '>=': 'is_ge',
-    '==': 'is_eq',
-    '!=': 'is_ne',
-    'in': 'is_in',
+    '<':  'm_lt',
+    '<=': 'm_le',
+    '>':  'm_gt',
+    '>=': 'm_ge',
+    '==': 'm_eq',
+    '!=': 'm_ne',
+    'in': 'm_in',
 }
 BIN_OPERATIONS: typing.Mapping[str, str]
 BIN_OPERATIONS = {
     # math
-    '+':  'op_add',
-    '-':  'op_sub',
-    '*':  'op_mul',
-    '/':  'op_div',
-    '//': 'op_floor_div',
-    '**': 'op_pow',
-    '%':  'op_mod',
-    '@':  'op_mat_mul',
+    '+':  'm_add',
+    '-':  'm_sub',
+    '*':  'm_mul',
+    '/':  'm_truediv',
+    '//': 'm_floordiv',
+    '**': 'm_pow',
+    '%':  'm_mod',
+    '@':  'm_matmul',
 
     # bitwise
-    '&':  'bit_and',
-    '|':  'bit_or',
-    '^':  'bit_xor',
-    '<<': 'bit_lshift',
-    '>>': 'bit_rshift',
+    '&':  'm_and',
+    '|':  'm_or',
+    '^':  'm_xor',
+    '<<': 'm_lshift',
+    '>>': 'm_rshift',
 }
 BOOL_OPERATIONS: typing.Mapping[str, typing.Callable[..., ProxySort]]
 BOOL_OPERATIONS = {
@@ -299,11 +299,11 @@ def eval_attr(node: astroid.Attribute, ctx: Context):
 def eval_unary_op(node: astroid.UnaryOp, ctx: Context) -> ProxySort:
     value_ref = eval_expr(node=node.operand, ctx=ctx)
     if node.op == '+':
-        return value_ref.as_positive(ctx=ctx)
+        return value_ref.m_pos(ctx=ctx)
     if node.op == '-':
-        return value_ref.as_negative(ctx=ctx)
+        return value_ref.m_neg(ctx=ctx)
     if node.op == '~':
-        return value_ref.as_inverted(ctx=ctx)
+        return value_ref.m_inv(ctx=ctx)
     if node.op == 'not':
         return not_expr(value_ref)
     raise RuntimeError('unsupported unary operation')
