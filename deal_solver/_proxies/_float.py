@@ -93,6 +93,10 @@ class FloatSort(ProxySort):
         return self._math_op(other=other, handler=operator.__pow__, ctx=ctx)
 
     def op_floor_div(self, other: ProxySort, ctx: 'Context') -> 'FloatSort':
+        if isinstance(other, registry.bool):
+            other = other.as_int
+        if not isinstance(other, (registry.float, registry.int)):
+            return self._bad_bin_op(other, op='//', ctx=ctx)
         if self.is_real and other.is_real:
             return self.op_div(other, ctx=ctx).as_int.as_float
 
@@ -115,8 +119,33 @@ class FloatSort(ProxySort):
 
         return result
 
-    def op_mul(self, other: 'ProxySort', ctx: 'Context') -> 'FloatSort':
+    def op_mul(self, other: ProxySort, ctx: 'Context') -> 'FloatSort':
+        if isinstance(other, registry.bool):
+            other = other.as_int
+        if not isinstance(other, (registry.float, registry.int)):
+            return self._bad_bin_op(other, op='*', ctx=ctx)
         return self._math_op(other=other, handler=operator.__mul__, ctx=ctx)  # type: ignore
+
+    def op_add(self, other: ProxySort, ctx: 'Context') -> 'ProxySort':
+        if isinstance(other, registry.bool):
+            other = other.as_int
+        if not isinstance(other, (registry.float, registry.int)):
+            return self._bad_bin_op(other, op='+', ctx=ctx)
+        return self._math_op(other=other, handler=operator.__add__, ctx=ctx)
+
+    def op_sub(self, other: ProxySort, ctx: 'Context') -> 'ProxySort':
+        if isinstance(other, registry.bool):
+            other = other.as_int
+        if not isinstance(other, (registry.float, registry.int)):
+            return self._bad_bin_op(other, op='-', ctx=ctx)
+        return self._math_op(other=other, handler=operator.__sub__, ctx=ctx)
+
+    def op_mod(self, other: ProxySort, ctx: 'Context') -> 'ProxySort':
+        if isinstance(other, registry.bool):
+            other = other.as_int
+        if not isinstance(other, (registry.float, registry.int)):
+            return self._bad_bin_op(other, op='%', ctx=ctx)
+        return self._math_op(other=other, handler=operator.__mod__, ctx=ctx)
 
 
 class RealSort(FloatSort):
@@ -166,12 +195,6 @@ class RealSort(FloatSort):
     def _binary_op(self, other: ProxySort, handler: typing.Callable, ctx: 'Context'):
         if isinstance(other, registry.int):
             return handler(self.expr, other.as_real.expr)
-        if not isinstance(other, FloatSort):
-            msg = "unsupported operand type(s) for binary operation: '{}' and '{}'"
-            msg = msg.format(self.type_name, other.type_name)
-            ctx.add_exception(TypeError, msg)
-            return self
-
         if other.is_real:
             return handler(self.expr, other.expr)
         if self.prefer_real:
@@ -179,15 +202,17 @@ class RealSort(FloatSort):
         return handler(self.as_fp.expr, other.expr)
 
     def op_mod(self, other: ProxySort, ctx: 'Context') -> ProxySort:
-        if isinstance(other, FloatSort):
+        if isinstance(other, registry.float):
             return self.as_fp.op_mod(other.as_fp, ctx=ctx)
         if isinstance(other, registry.int):
             return self.as_fp.op_mod(other, ctx=ctx)
-        return RealSort(expr=self.expr % other.expr)
+        return self._bad_bin_op(other, op='%', ctx=ctx)
 
     def op_div(self, other: ProxySort, ctx: 'Context') -> FloatSort:
-        if isinstance(other, registry.int):
+        if isinstance(other, (registry.int, registry.bool)):
             return RealSort(expr=self.as_real.expr / other.as_real.expr)
+        if not isinstance(other, registry.float):
+            return self._bad_bin_op(other, op='/', ctx=ctx)
 
         if other.is_real:
             return RealSort(expr=self.expr / other.expr)
@@ -243,13 +268,8 @@ class FPSort(FloatSort):
     def _binary_op(self, other: ProxySort, handler: typing.Callable, ctx: 'Context'):
         real_handler = handler
         fp_handler = FP_HANDLERS.get(handler, handler)
-        if isinstance(other, registry.int):
+        if isinstance(other, (registry.int, registry.bool)):
             return fp_handler(self.expr, other.as_fp.expr)
-        if not isinstance(other, FloatSort):
-            msg = "unsupported operand type(s) for binary operation: '{}' and '{}'"
-            msg = msg.format(self.type_name, other.type_name)
-            ctx.add_exception(TypeError, msg)
-            return self
 
         if other.is_fp:
             return fp_handler(self.expr, other.expr)
@@ -258,8 +278,10 @@ class FPSort(FloatSort):
         return fp_handler(self.expr, other.as_fp.expr)
 
     def op_div(self, other: ProxySort, ctx: 'Context') -> 'FloatSort':
-        if isinstance(other, registry.int):
+        if isinstance(other, (registry.int, registry.bool)):
             return type(self)(expr=self.as_fp.expr / other.as_fp.expr)
+        if not isinstance(other, registry.float):
+            return self._bad_bin_op(other, op='/', ctx=ctx)
 
         if other.is_fp:
             return type(self)(expr=self.expr / other.expr)

@@ -25,6 +25,8 @@ from .helpers import prove_f
 
     # math for int
     '13 == 13',
+    '+12 == 12',
+    '12 == --12',
     '-13 == -13',
     '+13 == --13',
     '3 + 6 == 9',
@@ -353,7 +355,6 @@ def test_list_extend():
     assert theorem.conclusion is Conclusion.OK
 
 
-@pytest.mark.parametrize('prefer_real', [True, False])
 @pytest.mark.parametrize('expr', [
     '1.2 + 3.4',
     '1.2 - 3.4',
@@ -370,17 +371,12 @@ def test_list_extend():
 ])
 def test_float(prefer_real: bool, expr: str):
     expected = eval(expr)
-    old_prefer_real = FloatSort.prefer_real
-    FloatSort.prefer_real = prefer_real
-    try:
-        theorem = prove_f(f"""
-            import math
-            def f():
-                assert math.isclose({expr}, {expected})
-        """)
-        assert theorem.conclusion is Conclusion.OK
-    finally:
-        FloatSort.prefer_real = old_prefer_real
+    theorem = prove_f(f"""
+        import math
+        def f():
+            assert math.isclose({expr}, {expected})
+    """)
+    assert theorem.conclusion is Conclusion.OK
 
 
 @hypothesis.settings(report_multiple_bugs=False)
