@@ -59,10 +59,34 @@ class BoolSort(ProxySort):
     def _math_op(self, other: ProxySort, handler: typing.Callable, ctx: 'Context') -> ProxySort:
         return self.as_int._math_op(other=other, handler=handler, ctx=ctx)
 
+    def op_add(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
+        if not isinstance(other, (registry.bool, registry.float, registry.int)):
+            return self._bad_bin_op(other, op='+', ctx=ctx)
+        return self.as_int.op_add(other, ctx=ctx)
+
+    def op_mod(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
+        if not isinstance(other, (registry.bool, registry.float, registry.int)):
+            return self._bad_bin_op(other, op='%', ctx=ctx)
+        return self.as_int.op_mod(other, ctx=ctx)
+
+    def op_sub(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
+        if not isinstance(other, (registry.bool, registry.float, registry.int)):
+            return self._bad_bin_op(other, op='-', ctx=ctx)
+        return self.as_int.op_sub(other, ctx=ctx)
+
+    def op_mul(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
+        if not isinstance(other, (registry.bool, registry.float, registry.int)):
+            return self._bad_bin_op(other, op='*', ctx=ctx)
+        return self.as_int.op_mul(other, ctx=ctx)
+
     def op_div(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
+        if not isinstance(other, (registry.bool, registry.float, registry.int)):
+            return self._bad_bin_op(other, op='/', ctx=ctx)
         return self.as_int.op_div(other, ctx=ctx)
 
     def op_floor_div(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
+        if not isinstance(other, (registry.bool, registry.float, registry.int)):
+            return self._bad_bin_op(other, op='//', ctx=ctx)
         return self.as_int.op_floor_div(other, ctx=ctx)
 
     def as_negative(self, ctx: 'Context') -> 'ProxySort':
