@@ -64,9 +64,6 @@ from .helpers import prove_f
     '7.3 // 2.0 == 3.0',
     '7.3 // -2.0 == -4.0',
     '-7.3 // 2.0 == -4.0',
-    '8.0 // float("-inf") == -1.0',
-    '-8.0 // float("-inf") == 0.0',
-    '0.0 // float("inf") == 0.0',
     '0.005 // 0.005 == 1.0',
     '2.7 > 1.4',
     '1.4 < 2.7',
@@ -105,6 +102,13 @@ from .helpers import prove_f
     '2 - True == 1',
     '2 * True == 2',
     '2 / True == 2.0',
+
+    # implicit bool to float
+    '2.3 + True == 3.3',
+    '2.4 - True == 1.4',
+    '2.3 * True == 2.3',
+    # '2.3 ** True == 2.3',
+    '2.3 / True == 2.3',
 
     # comparison
     '1 != 2',
@@ -161,7 +165,6 @@ from .helpers import prove_f
     'int(4.2) == 4',
     'float(4.2) == 4.2',
     'float(10 / 2) == 5.0',
-    'float("NaN") != 2.3',
     'float("Inf") > 100000',
     'abs(-4.2) == 4.2',
     # 'str(4.2) == "4.2"',
@@ -260,16 +263,44 @@ from .helpers import prove_f
     '[i for i in [4, 5, 6] if i != 5] == [4, 6]',
     '[i+i for i in [4, 5, 6, 7, 8] if i % 2 == 0] == [8, 12, 16]',
 ])
-def test_asserts_ok(check: str) -> None:
-    # assert eval(check)
+def test_asserts_ok(prefer_real: bool, check: str) -> None:
+    assert eval(check)
     text = """
         from typing import List
-        def f(x: List[int]):
+        def f():
             assert {}
     """
     text = text.format(check)
     theorem = prove_f(text)
     assert theorem.conclusion is Conclusion.OK
+
+
+@pytest.mark.parametrize('check', [
+    '8.0 // float("-inf") == -1.0',
+    '-8.0 // float("-inf") == 0.0',
+    '0.0 // float("inf") == 0.0',
+    'float("NaN") != 2.3',
+])
+def test_assert_ok_fp_only(check: str):
+    assert eval(check)
+    text = """
+        from typing import List
+        def f():
+            assert {}
+    """
+    text = text.format(check)
+
+    old_prefer_real = FloatSort.prefer_real
+    try:
+        FloatSort.prefer_real = False
+        theorem = prove_f(text)
+        assert theorem.conclusion is Conclusion.OK
+
+        FloatSort.prefer_real = True
+        theorem = prove_f(text)
+        assert theorem.conclusion in (Conclusion.SKIP, Conclusion.FAIL)
+    finally:
+        FloatSort.prefer_real = old_prefer_real
 
 
 @pytest.mark.parametrize('check', [
