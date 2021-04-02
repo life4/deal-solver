@@ -214,17 +214,17 @@ class ProxySort:
     def op_add(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         """self + other
         """
-        return self._math_op(other=other, handler=operator.__add__, ctx=ctx)
+        return self._bad_bin_op(other, op='+', ctx=ctx)
 
     def op_sub(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         """self - other
         """
-        return self._math_op(other=other, handler=operator.__sub__, ctx=ctx)
+        return self._bad_bin_op(other, op='-', ctx=ctx)
 
     def op_mul(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         """self * other
         """
-        return self._math_op(other=other, handler=operator.__mul__, ctx=ctx)
+        return self._bad_bin_op(other, op='*', ctx=ctx)
 
     def op_div(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         """self / other
@@ -239,7 +239,7 @@ class ProxySort:
     def op_mod(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         """self % other
         """
-        return self._math_op(other=other, handler=operator.__mod__, ctx=ctx)
+        return self._bad_bin_op(other, op='%', ctx=ctx)
 
     def op_pow(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         """self ** other

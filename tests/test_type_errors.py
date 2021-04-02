@@ -112,7 +112,7 @@ def test_type_error__table(prefer_real, expr, err):
 @pytest.mark.parametrize('left', ['""', '[]', 'set()', '1', '3.4', 'True'])
 @pytest.mark.parametrize('right', ['""', '[]', 'set()', '1', '3.4', 'True'])
 @pytest.mark.parametrize('op', ['+', '-', '*', '**', '/', '//', '%', '@'])
-def test_type_error__fuzz(prefer_real: bool, left: str, op: str, right: str):
+def test_type_error_bin_op(prefer_real: bool, left: str, op: str, right: str):
     expr = f'{left} {op} {right}'
 
     try:

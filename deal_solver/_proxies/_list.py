@@ -6,6 +6,7 @@ import typing
 import z3
 
 # app
+from .._exceptions import UnsupportedError
 from ._funcs import random_name, unwrap, wrap
 from ._proxy import ProxySort
 from ._registry import registry
@@ -113,13 +114,7 @@ class ListSort(ProxySort):
     def op_mul(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         if not isinstance(other, registry.int):
             return self._bad_bin_op(other, op='*', ctx=ctx)
-        return self._math_op(other=other, handler=operator.__mul__, ctx=ctx)
-
-    def op_sub(self, other: 'ProxySort', ctx: 'Context') -> 'ListSort':
-        return self._bad_bin_op(other, op='-', ctx=ctx)
-
-    def op_mod(self, other: 'ProxySort', ctx: 'Context') -> 'ListSort':
-        return self._bad_bin_op(other, op='%', ctx=ctx)
+        raise UnsupportedError('cannot multiply list')
 
     def as_positive(self, ctx: 'Context') -> 'ListSort':
         return self._bad_un_op(op='+', ctx=ctx)
