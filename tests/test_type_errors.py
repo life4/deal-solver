@@ -23,10 +23,12 @@ from .helpers import prove_f
 
     # binary operations for int
     ('4 / "a"',   "unsupported operand type(s) for /: 'int' and 'str'"),
-    # ('4 // "a"',   "unsupported operand type(s) for //: 'int' and 'str'"),
+    ('4 // "a"',  "unsupported operand type(s) for //: 'int' and 'str'"),
+    ('4 % "a"',   "unsupported operand type(s) for %: 'int' and 'str'"),
     ('3 @ 3',     "unsupported operand type(s) for @: 'int' and 'int'"),
     ('3 + ""',    "unsupported operand type(s) for +: 'int' and 'str'"),
     ('3 - ""',    "unsupported operand type(s) for -: 'int' and 'str'"),
+    ('3 * set()', "unsupported operand type(s) for *: 'int' and 'set'"),
     ('3 ** ""',   "unsupported operand type(s) for **: 'int' and 'str'"),
 
     # binary operations for str
@@ -87,7 +89,7 @@ def test_type_error__table(expr, err):
 
 @hypothesis.settings(report_multiple_bugs=False)
 @hypothesis.given(
-    left=hypothesis.strategies.sampled_from(['""', '[]', 'set()']),
+    left=hypothesis.strategies.sampled_from(['""', '[]', 'set()', '1']),
     right=hypothesis.strategies.sampled_from(['""', '[]', 'set()', '1', '1.2', 'True']),
     op=hypothesis.strategies.sampled_from([
         '+', '-', '*', '**', '/', '//', '%',
