@@ -13,10 +13,10 @@ from ._registry import registry
 
 if typing.TYPE_CHECKING:
     # app
+    from .._context import Context
     from ._bool import BoolSort
     from ._float import FloatSort, RealSort
     from ._str import StrSort
-    from .._context import Context
 
 
 INT_BITS = 64

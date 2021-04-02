@@ -12,11 +12,11 @@ from ._funcs import unwrap, wrap
 
 if typing.TYPE_CHECKING:
     # app
+    from .._context import Context
     from ._bool import BoolSort
     from ._float import FloatSort, FPSort, RealSort
     from ._int import IntSort
     from ._str import StrSort
-    from .._context import Context
 
 
 T = typing.TypeVar('T', bound='ProxySort')

@@ -9,16 +9,16 @@ import z3
 
 # app
 from .._exceptions import UnsupportedError
-from ._funcs import and_expr, switch, if_expr
+from ._funcs import and_expr, if_expr, switch
 from ._proxy import ProxySort
 from ._registry import registry
 
 
 if typing.TYPE_CHECKING:
     # app
+    from .._context import Context
     from ._bool import BoolSort
     from ._int import IntSort
-    from .._context import Context
 
 
 FP_HANDLERS = {

@@ -12,8 +12,8 @@ from ._registry import registry
 
 if typing.TYPE_CHECKING:
     # app
-    from ._bool import BoolSort
     from .._context import Context
+    from ._bool import BoolSort
 
 
 @registry.add

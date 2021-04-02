@@ -1,5 +1,7 @@
+# external
 import pytest
 
+# project
 from deal_solver._proxies import FloatSort
 
 

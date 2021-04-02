@@ -73,6 +73,7 @@ class Context(typing.NamedTuple):
         )
 
     def add_exception(self, exc: type, msg: str) -> None:
+        # app
         from .._proxies import BoolSort
 
         self.exceptions.add(ExceptionInfo(

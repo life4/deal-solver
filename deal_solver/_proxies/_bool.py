@@ -12,9 +12,9 @@ from ._registry import registry
 
 if typing.TYPE_CHECKING:
     # app
-    from ._float import FPSort, FloatSort, RealSort
-    from ._int import IntSort
     from .._context import Context
+    from ._float import FloatSort, FPSort, RealSort
+    from ._int import IntSort
 
 
 INT_BITS = 64

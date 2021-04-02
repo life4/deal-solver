@@ -14,9 +14,9 @@ from ._registry import registry
 
 if typing.TYPE_CHECKING:
     # app
+    from .._context import Context
     from ._bool import BoolSort
     from ._int import IntSort
-    from .._context import Context
 
 
 @registry.add
