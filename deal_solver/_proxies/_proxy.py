@@ -7,7 +7,7 @@ import z3
 
 # app
 from .._exceptions import UnsupportedError
-from ._funcs import unwrap, wrap
+from ._funcs import unwrap, wrap, not_expr
 
 
 if typing.TYPE_CHECKING:
@@ -185,6 +185,11 @@ class ProxySort:
         """self in other
         """
         return other.m_contains(self, ctx=ctx)
+
+    def m_not_in(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
+        """self in other
+        """
+        return not_expr(other.m_contains(self, ctx=ctx))
 
     # unary operations
 

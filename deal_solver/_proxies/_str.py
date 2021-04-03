@@ -55,6 +55,11 @@ class StrSort(ProxySort):
         return registry.bool(expr=expr)
 
     def m_contains(self, item: 'ProxySort', ctx: 'Context') -> 'BoolSort':
+        if not isinstance(item, registry.str):
+            msg = "'in <string>' requires string as left operand, not {}"
+            msg = msg.format(item.type_name)
+            ctx.add_exception(TypeError, msg)
+            return registry.bool.val(True)
         assert self.expr is not None
         self._ensure(item)
         expr = z3.Contains(self.expr, unwrap(item))

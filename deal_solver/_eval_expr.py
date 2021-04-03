@@ -36,6 +36,7 @@ COMAPARISON = {
     '==': 'm_eq',
     '!=': 'm_ne',
     'in': 'm_in',
+    'not in': 'm_not_in',
 }
 BIN_OPERATIONS: typing.Mapping[str, str]
 BIN_OPERATIONS = {
