@@ -67,7 +67,7 @@ class ListSort(ProxySort):
         self._ensure(item)
         return cls(expr=self.expr + unit)
 
-    def contains(self, item: 'ProxySort') -> 'BoolSort':
+    def m_contains(self, item: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         self._ensure(item)
         unit = z3.Unit(unwrap(item))
         return registry.bool(expr=z3.Contains(self.expr, unit))

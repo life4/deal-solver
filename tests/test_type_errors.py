@@ -32,6 +32,7 @@ from .helpers import prove_f
     ('4 / "a"',   "unsupported operand type(s) for /: 'int' and 'str'"),
     ('4 // "a"',  "unsupported operand type(s) for //: 'int' and 'str'"),
     ('4 % "a"',   "unsupported operand type(s) for %: 'int' and 'str'"),
+    ('13 in 123', "argument of type 'int' is not iterable"),
 
     # bitwise operations for int
     ('3 | []',   "unsupported operand type(s) for |: 'int' and 'list'"),
@@ -49,6 +50,7 @@ from .helpers import prove_f
     ('4.1 // []', "unsupported operand type(s) for //: 'float' and 'list'"),
     ('4.1 % []',  "unsupported operand type(s) for %: 'float' and 'list'"),
     ('4.1 + []',  "unsupported operand type(s) for +: 'float' and 'list'"),
+    ('13 in 1.3', "argument of type 'float' is not iterable"),
 
     # unary operations for float
     ('~3.14',     "bad operand type for unary ~: 'float'"),
@@ -62,6 +64,7 @@ from .helpers import prove_f
     ('"a" // 3',  "unsupported operand type(s) for //: 'str' and 'int'"),
     ('"a" % 3',   "not all arguments converted during string formatting"),
     ('"a" + 3',   'can only concatenate str (not "int") to str'),
+    # ('13 in ""',  "'in <string>' requires string as left operand, not int"),
 
     # unary operations for str
     ('+"a"',     "bad operand type for unary +: 'str'"),

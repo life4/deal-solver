@@ -42,7 +42,7 @@ class SetSort(ProxySort):
             expr=z3.SetAdd(s=self.expr, e=unwrap(item)),
         )
 
-    def contains(self, item: 'ProxySort') -> 'BoolSort':
+    def m_contains(self, item: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         self._ensure(item)
         return registry.bool(expr=z3.IsMember(e=unwrap(item), s=self.expr))
 

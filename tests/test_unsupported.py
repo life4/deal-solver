@@ -44,7 +44,6 @@ def test_timeout():
     ('[1,2,3](2)',      'list object is not callable'),
     ('int([])',         'cannot convert list to int'),
     ('float([])',       'cannot convert list to float'),
-    ('13 in 123',       'int.__contains__ is not defined'),
 
     # temporary unsupported
     ('None',                'unsupported constant None'),

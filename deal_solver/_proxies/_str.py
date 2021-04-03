@@ -54,7 +54,7 @@ class StrSort(ProxySort):
         expr = self.expr != z3.Empty(z3.StringSort())
         return registry.bool(expr=expr)
 
-    def contains(self, item: 'ProxySort') -> 'BoolSort':
+    def m_contains(self, item: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         assert self.expr is not None
         self._ensure(item)
         expr = z3.Contains(self.expr, unwrap(item))

@@ -113,7 +113,7 @@ class ProxySort:
         from ._registry import registry
         msg = "object of type '{}' has no len()".format(self.type_name)
         ctx.add_exception(TypeError, msg)
-        return registry.int(z3.IntVal(0))
+        return registry.int.val(0)
 
     def get_item(self, item, ctx: 'Context') -> 'ProxySort':
         """self[item]
@@ -131,10 +131,13 @@ class ProxySort:
         ctx.add_exception(TypeError, msg)
         return self
 
-    def contains(self, item) -> 'BoolSort':
+    def m_contains(self, item, ctx: 'Context') -> 'BoolSort':
         """item in self
         """
-        raise UnsupportedError('{}.__contains__ is not defined'.format(self.type_name))
+        from ._registry import registry
+        msg = "argument of type '{}' is not iterable".format(self.type_name)
+        ctx.add_exception(TypeError, msg)
+        return registry.bool.val(False)
 
     def _binary_op(self, other: 'ProxySort', handler: typing.Callable, ctx: 'Context'):
         self._ensure(other, seq=True)
@@ -181,7 +184,7 @@ class ProxySort:
     def m_in(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         """self in other
         """
-        return other.contains(self)
+        return other.m_contains(self, ctx=ctx)
 
     # unary operations
 
