@@ -166,3 +166,38 @@ class IntSort(ProxySort):
             z3.Int2BV(unwrap(other), INT_BITS),
         ))
         return type(self)(expr=expr)
+
+    def m_and(self, other: 'ProxySort', ctx: 'Context'):
+        """self & other
+        """
+        if not isinstance(other, registry.int):
+            return self._bad_bin_op(other, op='&', ctx=ctx)
+        return self._bitwise_op(other=other, handler=operator.__and__, ctx=ctx)
+
+    def m_or(self, other: 'ProxySort', ctx: 'Context'):
+        """self | other
+        """
+        if not isinstance(other, registry.int):
+            return self._bad_bin_op(other, op='|', ctx=ctx)
+        return self._bitwise_op(other=other, handler=operator.__or__, ctx=ctx)
+
+    def m_xor(self, other: 'ProxySort', ctx: 'Context'):
+        """self ^ other
+        """
+        if not isinstance(other, registry.int):
+            return self._bad_bin_op(other, op='^', ctx=ctx)
+        return self._bitwise_op(other=other, handler=operator.__xor__, ctx=ctx)
+
+    def m_lshift(self, other: 'ProxySort', ctx: 'Context'):
+        """self << other
+        """
+        if not isinstance(other, registry.int):
+            return self._bad_bin_op(other, op='<<', ctx=ctx)
+        return self._bitwise_op(other=other, handler=operator.__lshift__, ctx=ctx)
+
+    def m_rshift(self, other: 'ProxySort', ctx: 'Context'):
+        """self >> other
+        """
+        if not isinstance(other, registry.int):
+            return self._bad_bin_op(other, op='>>', ctx=ctx)
+        return self._bitwise_op(other=other, handler=operator.__rshift__, ctx=ctx)

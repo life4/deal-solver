@@ -252,33 +252,30 @@ class ProxySort:
 
     # bitwise binary operations
 
-    def _bitwise_op(self: T, other: 'ProxySort', handler: typing.Callable, ctx: 'Context') -> T:
-        return self._bad_bin_op(other, op='bitwise operation', ctx=ctx)
-
     def m_and(self: T, other: 'ProxySort', ctx: 'Context') -> T:
         """self & other
         """
-        return self._bitwise_op(other=other, handler=operator.__and__, ctx=ctx)
+        return self._bad_bin_op(other, op='&', ctx=ctx)
 
     def m_or(self: T, other: 'ProxySort', ctx: 'Context') -> T:
         """self | other
         """
-        return self._bitwise_op(other=other, handler=operator.__or__, ctx=ctx)
+        return self._bad_bin_op(other, op='|', ctx=ctx)
 
     def m_xor(self: T, other: 'ProxySort', ctx: 'Context') -> T:
         """self ^ other
         """
-        return self._bitwise_op(other=other, handler=operator.__xor__, ctx=ctx)
+        return self._bad_bin_op(other, op='^', ctx=ctx)
 
     def m_lshift(self: T, other: 'ProxySort', ctx: 'Context') -> T:
         """self << other
         """
-        return self._bitwise_op(other=other, handler=operator.__lshift__, ctx=ctx)
+        return self._bad_bin_op(other, op='<<', ctx=ctx)
 
     def m_rshift(self: T, other: 'ProxySort', ctx: 'Context') -> T:
         """self >> other
         """
-        return self._bitwise_op(other=other, handler=operator.__rshift__, ctx=ctx)
+        return self._bad_bin_op(other, op='>>', ctx=ctx)
 
     # helpers for error messages in operations
 

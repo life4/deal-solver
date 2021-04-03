@@ -33,6 +33,13 @@ from .helpers import prove_f
     ('4 // "a"',  "unsupported operand type(s) for //: 'int' and 'str'"),
     ('4 % "a"',   "unsupported operand type(s) for %: 'int' and 'str'"),
 
+    # bitwise operations for int
+    ('3 | []',   "unsupported operand type(s) for |: 'int' and 'list'"),
+    ('3 & []',   "unsupported operand type(s) for &: 'int' and 'list'"),
+    ('3 ^ []',   "unsupported operand type(s) for ^: 'int' and 'list'"),
+    ('3 << []',  "unsupported operand type(s) for <<: 'int' and 'list'"),
+    ('3 >> []',  "unsupported operand type(s) for >>: 'int' and 'list'"),
+
     # binary operations for float
     ('4.1 - []',  "unsupported operand type(s) for -: 'float' and 'list'"),
     ('4.1 @ []',  "unsupported operand type(s) for @: 'float' and 'list'"),
@@ -76,6 +83,13 @@ from .helpers import prove_f
     ('-[]',      "bad operand type for unary -: 'list'"),
     ('~[]',      "bad operand type for unary ~: 'list'"),
 
+    # bitwise operations for list
+    ('[] | 1',   "unsupported operand type(s) for |: 'list' and 'int'"),
+    ('[] & 1',   "unsupported operand type(s) for &: 'list' and 'int'"),
+    ('[] ^ 1',   "unsupported operand type(s) for ^: 'list' and 'int'"),
+    ('[] << 1',  "unsupported operand type(s) for <<: 'list' and 'int'"),
+    ('[] >> 1',  "unsupported operand type(s) for >>: 'list' and 'int'"),
+
     # binary operations for set
     ('{1} - 3',  "unsupported operand type(s) for -: 'set' and 'int'"),
     ('{1} @ 3',  "unsupported operand type(s) for @: 'set' and 'int'"),
@@ -117,7 +131,10 @@ def test_type_error__table(prefer_real, expr, err):
 
 @pytest.mark.parametrize('left', ['""', '[]', 'set()', '1', '3.4', 'True'])
 @pytest.mark.parametrize('right', ['""', '[]', 'set()', '1', '3.4', 'True'])
-@pytest.mark.parametrize('op', ['+', '-', '*', '**', '/', '//', '%', '@'])
+@pytest.mark.parametrize('op', [
+    '+', '-', '*', '**', '/', '//', '%', '@',
+    '|', '&', '^', '<<', '>>',
+])
 def test_type_error_bin_op(prefer_real: bool, left: str, op: str, right: str):
     expr = f'{left} {op} {right}'
 
