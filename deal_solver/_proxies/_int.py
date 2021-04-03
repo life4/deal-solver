@@ -31,10 +31,6 @@ class IntSort(ProxySort):
         self.expr = expr
 
     @classmethod
-    def sort(cls) -> z3.IntSort:
-        return z3.IntSort()
-
-    @classmethod
     def val(cls, x: int) -> 'IntSort':
         return cls(expr=z3.IntVal(x))
 

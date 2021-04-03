@@ -2,7 +2,7 @@
 import z3
 
 # app
-from .._context import Context
+from .._context import Context, ExceptionInfo
 from .._proxies import (
     BoolSort, IntSort, ProxySort, SetSort, StrSort, if_expr, random_name, unwrap, wrap,
 )
@@ -90,6 +90,24 @@ def builtins_max(a: ProxySort, b: ProxySort = None, *, ctx: Context, **kwargs) -
     ))
     result = f(z3.Length(items) - one)
     return wrap(result)
+
+
+@register('builtins.ord')
+def builtins_ord(val: ProxySort, ctx: Context, **kwargs) -> IntSort:
+    if not isinstance(val, StrSort):
+        msg = 'ord() expected string of length 1, but {} found'
+        msg = msg .format(val.type_name)
+        ctx.add_exception(TypeError, msg)
+        return IntSort.val(0)
+    ctx.exceptions.add(ExceptionInfo(
+        name='TypeError',
+        names={'TypeError', 'Exception', 'BaseException'},
+        cond=val.length.m_ne(IntSort.val(1), ctx=ctx),
+        message='ord() expected a character, but string of length N found',
+    ))
+    bv = z3.BitVec(random_name('ord_bv'), 8)
+    ctx.given.add(BoolSort(z3.Unit(bv) == unwrap(val)))
+    return IntSort(z3.BV2Int(bv))
 
 
 @register('builtins.abs')

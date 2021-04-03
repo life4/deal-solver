@@ -102,6 +102,8 @@ from .helpers import prove_f
     '2 - True == 1',
     '2 * True == 2',
     '2 / True == 2.0',
+    '+True == 1',
+    '-True == -1',
 
     # implicit bool to float
     '2.3 + True == 3.3',
@@ -152,6 +154,8 @@ from .helpers import prove_f
     'len("abcd") == 4',
     'str("abc") == "abc"',
     # 'float("12.3") == 12.3',
+    'ord("a") == 97',
+    'ord(".") == 46',
 
     # string methods
     '"abcd".startswith("ab")',

@@ -29,10 +29,6 @@ class BoolSort(ProxySort):
         self.expr = expr
 
     @classmethod
-    def sort(cls) -> z3.BoolSortRef:
-        return z3.BoolSort()
-
-    @classmethod
     def val(cls, x) -> 'BoolSort':
         return cls(expr=z3.BoolVal(x))
 
@@ -55,9 +51,6 @@ class BoolSort(ProxySort):
     @property
     def as_fp(self) -> 'FPSort':
         return self.as_int.as_fp
-
-    def _math_op(self, other: ProxySort, handler: typing.Callable, ctx: 'Context') -> ProxySort:
-        return self.as_int._math_op(other=other, handler=handler, ctx=ctx)
 
     def m_add(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         if not isinstance(other, (registry.bool, registry.float, registry.int)):

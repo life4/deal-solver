@@ -33,9 +33,6 @@ class Registry:
     def __getattr__(self, name: Str) -> typing.Type['ProxySort']:
         return self._proxies[name]
 
-    def __getitem__(self, name: Str) -> typing.Type['ProxySort']:
-        return self._proxies[name]
-
     def add(self, cls: P) -> P:
         self._proxies[cls.type_name] = cls
         return cls

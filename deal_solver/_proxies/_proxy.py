@@ -57,7 +57,7 @@ class ProxySort:
         self.expr = self.make_empty_expr(sort)
 
     def __init__(self, expr) -> None:
-        self.expr = expr
+        raise NotImplementedError
 
     @property
     def is_real(self) -> bool:
@@ -133,9 +133,6 @@ class ProxySort:
         """item in self
         """
         raise UnsupportedError('{}.__contains__ is not defined'.format(self.type_name))
-
-    def sort(self):
-        return self.expr.sort()
 
     def _binary_op(self, other: 'ProxySort', handler: typing.Callable, ctx: 'Context'):
         self._ensure(other, seq=True)
