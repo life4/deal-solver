@@ -84,3 +84,18 @@ def test_random_module(check: str) -> None:
     text = text.format(check)
     theorem = prove_f(text)
     assert theorem.conclusion is Conclusion.OK
+
+
+@pytest.mark.parametrize('check', [
+    'os.path.join("ab", "cd") == "ab/cd"',
+])
+def test_os_path_module(check: str) -> None:
+    text = """
+        import os.path
+
+        def f():
+            assert {}
+    """
+    text = text.format(check)
+    theorem = prove_f(text)
+    assert theorem.conclusion is Conclusion.OK

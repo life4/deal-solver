@@ -270,7 +270,7 @@ def eval_attr(node: astroid.Attribute, ctx: Context):
     except UnsupportedError:
         # resolve functions
         definitions = infer(node)
-        if len(definitions) != 1:
+        if not definitions:
             raise UnsupportedError('cannot resolve attribute', node.as_string())
         target = definitions[0]
 
