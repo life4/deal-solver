@@ -234,7 +234,7 @@ def eval_getitem(node: astroid.Subscript, ctx: Context) -> ProxySort:
     if node.slice.upper:
         upper_ref = eval_expr(node=node.slice.upper, ctx=ctx)
     else:
-        upper_ref = value_ref.length
+        upper_ref = value_ref.m_len(ctx=ctx)
     return value_ref.get_slice(start=lower_ref, stop=upper_ref, ctx=ctx)
 
 

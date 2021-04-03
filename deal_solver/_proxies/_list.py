@@ -78,8 +78,7 @@ class ListSort(ProxySort):
         unit = z3.Unit(unwrap(other))
         return registry.int(expr=z3.IndexOf(self.expr, unit, unwrap(start)))
 
-    @property
-    def length(self) -> 'IntSort':
+    def m_len(self, ctx: 'Context') -> 'IntSort':
         if self.expr is None:
             return registry.int(expr=z3.IntVal(0))
         return registry.int(expr=z3.Length(self.expr))
@@ -113,7 +112,10 @@ class ListSort(ProxySort):
 
     def m_mul(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         if not isinstance(other, registry.int):
-            return self._bad_bin_op(other, op='*', ctx=ctx)
+            msg = "can't multiply sequence by non-int of type '{}'"
+            msg = msg.format(other.type_name)
+            ctx.add_exception(TypeError, msg)
+            return self
         raise UnsupportedError('cannot multiply list')
 
     def m_pos(self, ctx: 'Context') -> 'ListSort':

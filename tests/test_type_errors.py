@@ -1,3 +1,5 @@
+import re
+
 # external
 import pytest
 
@@ -9,7 +11,7 @@ from .helpers import prove_f
 
 
 @pytest.mark.parametrize('expr, err', [
-    ('3.1 | 4.2', "unsupported operand type(s) for bitwise operation: 'float' and 'float'"),
+    # ('3.1 | 4.2', "unsupported operand type(s) for bitwise operation: 'float' and 'float'"),
 
     # get attr
     ('4[0]',      "'int' object is not subscriptable"),
@@ -25,7 +27,7 @@ from .helpers import prove_f
     ('3 - ""',    "unsupported operand type(s) for -: 'int' and 'str'"),
     ('3 @ 3',     "unsupported operand type(s) for @: 'int' and 'int'"),
     ('3 * set()', "unsupported operand type(s) for *: 'int' and 'set'"),
-    ('3 ** ""',   "unsupported operand type(s) for **: 'int' and 'str'"),
+    ('3 ** ""',   "unsupported operand type(s) for ** or pow(): 'int' and 'str'"),
     ('3 + ""',    "unsupported operand type(s) for +: 'int' and 'str'"),
     ('4 / "a"',   "unsupported operand type(s) for /: 'int' and 'str'"),
     ('4 // "a"',  "unsupported operand type(s) for //: 'int' and 'str'"),
@@ -34,8 +36,8 @@ from .helpers import prove_f
     # binary operations for float
     ('4.1 - []',  "unsupported operand type(s) for -: 'float' and 'list'"),
     ('4.1 @ []',  "unsupported operand type(s) for @: 'float' and 'list'"),
-    ('4.1 * []',  "unsupported operand type(s) for *: 'float' and 'list'"),
-    ('4.1 ** []', "unsupported operand type(s) for **: 'float' and 'list'"),
+    ('4.1 * []',  "can't multiply sequence by non-int of type 'float'"),
+    ('4.1 ** []', "unsupported operand type(s) for ** or pow(): 'float' and 'list'"),
     ('4.1 / []',  "unsupported operand type(s) for /: 'float' and 'list'"),
     ('4.1 // []', "unsupported operand type(s) for //: 'float' and 'list'"),
     ('4.1 % []',  "unsupported operand type(s) for %: 'float' and 'list'"),
@@ -45,14 +47,14 @@ from .helpers import prove_f
     ('~3.14',     "bad operand type for unary ~: 'float'"),
 
     # binary operations for str
-    ('"" * ""',   "unsupported operand type(s) for *: 'str' and 'str'"),
+    ('"" * ""',   "can't multiply sequence by non-int of type 'str'"),
     ('"a" - 3',   "unsupported operand type(s) for -: 'str' and 'int'"),
     ('"a" @ 3',   "unsupported operand type(s) for @: 'str' and 'int'"),
-    ('"a" ** 3',  "unsupported operand type(s) for **: 'str' and 'int'"),
+    ('"a" ** 3',  "unsupported operand type(s) for ** or pow(): 'str' and 'int'"),
     ('"a" / 3',   "unsupported operand type(s) for /: 'str' and 'int'"),
     ('"a" // 3',  "unsupported operand type(s) for //: 'str' and 'int'"),
-    ('"a" % 3',   "unsupported operand type(s) for %: 'str' and 'int'"),
-    ('"a" + 3',   "unsupported operand type(s) for +: 'str' and 'int'"),
+    ('"a" % 3',   "not all arguments converted during string formatting"),
+    ('"a" + 3',   'can only concatenate str (not "int") to str'),
 
     # unary operations for str
     ('+"a"',     "bad operand type for unary +: 'str'"),
@@ -62,7 +64,8 @@ from .helpers import prove_f
     # binary operations for list
     ('[] - 3',   "unsupported operand type(s) for -: 'list' and 'int'"),
     ('[] @ 3',   "unsupported operand type(s) for @: 'list' and 'int'"),
-    ('[] ** 3',  "unsupported operand type(s) for **: 'list' and 'int'"),
+    ('[] * 3.1', "can't multiply sequence by non-int of type 'float'"),
+    ('[] ** 3',  "unsupported operand type(s) for ** or pow(): 'list' and 'int'"),
     ('[] / 3',   "unsupported operand type(s) for /: 'list' and 'int'"),
     ('[] // 3',  "unsupported operand type(s) for //: 'list' and 'int'"),
     ('[] % 3',   "unsupported operand type(s) for %: 'list' and 'int'"),
@@ -77,7 +80,7 @@ from .helpers import prove_f
     ('{1} - 3',  "unsupported operand type(s) for -: 'set' and 'int'"),
     ('{1} @ 3',  "unsupported operand type(s) for @: 'set' and 'int'"),
     ('{1} * 3',  "unsupported operand type(s) for *: 'set' and 'int'"),
-    ('{1} ** 3', "unsupported operand type(s) for **: 'set' and 'int'"),
+    ('{1} ** 3', "unsupported operand type(s) for ** or pow(): 'set' and 'int'"),
     ('{1} / 3',  "unsupported operand type(s) for /: 'set' and 'int'"),
     ('{1} // 3', "unsupported operand type(s) for //: 'set' and 'int'"),
     ('{1} % 3',  "unsupported operand type(s) for %: 'set' and 'int'"),
@@ -92,15 +95,17 @@ from .helpers import prove_f
     ('True - []',       "unsupported operand type(s) for -: 'bool' and 'list'"),
     ('True @ []',       "unsupported operand type(s) for @: 'bool' and 'list'"),
     ('True * set()',    "unsupported operand type(s) for *: 'bool' and 'set'"),
-    ('True ** []',      "unsupported operand type(s) for **: 'bool' and 'list'"),
+    ('True ** []',      "unsupported operand type(s) for ** or pow(): 'bool' and 'list'"),
     ('True / []',       "unsupported operand type(s) for /: 'bool' and 'list'"),
     ('True // []',      "unsupported operand type(s) for //: 'bool' and 'list'"),
     ('True % []',       "unsupported operand type(s) for %: 'bool' and 'list'"),
     ('True + []',       "unsupported operand type(s) for +: 'bool' and 'list'"),
 
+    # built-in functions
+    ('len(12)',     "object of type 'int' has no len()"),
 ])
 def test_type_error__table(prefer_real, expr, err):
-    with pytest.raises(TypeError):
+    with pytest.raises(TypeError, match=re.escape(err)):
         eval(expr)
     proof = prove_f(f"""
         def f():

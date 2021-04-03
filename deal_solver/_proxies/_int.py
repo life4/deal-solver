@@ -91,7 +91,7 @@ class IntSort(ProxySort):
     def m_mul(self, other: ProxySort, ctx: 'Context') -> 'ProxySort':
         if isinstance(other, registry.bool):
             other = other.as_int
-        if isinstance(other, registry.str):
+        if isinstance(other, (registry.str, registry.list)):
             return other.m_mul(self, ctx=ctx)
         if isinstance(other, (registry.int, registry.float)):
             return self._math_op(other=other, handler=operator.__mul__, ctx=ctx)
@@ -101,7 +101,7 @@ class IntSort(ProxySort):
         if isinstance(other, registry.bool):
             other = other.as_int
         if not isinstance(other, (registry.int, registry.float)):
-            return self._bad_bin_op(other, op='**', ctx=ctx)
+            return self._bad_bin_op(other, op='** or pow()', ctx=ctx)
         return self._math_op(other=other, handler=operator.__pow__, ctx=ctx)
 
     def m_truediv(self, other: ProxySort, ctx: 'Context') -> 'FloatSort':

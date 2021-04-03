@@ -42,7 +42,6 @@ def test_timeout():
     ('hello',           'cannot resolve name hello'),
     ('hello.world',     'cannot resolve attribute hello.world'),
     ('[1,2,3](2)',      'list object is not callable'),
-    ('len(12)',         'int.__len__ is not defined'),
     ('int([])',         'cannot convert list to int'),
     ('float([])',       'cannot convert list to float'),
     ('13 in 123',       'int.__contains__ is not defined'),

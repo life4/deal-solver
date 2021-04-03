@@ -76,20 +76,30 @@ class StrSort(ProxySort):
             start = z3.IntVal(0)
         return registry.int(expr=z3.IndexOf(self.expr, unwrap(other), unwrap(start)))
 
-    @property
-    def length(self) -> 'IntSort':
+    def m_len(self, ctx: 'Context') -> 'IntSort':
         assert self.expr is not None
         return registry.int(expr=z3.Length(self.expr))
 
     def m_add(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         if not isinstance(other, registry.str):
-            return self._bad_bin_op(other, op='+', ctx=ctx)
+            msg = 'can only concatenate str (not "{}") to {}'
+            msg = msg.format(other.type_name, self.type_name)
+            ctx.add_exception(TypeError, msg)
+            return self
         return self._math_op(other=other, handler=operator.__add__, ctx=ctx)
 
     def m_mul(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         if not isinstance(other, registry.int):
-            return self._bad_bin_op(other, op='*', ctx=ctx)
+            msg = "can't multiply sequence by non-int of type '{}'"
+            msg = msg.format(other.type_name)
+            ctx.add_exception(TypeError, msg)
+            return self
         raise UnsupportedError('cannot multiply str')
+
+    def m_mod(self, other: 'ProxySort', ctx: 'Context') -> 'StrSort':
+        msg = 'not all arguments converted during string formatting'
+        ctx.add_exception(TypeError, msg)
+        return self
 
     def m_sub(self, other: 'ProxySort', ctx: 'Context') -> 'StrSort':
         return self._bad_bin_op(other, op='-', ctx=ctx)

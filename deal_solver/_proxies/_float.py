@@ -89,7 +89,7 @@ class FloatSort(ProxySort):
         if isinstance(other, registry.bool):
             other = other.as_int
         if not isinstance(other, (registry.int, registry.float)):
-            return self._bad_bin_op(other, op='**', ctx=ctx)
+            return self._bad_bin_op(other, op='** or pow()', ctx=ctx)
         return self._math_op(other=other, handler=operator.__pow__, ctx=ctx)
 
     def m_floordiv(self, other: ProxySort, ctx: 'Context') -> 'FloatSort':
@@ -120,6 +120,11 @@ class FloatSort(ProxySort):
         return result
 
     def m_mul(self, other: ProxySort, ctx: 'Context') -> 'FloatSort':
+        if isinstance(other, (registry.str, registry.list)):
+            msg = "can't multiply sequence by non-int of type '{}'"
+            msg = msg.format(self.type_name)
+            ctx.add_exception(TypeError, msg)
+            return self
         if isinstance(other, registry.bool):
             other = other.as_int
         if not isinstance(other, (registry.float, registry.int)):

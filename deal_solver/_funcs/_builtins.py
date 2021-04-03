@@ -102,7 +102,7 @@ def builtins_ord(val: ProxySort, ctx: Context, **kwargs) -> IntSort:
     ctx.exceptions.add(ExceptionInfo(
         name='TypeError',
         names={'TypeError', 'Exception', 'BaseException'},
-        cond=val.length.m_ne(IntSort.val(1), ctx=ctx),
+        cond=val.m_len(ctx=ctx).m_ne(IntSort.val(1), ctx=ctx),
         message='ord() expected a character, but string of length N found',
     ))
     bv = z3.BitVec(random_name('ord_bv'), 8)
@@ -116,8 +116,8 @@ def builtins_abs(a: ProxySort, **kwargs) -> ProxySort:
 
 
 @register('builtins.len')
-def builtins_len(items: ProxySort, **kwargs) -> IntSort:
-    return items.length
+def builtins_len(items: ProxySort, ctx: 'Context', **kwargs) -> IntSort:
+    return items.m_len(ctx=ctx)
 
 
 @register('builtins.int')

@@ -107,11 +107,13 @@ class ProxySort:
     def as_fp(self) -> 'FPSort':
         raise UnsupportedError('cannot convert {} to float'.format(self.type_name))
 
-    @property
-    def length(self) -> 'IntSort':
+    def m_len(self, ctx: 'Context') -> 'IntSort':
         """len(self)
         """
-        raise UnsupportedError('{}.__len__ is not defined'.format(self.type_name))
+        from ._registry import registry
+        msg = "object of type '{}' has no len()".format(self.type_name)
+        ctx.add_exception(TypeError, msg)
+        return registry.int(z3.IntVal(0))
 
     def get_item(self, item, ctx: 'Context') -> 'ProxySort':
         """self[item]
@@ -241,7 +243,7 @@ class ProxySort:
     def m_pow(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         """self ** other
         """
-        return self._bad_bin_op(other, op='**', ctx=ctx)
+        return self._bad_bin_op(other, op='** or pow()', ctx=ctx)
 
     def m_matmul(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         """self @ other
