@@ -135,6 +135,20 @@ class Theorem:
         eval_stmt(node=self._func, ctx=self._context)
         contracts = eval_contracts(func=self._func, ctx=self._context)
 
+        for exc in self._context.exceptions:
+            if exc.names & contracts.raises:
+                continue
+            descr = exc.name
+            if exc.message:
+                descr += ': {}'.format(exc.message)
+            yield Constraint(
+                description=descr,
+                condition=and_expr(
+                    *contracts.pre,
+                    *self._context.given,
+                    exc.cond,
+                ),
+            )
         for constraint in self._context.expected:
             yield Constraint(
                 description='assertion',
@@ -151,20 +165,6 @@ class Theorem:
                     *contracts.pre,
                     *self._context.given,
                     not_expr(constraint),
-                ),
-            )
-        for exc in self._context.exceptions:
-            if exc.names & contracts.raises:
-                continue
-            descr = exc.name
-            if exc.message:
-                descr += ': {}'.format(exc.message)
-            yield Constraint(
-                description=descr,
-                condition=and_expr(
-                    *contracts.pre,
-                    *self._context.given,
-                    exc.cond,
                 ),
             )
 

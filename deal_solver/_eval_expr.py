@@ -112,9 +112,7 @@ def eval_bool_op(node: astroid.BoolOp, ctx: Context) -> ProxySort:
     subnodes = []
     for subnode in node.values:
         right = eval_expr(node=subnode, ctx=ctx)
-        if isinstance(right, ProxySort):
-            right = right.as_bool
-        subnodes.append(right)
+        subnodes.append(right.as_bool)
     return operation(*subnodes)
 
 

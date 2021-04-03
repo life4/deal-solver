@@ -113,7 +113,7 @@ class FloatSort(ProxySort):
                 default=minus_one,
             )
         if self.is_fp:
-            nan = z3.fpNaN(self.sort())
+            nan = z3.fpNaN(FPSort.sort())
             result = if_expr(z3.fpIsInf(self.expr), nan, result)
             result = if_expr(z3.fpIsZero(self.expr), zero, result)
 
@@ -159,10 +159,6 @@ class RealSort(FloatSort):
     def __init__(self, expr) -> None:
         assert z3.is_real(expr), f'expected real, given {type(expr)}'
         self.expr = expr
-
-    @classmethod
-    def sort(cls, ctx: z3.Context = None):
-        return z3.RealSort(ctx=ctx)
 
     @classmethod
     def val(cls, x: float, ctx: z3.Context = None):
