@@ -11,6 +11,8 @@ vars:
   ISORT_ENV:  "{{.VENVS}}tests"
 
   TESTS_PATH: tests/
+  NPROC:
+    sh: nproc
 
 env:
   FLIT_ROOT_INSTALL: "1"
@@ -82,7 +84,7 @@ tasks:
           ENV: "{{.PYTEST_ENV}}"
           EXTRA: tests
     cmds:
-      - "{{.PYTEST_ENV}}/bin/pytest {{.ARGS}} {{.TESTS_PATH}}"
+      - "{{.PYTEST_ENV}}/bin/pytest -n {{.NPROC}} {{.ARGS}} {{.TESTS_PATH}}"
 
   isort:run:
     sources:
