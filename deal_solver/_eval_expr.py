@@ -12,8 +12,8 @@ from ._context import Context
 from ._exceptions import UnsupportedError
 from ._funcs import FUNCTIONS
 from ._proxies import (
-    FloatSort, LambdaSort, ListSort, ProxySort, SetSort, and_expr,
-    FuncSort, if_expr, not_expr, or_expr, random_name, unwrap, wrap,
+    FloatSort, FuncSort, LambdaSort, ListSort, ProxySort, SetSort,
+    and_expr, if_expr, not_expr, or_expr, random_name, unwrap, wrap,
 )
 from ._registry import HandlersRegistry
 

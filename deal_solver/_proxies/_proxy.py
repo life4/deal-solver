@@ -7,7 +7,7 @@ import z3
 
 # app
 from .._exceptions import UnsupportedError
-from ._funcs import unwrap, wrap, not_expr
+from ._funcs import not_expr, unwrap, wrap
 
 
 if typing.TYPE_CHECKING:
@@ -117,6 +117,7 @@ class ProxySort:
     def m_len(self, ctx: 'Context') -> 'IntSort':
         """len(self)
         """
+        # app
         from ._registry import registry
         msg = "object of type '{}' has no len()".format(self.type_name)
         ctx.add_exception(TypeError, msg)
@@ -141,6 +142,7 @@ class ProxySort:
     def m_contains(self, item, ctx: 'Context') -> 'BoolSort':
         """item in self
         """
+        # app
         from ._registry import registry
         msg = "argument of type '{}' is not iterable".format(self.type_name)
         ctx.add_exception(TypeError, msg)

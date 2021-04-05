@@ -4,7 +4,9 @@ import typing
 # external
 import astroid
 
+# app
 from ._proxy import ProxySort
+
 
 if typing.TYPE_CHECKING:
     # app
