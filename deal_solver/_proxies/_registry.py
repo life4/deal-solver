@@ -6,6 +6,7 @@ if typing.TYPE_CHECKING:
     # app
     from ._bool import BoolSort
     from ._float import FloatSort
+    from ._func import FuncSort
     from ._int import IntSort
     from ._list import ListSort
     from ._proxy import ProxySort
@@ -24,6 +25,7 @@ class Registry:
     list: typing.Type['ListSort']
     set: typing.Type['SetSort']
     str: typing.Type['StrSort']
+    func: typing.Type['FuncSort']
 
     _proxies: typing.Dict[Str, typing.Type['ProxySort']]
 

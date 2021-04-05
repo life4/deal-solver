@@ -13,7 +13,7 @@ from ._exceptions import UnsupportedError
 from ._funcs import FUNCTIONS
 from ._proxies import (
     FloatSort, LambdaSort, ListSort, ProxySort, SetSort, and_expr,
-    if_expr, not_expr, or_expr, random_name, unwrap, wrap,
+    FuncSort, if_expr, not_expr, or_expr, random_name, unwrap, wrap,
 )
 from ._registry import HandlersRegistry
 
@@ -259,17 +259,17 @@ def eval_name(node: astroid.Name, ctx: Context) -> ProxySort:
     # resolve built-in functions
     value = FUNCTIONS.get('builtins.' + node.name)
     if value is not None:
-        return value
+        return FuncSort(value)
 
     raise UnsupportedError('cannot resolve name', node.name)
 
 
 @eval_expr.register(astroid.Attribute)
-def eval_attr(node: astroid.Attribute, ctx: Context):
+def eval_attr(node: astroid.Attribute, ctx: Context) -> ProxySort:
     try:
         expr_ref = eval_expr(node=node.expr, ctx=ctx)
     except UnsupportedError:
-        # resolve functions
+        # resolve functions defined outside of the scope
         definitions = infer(node)
         if not definitions:
             raise UnsupportedError('cannot resolve attribute', node.as_string())
@@ -280,18 +280,17 @@ def eval_attr(node: astroid.Attribute, ctx: Context):
             func = FUNCTIONS.get(target_name)
             if func is None:
                 raise UnsupportedError('no definition for', target_name)
-            return func
+            return FuncSort(func)
 
-        # resolve constants
+        # resolve constants defined outside of the scope
         return eval_expr(node=target, ctx=ctx)
 
-    # resolve methods
-    if isinstance(expr_ref, ProxySort):
-        target = 'builtins.{}.{}'.format(expr_ref.type_name, node.attrname)
-        func = FUNCTIONS.get(target)
-        if func is None:
-            raise UnsupportedError('no definition for', target)
-        return partial(func, expr_ref)
+    # resolve methods for variables defined in the scope
+    target = 'builtins.{}.{}'.format(expr_ref.type_name, node.attrname)
+    func = FUNCTIONS.get(target)
+    if func is None:
+        raise UnsupportedError('no definition for', target)
+    return FuncSort(partial(func, expr_ref))
 
 
 @eval_expr.register(astroid.UnaryOp)
@@ -335,15 +334,13 @@ def eval_call(node: astroid.Call, ctx: Context) -> ProxySort:
     value = eval_expr(node=node.func, ctx=ctx)
     if isinstance(value, astroid.FunctionDef):
         return _call_function(node=value, ctx=ctx, call_args=call_args)
-    if not callable(value):
-        raise UnsupportedError(value.type_name, 'object is not callable')
 
     if isinstance(node.func, astroid.Attribute):
         var_name = node.func.expr.as_string()
     else:
         var_name = node.func.as_string()
 
-    return value(*call_args, ctx=ctx, var_name=var_name)
+    return value.m_call(*call_args, ctx=ctx, var_name=var_name)
 
 
 def _call_function(node: astroid.FunctionDef, ctx: Context, call_args=typing.List[z3.Z3PPObject]):
@@ -372,7 +369,7 @@ def _call_function(node: astroid.FunctionDef, ctx: Context, call_args=typing.Lis
 
 
 @eval_expr.register(astroid.Lambda)
-def eval_lambda(node: astroid.Lambda, ctx: Context):
+def eval_lambda(node: astroid.Lambda, ctx: Context) -> LambdaSort:
     return LambdaSort(
         ctx=ctx,
         args=node.args,

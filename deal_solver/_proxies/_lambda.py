@@ -4,18 +4,24 @@ import typing
 # external
 import astroid
 
+from ._proxy import ProxySort
 
 if typing.TYPE_CHECKING:
     # app
     from .._context import Context
 
 
-class LambdaSort(typing.NamedTuple):
+class LambdaSort(ProxySort):
     ctx: 'Context'
     args: astroid.Arguments
     body: astroid.Expr
 
-    def __call__(self, *values, **kwargs):
+    def __init__(self, *, ctx: 'Context', args: astroid.Arguments, body) -> None:
+        self.ctx = ctx
+        self.args = args
+        self.body = body
+
+    def m_call(self, *values, **kwargs) -> ProxySort:
         # app
         from .._eval_expr import eval_expr
 

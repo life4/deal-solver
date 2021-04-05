@@ -118,6 +118,13 @@ from .helpers import prove_f
     ('True % []',       "unsupported operand type(s) for %: 'bool' and 'list'"),
     ('True + []',       "unsupported operand type(s) for +: 'bool' and 'list'"),
 
+    # not callable
+    ('[](2)',   "'list' object is not callable"),
+    ('""(2)',   "'str' object is not callable"),
+    ('1(2)',    "'int' object is not callable"),
+    ('1.1(2)',  "'float' object is not callable"),
+    ('True(2)', "'bool' object is not callable"),
+
     # built-in functions
     ('len(12)',     "object of type 'int' has no len()"),
 ])

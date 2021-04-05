@@ -107,6 +107,13 @@ class ProxySort:
     def as_fp(self) -> 'FPSort':
         raise UnsupportedError('cannot convert {} to float'.format(self.type_name))
 
+    def m_call(self, *args, ctx: 'Context', var_name: str, **kwargs) -> 'ProxySort':
+        """self(*args, **kwargs)
+        """
+        msg = "'{}' object is not callable".format(self.type_name)
+        ctx.add_exception(TypeError, msg)
+        return self
+
     def m_len(self, ctx: 'Context') -> 'IntSort':
         """len(self)
         """
