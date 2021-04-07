@@ -44,8 +44,15 @@ class PatternSort(ProxySort):
 
     @classmethod
     def _parse_token(cls, t_type: int, t_args) -> 'PatternSort':
+        re_all = z3.Range(
+            z3.Unit(z3.BitVecVal(0, 8)),
+            z3.Unit(z3.BitVecVal(255, 8)),
+        )
+
         if t_type == sre_constants.LITERAL:
             return z3.Re(chr(t_args))
+        if t_type == sre_constants.NOT_LITERAL:
+            return z3.Intersect(re_all, z3.Complement(z3.Re(chr(t_args))))
         if t_type == sre_constants.RANGE:
             lo, hi = t_args
             return z3.Range(chr(lo), chr(hi))
@@ -54,7 +61,10 @@ class PatternSort(ProxySort):
             for st_type, st_args in t_args:
                 subpatterns.append(cls._parse_token(st_type, st_args))
             return z3.Union(*subpatterns)
+        if t_type == sre_constants.ANY and t_args is None:
+            return z3.Intersect(re_all, z3.Complement(z3.Re('\n')))
         if t_type == sre_constants.CATEGORY:
+            # inclusive
             if t_args == sre_constants.CATEGORY_DIGIT:
                 return z3.Range('0', '9')
             if t_args == sre_constants.CATEGORY_WORD:
@@ -64,11 +74,18 @@ class PatternSort(ProxySort):
                 )
             if t_args == sre_constants.CATEGORY_SPACE:
                 return z3.Union(*(z3.Re(ch) for ch in string.whitespace))
-        if t_type == sre_constants.ANY and t_args is None:
-            return z3.Intersect(
-                z3.Range(z3.Unit(z3.BitVecVal(0, 8)), z3.Unit(z3.BitVecVal(255, 8))),
-                z3.Complement(z3.Re('\n')),
-            )
+
+            # exclusive
+            sub_re = None
+            if t_args == sre_constants.CATEGORY_NOT_DIGIT:
+                sub_re = cls._parse_token(t_type, sre_constants.CATEGORY_DIGIT)
+            if t_args == sre_constants.CATEGORY_NOT_WORD:
+                sub_re = cls._parse_token(t_type, sre_constants.CATEGORY_WORD)
+            if t_args == sre_constants.CATEGORY_NOT_SPACE:
+                sub_re = cls._parse_token(t_type, sre_constants.CATEGORY_SPACE)
+            if sub_re is not None:
+                return z3.Intersect(re_all, z3.Complement(sub_re))
+
         raise UnsupportedError('cannot interpret regexp')
 
     def fullmatch(self, string: ProxySort, ctx: 'Context') -> 'BoolSort':

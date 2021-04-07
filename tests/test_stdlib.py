@@ -128,6 +128,10 @@ def test_os_path_module(check: str) -> None:
     r're.fullmatch(r"\d", "1")',
     r'not re.fullmatch(r"\d", "d")',
 
+    # not digit
+    r'not re.fullmatch(r"\D", "1")',
+    r're.fullmatch(r"\D", "d")',
+
     # whitespace
     r're.fullmatch(r"\s", " ")',
     r're.fullmatch(r"\s", "	")',
@@ -153,6 +157,12 @@ def test_os_path_module(check: str) -> None:
     're.fullmatch(r"[a-c]", "c")',
     'not re.fullmatch(r"[a-c]", "d")',
     'not re.fullmatch(r"[a-c]", "aa")',
+
+    # not a literal
+    're.fullmatch(r"[^a]", "b")',
+    'not re.fullmatch(r"[^a]", "a")',
+    'not re.fullmatch(r"[^a]", "ab")',
+    'not re.fullmatch(r"[^a]", "bc")',
 ])
 def test_re_module(check: str) -> None:
     text = """
