@@ -9,6 +9,7 @@ if typing.TYPE_CHECKING:
     from ._func import FuncSort
     from ._int import IntSort
     from ._list import ListSort
+    from ._pattern import PatternSort
     from ._proxy import ProxySort
     from ._set import SetSort
     from ._str import StrSort
@@ -19,13 +20,19 @@ Str = str
 
 
 class Registry:
+    # built-ins
     bool: typing.Type['BoolSort']
     int: typing.Type['IntSort']
     float: typing.Type['FloatSort']
     list: typing.Type['ListSort']
     set: typing.Type['SetSort']
     str: typing.Type['StrSort']
+
+    # internal
     func: typing.Type['FuncSort']
+
+    # stdlib
+    pattern: typing.Type['PatternSort']
 
     _proxies: typing.Dict[Str, typing.Type['ProxySort']]
 

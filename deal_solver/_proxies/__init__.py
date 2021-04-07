@@ -6,6 +6,7 @@ from ._funcs import and_expr, if_expr, not_expr, or_expr, random_name, unwrap, w
 from ._int import IntSort
 from ._lambda import LambdaSort
 from ._list import ListSort
+from ._pattern import PatternSort
 from ._proxy import ProxySort
 from ._set import SetSort
 from ._str import StrSort
@@ -30,4 +31,5 @@ __all__ = [
     'ListSort',
     'SetSort',
     'StrSort',
+    'PatternSort',
 ]

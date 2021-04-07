@@ -99,3 +99,68 @@ def test_os_path_module(check: str) -> None:
     text = text.format(check)
     theorem = prove_f(text)
     assert theorem.conclusion is Conclusion.OK
+
+
+@pytest.mark.parametrize('check', [
+    # empty
+    r're.fullmatch("", "")',
+    r'not re.fullmatch("", "a")',
+
+    # exact match
+    r're.fullmatch("ab", "ab")',
+    r'not re.fullmatch("ab", "a")',
+    r'not re.fullmatch("ab", "b")',
+    r'not re.fullmatch("a", "ab")',
+    r'not re.fullmatch("b", "ab")',
+
+    # dot
+    r're.fullmatch(".", "a")',
+    r'not re.fullmatch(".", "aa")',
+    r'not re.fullmatch(".", "\n")',
+
+    # or
+    r're.fullmatch("a|b", "a")',
+    r're.fullmatch("a|b", "b")',
+    r'not re.fullmatch("a|b", "c")',
+    r'not re.fullmatch("a|b", "ab")',
+
+    # digit
+    r're.fullmatch(r"\d", "1")',
+    r'not re.fullmatch(r"\d", "d")',
+
+    # whitespace
+    r're.fullmatch(r"\s", " ")',
+    r're.fullmatch(r"\s", "	")',
+    r'not re.fullmatch(r"\s", "s")',
+
+    # newline
+    r're.fullmatch(r"\n", "\n")',
+    r'not re.fullmatch(r"\n", " ")',
+
+    # letter
+    r're.fullmatch(r"\w", "a")',
+    r're.fullmatch(r"\w", "g")',
+    r're.fullmatch(r"\w", "z")',
+    r're.fullmatch(r"\w", "A")',
+    r're.fullmatch(r"\w", "G")',
+    r're.fullmatch(r"\w", "Z")',
+    r'not re.fullmatch(r"\w", " ")',
+    r'not re.fullmatch(r"\w", "?")',
+
+    # range
+    're.fullmatch(r"[a-c]", "a")',
+    're.fullmatch(r"[a-c]", "b")',
+    're.fullmatch(r"[a-c]", "c")',
+    'not re.fullmatch(r"[a-c]", "d")',
+    'not re.fullmatch(r"[a-c]", "aa")',
+])
+def test_re_module(check: str) -> None:
+    text = """
+        import re
+
+        def f():
+            assert {}
+    """
+    text = text.format(check)
+    theorem = prove_f(text)
+    assert theorem.conclusion is Conclusion.OK

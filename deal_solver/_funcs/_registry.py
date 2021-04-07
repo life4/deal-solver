@@ -11,6 +11,7 @@ def init_all():
     import_module('._math', package=__package__)
     import_module('._os_path', package=__package__)
     import_module('._random', package=__package__)
+    import_module('._re', package=__package__)
     import_module('._str', package=__package__)
 
 
