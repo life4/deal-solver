@@ -23,6 +23,7 @@ T = typing.TypeVar('T', bound='ProxySort')
 
 
 class ProxySort:
+    module_name: str = 'builtins'
     type_name: str
     expr: z3.Z3PPObject
 

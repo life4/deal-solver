@@ -103,15 +103,15 @@ def test_os_path_module(check: str) -> None:
 
 @pytest.mark.parametrize('check', [
     # empty
-    r're.fullmatch("", "")',
-    r'not re.fullmatch("", "a")',
+    're.fullmatch("", "")',
+    'not re.fullmatch("", "a")',
 
     # exact match
-    r're.fullmatch("ab", "ab")',
-    r'not re.fullmatch("ab", "a")',
-    r'not re.fullmatch("ab", "b")',
-    r'not re.fullmatch("a", "ab")',
-    r'not re.fullmatch("b", "ab")',
+    're.fullmatch("ab", "ab")',
+    'not re.fullmatch("ab", "a")',
+    'not re.fullmatch("ab", "b")',
+    'not re.fullmatch("a", "ab")',
+    'not re.fullmatch("b", "ab")',
 
     # dot
     r're.fullmatch(".", "a")',
@@ -119,10 +119,10 @@ def test_os_path_module(check: str) -> None:
     r'not re.fullmatch(".", "\n")',
 
     # or
-    r're.fullmatch("a|b", "a")',
-    r're.fullmatch("a|b", "b")',
-    r'not re.fullmatch("a|b", "c")',
-    r'not re.fullmatch("a|b", "ab")',
+    're.fullmatch("a|b", "a")',
+    're.fullmatch("a|b", "b")',
+    'not re.fullmatch("a|b", "c")',
+    'not re.fullmatch("a|b", "ab")',
 
     # digit
     r're.fullmatch(r"\d", "1")',
@@ -163,6 +163,20 @@ def test_os_path_module(check: str) -> None:
     'not re.fullmatch(r"[^a]", "a")',
     'not re.fullmatch(r"[^a]", "ab")',
     'not re.fullmatch(r"[^a]", "bc")',
+
+    # re.match
+    're.match("[ab]", "a")',
+    're.match("[ab]", "ac")',
+    'not re.match("[ab]", "c")',
+
+    # re.Pattern.fullmatch
+    're.compile("[ab]").fullmatch("a")',
+    'not re.compile("[ab]").fullmatch("c")',
+
+    # re.Pattern.match
+    're.compile("[ab]").match("a")',
+    're.compile("[ab]").match("ac")',
+    'not re.compile("[ab]").match("c")',
 ])
 def test_re_module(check: str) -> None:
     text = """

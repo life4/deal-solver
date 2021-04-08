@@ -286,7 +286,11 @@ def eval_attr(node: astroid.Attribute, ctx: Context) -> ProxySort:
         return eval_expr(node=target, ctx=ctx)
 
     # resolve methods for variables defined in the scope
-    target = 'builtins.{}.{}'.format(expr_ref.type_name, node.attrname)
+    target = '{m}.{t}.{a}'.format(
+        m=expr_ref.module_name,
+        t=expr_ref.type_name,
+        a=node.attrname,
+    )
     func = FUNCTIONS.get(target)
     if func is None:
         raise UnsupportedError('no definition for', target)

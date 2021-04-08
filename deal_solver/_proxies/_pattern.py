@@ -17,18 +17,22 @@ if typing.TYPE_CHECKING:
 
 @registry.add
 class PatternSort(ProxySort):
-    expr: z3.ReRef
+    module_name = 're'
     type_name = 'Pattern'
 
-    def __init__(self, expr) -> None:
+    expr: z3.ReRef
+    pattern: str
+
+    def __init__(self, expr, pattern: str) -> None:
         assert z3.is_re(expr)
         self.expr = expr
+        self.pattern = pattern
 
     @classmethod
     def from_str(cls, pattern: str, flags: int) -> 'PatternSort':
         parsed = sre_parse.parse(pattern, flags=flags)
         expr = cls._parse_pattern(parsed)
-        return cls(expr=expr)
+        return cls(expr=expr, pattern=pattern)
 
     @classmethod
     def _parse_pattern(cls, pattern: sre_parse.SubPattern):
@@ -91,5 +95,18 @@ class PatternSort(ProxySort):
     def fullmatch(self, string: ProxySort, ctx: 'Context') -> 'BoolSort':
         if not isinstance(string, registry.str):
             ctx.add_exception(TypeError, "expected string or bytes-like object")
-        print(z3.InRe(string.expr, self.expr))
         return registry.bool(expr=z3.InRe(string.expr, self.expr))
+
+    def match(self, string: ProxySort, ctx: 'Context') -> 'BoolSort':
+        if not isinstance(string, registry.str):
+            ctx.add_exception(TypeError, "expected string or bytes-like object")
+        rex = z3.Concat(
+            self.expr,
+            z3.Star(
+                z3.Range(
+                    z3.Unit(z3.BitVecVal(0, 8)),
+                    z3.Unit(z3.BitVecVal(255, 8)),
+                )
+            ),
+        )
+        return registry.bool(expr=z3.InRe(string.expr, rex))
