@@ -28,14 +28,14 @@ CONSTS = {
 }
 COMAPARISON: typing.Mapping[str, str]
 COMAPARISON = {
-    '<':  'm_lt',
-    '<=': 'm_le',
-    '>':  'm_gt',
-    '>=': 'm_ge',
-    '==': 'm_eq',
-    '!=': 'm_ne',
-    'in': 'm_in',
-    'not in': 'm_not_in',
+    '<':  '__lt__',
+    '<=': '__le__',
+    '>':  '__gt__',
+    '>=': '__ge__',
+    '==': '__eq__',
+    '!=': '__ne__',
+    'in': 'in',
+    'not in': 'not in',
 }
 BIN_OPERATIONS: typing.Mapping[str, str]
 BIN_OPERATIONS = {
@@ -97,8 +97,8 @@ def eval_compare(node: astroid.Compare, ctx: Context) -> ProxySort:
 
         right = wrap(eval_expr(node=right_node, ctx=ctx))
         # TODO: proper chain
-        method = getattr(left, op_name)
-        return method(right, ctx=ctx)
+        method = left.m_getattr(op_name, ctx=ctx)
+        return method.m_call(right, ctx=ctx)
     raise RuntimeError('unreachable')  # pragma: no cover
 
 

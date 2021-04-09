@@ -70,7 +70,17 @@ class ProxySort:
     def is_fp(self) -> bool:
         return False
 
-    # abstract methods
+    @methods.add(name='__getattr__')
+    def m_getattr(self, name: str, ctx: 'Context') -> 'ProxySort':
+        """self.name
+        """
+        method = self.methods.get(name)
+        if method is None:
+            msg = "type object '{}' has no attribute '{}'"
+            msg.format(self.type_name, name)
+            ctx.add_exception(AttributeError, msg)
+            return self
+        return method.with_obj(self)
 
     @methods.add(name='__bool__')
     def m_bool(self, ctx: 'Context') -> 'BoolSort':
@@ -109,7 +119,7 @@ class ProxySort:
         raise UnsupportedError('cannot convert {} to float'.format(self.type_name))
 
     @methods.add(name='__call__')
-    def m_call(self, *args, ctx: 'Context', var_name: str, **kwargs) -> 'ProxySort':
+    def m_call(self, *args, ctx: 'Context', **kwargs) -> 'ProxySort':
         """self(*args, **kwargs)
         """
         msg = "'{}' object is not callable".format(self.type_name)

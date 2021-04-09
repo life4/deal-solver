@@ -31,10 +31,10 @@ class Method(ProxySort):
         )
 
     @methods.add(name='__call__')
-    def m_call(self, *args, ctx: 'Context', var_name: str, **kwargs) -> ProxySort:
+    def m_call(self, *args, ctx: 'Context', var_name: str = '', **kwargs) -> ProxySort:
         assert self.obj is not None
         result = self.impl(self.obj, *args, ctx=ctx, **kwargs)
-        if not self.pure:
+        if not self.pure and var_name:
             if not var_name.isidentifier():
                 raise UnsupportedError('cannot modify attribute', var_name)
             ctx.scope.set(name=var_name, value=result)
