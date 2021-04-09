@@ -38,7 +38,6 @@ def test_timeout():
 
 @pytest.mark.parametrize('expr, err', [
     # actual errors
-    ('[1,2,3,4].hello', 'no definition for builtins.list.hello'),
     ('hello',           'cannot resolve name hello'),
     ('hello.world',     'cannot resolve attribute hello.world'),
     ('int([])',         'cannot convert list to int'),
@@ -54,7 +53,6 @@ def test_timeout():
     ('[1] * 3',             'cannot multiply list'),
     ('[1,2,3,4][::2]',      'slice step is not supported'),
     ('str(12.34)',          'cannot convert float to str'),
-    ('(4).bit_length()',    'no definition for builtins.int.bit_length'),
     ('min([], default=13)', 'keyword function arguments are unsupported'),
     ('[1 for i in "12" for j in "34"]', 'to many loops inside list compr'),
 ])

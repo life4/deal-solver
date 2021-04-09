@@ -281,15 +281,7 @@ def eval_attr(node: astroid.Attribute, ctx: Context) -> ProxySort:
         # resolve constants defined outside of the scope
         return eval_expr(node=target, ctx=ctx)
 
-    method = expr_ref.methods.get(node.attrname)
-    if method is None:
-        target = '{m}.{t}.{a}'.format(
-            m=expr_ref.module_name,
-            t=expr_ref.type_name,
-            a=node.attrname,
-        )
-        raise UnsupportedError('no definition for', target)
-    return method.with_obj(expr_ref)
+    return expr_ref.m_getattr(node.attrname, ctx=ctx)
 
 
 @eval_expr.register(astroid.UnaryOp)

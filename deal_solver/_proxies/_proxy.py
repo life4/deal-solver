@@ -76,8 +76,8 @@ class ProxySort:
         """
         method = self.methods.get(name)
         if method is None:
-            msg = "type object '{}' has no attribute '{}'"
-            msg.format(self.type_name, name)
+            msg = "'{}' object has no attribute '{}'"
+            msg = msg.format(self.type_name, name)
             ctx.add_exception(AttributeError, msg)
             return self
         return method.with_obj(self)

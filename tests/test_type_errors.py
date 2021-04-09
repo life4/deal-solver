@@ -161,3 +161,17 @@ def test_type_error_bin_op(prefer_real: bool, left: str, op: str, right: str):
     """)
     assert proof.conclusion == Conclusion.FAIL
     assert proof.description.startswith('TypeError')
+
+
+@pytest.mark.parametrize('expr, err', [
+    ('(2).testme', "'int' object has no attribute 'testme'"),
+])
+def test_attribute_error(expr: str, err: str):
+    with pytest.raises(AttributeError, match=re.escape(err)):
+        eval(expr)
+    proof = prove_f(f"""
+        def f():
+            {expr}
+    """)
+    assert proof.conclusion == Conclusion.FAIL
+    assert proof.description == f'AttributeError: {err}'
