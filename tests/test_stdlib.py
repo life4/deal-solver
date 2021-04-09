@@ -137,6 +137,12 @@ def test_os_path_module(check: str) -> None:
     r're.fullmatch(r"\s", "	")',
     r'not re.fullmatch(r"\s", "s")',
 
+    # not whitespace
+    r're.fullmatch(r"\S", "s")',
+    r'not re.fullmatch(r"\S", "ss")',
+    r'not re.fullmatch(r"\S", " ")',
+    r'not re.fullmatch(r"\S", "\n")',
+
     # newline
     r're.fullmatch(r"\n", "\n")',
     r'not re.fullmatch(r"\n", " ")',
@@ -150,6 +156,17 @@ def test_os_path_module(check: str) -> None:
     r're.fullmatch(r"\w", "Z")',
     r'not re.fullmatch(r"\w", " ")',
     r'not re.fullmatch(r"\w", "?")',
+
+    # not letter
+    r're.fullmatch(r"\W", " ")',
+    r're.fullmatch(r"\W", "?")',
+    r'not re.fullmatch(r"\W", "abs")',
+    r'not re.fullmatch(r"\W", "a")',
+    r'not re.fullmatch(r"\W", "g")',
+    r'not re.fullmatch(r"\W", "z")',
+    r'not re.fullmatch(r"\W", "A")',
+    r'not re.fullmatch(r"\W", "G")',
+    r'not re.fullmatch(r"\W", "Z")',
 
     # range
     're.fullmatch(r"[a-c]", "a")',
@@ -188,3 +205,21 @@ def test_re_module(check: str) -> None:
     text = text.format(check)
     theorem = prove_f(text)
     assert theorem.conclusion is Conclusion.OK
+
+
+@pytest.mark.parametrize('expr, err', [
+    # ('re.fullmatch(123, "")', 'first argument must be string or compiled pattern'),
+    ('re.fullmatch("", 123)', 'expected string or bytes-like object'),
+    ('re.match("", 123)', 'expected string or bytes-like object'),
+])
+def test_re_module_type_error(expr: str, err: str) -> None:
+    text = """
+        import re
+
+        def f():
+            assert {}
+    """
+    text = text.format(expr)
+    proof = prove_f(text)
+    assert proof.conclusion is Conclusion.FAIL
+    assert proof.description == f'TypeError: {err}'

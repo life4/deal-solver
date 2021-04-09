@@ -69,7 +69,7 @@ def eval_assign(node: astroid.Assign, ctx: Context) -> None:
         raise UnsupportedError('multiple assignment')
     target = node.targets[0]
     if not isinstance(target, astroid.AssignName):
-        raise UnsupportedError('assignment target', type(target))
+        raise UnsupportedError('cannot assign to', type(target).__name__)
 
     value_ref = eval_expr(node=node.value, ctx=ctx)
     ctx.scope.set(name=target.name, value=value_ref)

@@ -55,11 +55,12 @@ def test_timeout():
     ('str(12.34)',          'cannot convert float to str'),
     ('min([], default=13)', 'keyword function arguments are unsupported'),
     ('[1 for i in "12" for j in "34"]', 'to many loops inside list compr'),
+    ('a, b = 3, 4',         'cannot assign to Tuple'),
 ])
 def test_unsupported(expr, err):
     proof = prove_f(f"""
         def f():
-            assert {expr}
+            {expr}
     """)
     assert proof.conclusion == Conclusion.SKIP
     assert type(proof.error) is UnsupportedError
