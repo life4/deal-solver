@@ -146,6 +146,7 @@ from .helpers import prove_f
     'max(5, 13) == 13',
     'float(4) == 4.0',
     'str(42) == "42"',
+    '(12).conjugate() == 12',
 
     # string functions
     'min("ab", "cd") == "ab"',

@@ -9,6 +9,7 @@ import z3
 from ._funcs import if_expr, unwrap, wrap
 from ._proxy import ProxySort
 from ._registry import registry
+from .._exceptions import UnsupportedError
 
 
 if typing.TYPE_CHECKING:
@@ -220,3 +221,19 @@ class IntSort(ProxySort):
         if isinstance(other, registry.float):
             return self.m_float(ctx=ctx)._comp_op(other=other, handler=handler, ctx=ctx)
         return super()._comp_op(other=other, handler=handler, ctx=ctx)
+
+    @methods.add(name='conjugate')
+    def r_self(self, ctx: 'Context'):
+        return self
+
+    @methods.add(name='as_integer_ratio')
+    @methods.add(name='bit_length')
+    @methods.add(name='denominator')
+    @methods.add(name='from_bytes')
+    @methods.add(name='imag')
+    @methods.add(name='numerator')
+    @methods.add(name='real')
+    @methods.add(name='to_bytes')
+    def unsupported(self, *args, **kwargs):
+        msg = 'unsupported attribute for type {}'.format(self.type_name)
+        raise UnsupportedError(msg)

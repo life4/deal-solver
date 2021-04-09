@@ -56,6 +56,10 @@ def test_timeout():
     ('min([], default=13)', 'keyword function arguments are unsupported'),
     ('[1 for i in "12" for j in "34"]', 'to many loops inside list compr'),
     ('a, b = 3, 4',         'cannot assign to Tuple'),
+
+    # unsupported attributes
+    ('"Ab".swapcase()',     'unsupported attribute for type str'),
+    ('(12).bit_length()',   'unsupported attribute for type int'),
 ])
 def test_unsupported(expr, err):
     proof = prove_f(f"""
