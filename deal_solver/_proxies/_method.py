@@ -9,6 +9,7 @@ if typing.TYPE_CHECKING:
 
 class Method(ProxySort):
     type_name = 'method'
+    methods = ProxySort.methods.copy()
 
     name: str
     impl: typing.Callable
@@ -29,6 +30,7 @@ class Method(ProxySort):
             obj=obj,
         )
 
+    @methods.add(name='__call__')
     def m_call(self, *args, ctx: 'Context', var_name: str, **kwargs) -> ProxySort:
         assert self.obj is not None
         result = self.impl(self.obj, *args, ctx=ctx, **kwargs)

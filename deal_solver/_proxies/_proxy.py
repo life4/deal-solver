@@ -108,6 +108,7 @@ class ProxySort:
     def m_fp(self, ctx: 'Context') -> 'FPSort':
         raise UnsupportedError('cannot convert {} to float'.format(self.type_name))
 
+    @methods.add(name='__call__')
     def m_call(self, *args, ctx: 'Context', var_name: str, **kwargs) -> 'ProxySort':
         """self(*args, **kwargs)
         """
@@ -115,6 +116,7 @@ class ProxySort:
         ctx.add_exception(TypeError, msg)
         return self
 
+    @methods.add(name='__len__')
     def m_len(self, ctx: 'Context') -> 'IntSort':
         """len(self)
         """
@@ -140,6 +142,7 @@ class ProxySort:
         ctx.add_exception(TypeError, msg)
         return self
 
+    @methods.add(name='__contains__')
     def m_contains(self, item, ctx: 'Context') -> 'BoolSort':
         """item in self
         """
@@ -161,41 +164,49 @@ class ProxySort:
         expr = self._binary_op(other=other, handler=handler, ctx=ctx)
         return BoolSort(expr=expr)
 
+    @methods.add(name='__eq__')
     def m_eq(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         """self == other
         """
         return self._comp_op(other=other, handler=operator.__eq__, ctx=ctx)
 
+    @methods.add(name='__ne__')
     def m_ne(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         """self != other
         """
         return self._comp_op(other=other, handler=operator.__ne__, ctx=ctx)
 
+    @methods.add(name='__lt__')
     def m_lt(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         """self < other
         """
         return self._comp_op(other=other, handler=operator.__lt__, ctx=ctx)
 
+    @methods.add(name='__le__')
     def m_le(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         """self <= other
         """
         return self._comp_op(other=other, handler=operator.__le__, ctx=ctx)
 
+    @methods.add(name='__gt__')
     def m_gt(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         """self > other
         """
         return self._comp_op(other=other, handler=operator.__gt__, ctx=ctx)
 
+    @methods.add(name='__ge__')
     def m_ge(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         """self >= other
         """
         return self._comp_op(other=other, handler=operator.__ge__, ctx=ctx)
 
+    @methods.add(name='in')
     def m_in(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         """self in other
         """
         return other.m_contains(self, ctx=ctx)
 
+    @methods.add(name='not in')
     def m_not_in(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         """self in other
         """
@@ -203,66 +214,74 @@ class ProxySort:
 
     # unary operations
 
+    @methods.add(name='__neg__')
     def m_neg(self, ctx: 'Context') -> 'ProxySort':
         """-self
         """
         cls = type(self)
         return cls(expr=-self.expr)
 
+    @methods.add(name='__pos__')
     def m_pos(self, ctx: 'Context') -> 'ProxySort':
         """+self
         """
         cls = type(self)
         return cls(expr=+self.expr)
 
+    @methods.add(name='__inv__')
     def m_inv(self, ctx: 'Context') -> 'ProxySort':
         """~self
         """
-        msg = "bad operand type for unary ~: '{}'"
-        msg = msg.format(self.type_name)
-        ctx.add_exception(TypeError, msg)
-        return self
+        return self._bad_un_op(op='~', ctx=ctx)
 
     # math binary operations
 
     def _math_op(self, other: 'ProxySort', handler: typing.Callable, ctx: 'Context') -> 'ProxySort':
         return wrap(self._binary_op(other=other, handler=handler, ctx=ctx))
 
+    @methods.add(name='__add__')
     def m_add(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         """self + other
         """
         return self._bad_bin_op(other, op='+', ctx=ctx)
 
+    @methods.add(name='__sub__')
     def m_sub(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         """self - other
         """
         return self._bad_bin_op(other, op='-', ctx=ctx)
 
+    @methods.add(name='__mul__')
     def m_mul(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         """self * other
         """
         return self._bad_bin_op(other, op='*', ctx=ctx)
 
+    @methods.add(name='__truediv__')
     def m_truediv(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         """self / other
         """
         return self._bad_bin_op(other, op='/', ctx=ctx)
 
+    @methods.add(name='__floordiv__')
     def m_floordiv(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         """self // other
         """
         return self._bad_bin_op(other, op='//', ctx=ctx)
 
+    @methods.add(name='__mod__')
     def m_mod(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         """self % other
         """
         return self._bad_bin_op(other, op='%', ctx=ctx)
 
+    @methods.add(name='__pow__')
     def m_pow(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         """self ** other
         """
         return self._bad_bin_op(other, op='** or pow()', ctx=ctx)
 
+    @methods.add(name='__matmul__')
     def m_matmul(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         """self @ other
         """
@@ -270,26 +289,31 @@ class ProxySort:
 
     # bitwise binary operations
 
+    @methods.add(name='__and__')
     def m_and(self: T, other: 'ProxySort', ctx: 'Context') -> T:
         """self & other
         """
         return self._bad_bin_op(other, op='&', ctx=ctx)
 
+    @methods.add(name='__or__')
     def m_or(self: T, other: 'ProxySort', ctx: 'Context') -> T:
         """self | other
         """
         return self._bad_bin_op(other, op='|', ctx=ctx)
 
+    @methods.add(name='__xor__')
     def m_xor(self: T, other: 'ProxySort', ctx: 'Context') -> T:
         """self ^ other
         """
         return self._bad_bin_op(other, op='^', ctx=ctx)
 
+    @methods.add(name='__lshift__')
     def m_lshift(self: T, other: 'ProxySort', ctx: 'Context') -> T:
         """self << other
         """
         return self._bad_bin_op(other, op='<<', ctx=ctx)
 
+    @methods.add(name='__rshift__')
     def m_rshift(self: T, other: 'ProxySort', ctx: 'Context') -> T:
         """self >> other
         """

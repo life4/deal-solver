@@ -18,10 +18,12 @@ F = typing.Callable[..., ProxySort]
 class FuncSort(ProxySort):
     type_name = 'function'
     impl: F
+    methods = ProxySort.methods.copy()
 
     def __init__(self, impl: F) -> None:
         self.impl = impl  # type: ignore
 
+    @methods.add(name='__call__')
     def m_call(self, *args, ctx: 'Context', var_name: str, **kwargs) -> 'ProxySort':
         """self(*args, **kwargs)
         """

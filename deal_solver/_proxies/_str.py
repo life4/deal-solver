@@ -55,6 +55,7 @@ class StrSort(ProxySort):
         expr = self.expr != z3.Empty(z3.StringSort())
         return registry.bool(expr=expr)
 
+    @methods.add(name='__contains__')
     def m_contains(self, item: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         if not isinstance(item, registry.str):
             msg = "'in <string>' requires string as left operand, not {}"
@@ -85,10 +86,12 @@ class StrSort(ProxySort):
             start = z3.IntVal(0)
         return registry.int(expr=z3.IndexOf(self.expr, unwrap(other), unwrap(start)))
 
+    @methods.add(name='__len__')
     def m_len(self, ctx: 'Context') -> 'IntSort':
         assert self.expr is not None
         return registry.int(expr=z3.Length(self.expr))
 
+    @methods.add(name='__add__')
     def m_add(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         if not isinstance(other, registry.str):
             msg = 'can only concatenate str (not "{}") to {}'
@@ -97,6 +100,7 @@ class StrSort(ProxySort):
             return self
         return self._math_op(other=other, handler=operator.__add__, ctx=ctx)
 
+    @methods.add(name='__mul__')
     def m_mul(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         if not isinstance(other, registry.int):
             msg = "can't multiply sequence by non-int of type '{}'"
@@ -105,19 +109,20 @@ class StrSort(ProxySort):
             return self
         raise UnsupportedError('cannot multiply str')
 
+    @methods.add(name='__mod__')
     def m_mod(self, other: 'ProxySort', ctx: 'Context') -> 'StrSort':
         msg = 'not all arguments converted during string formatting'
         ctx.add_exception(TypeError, msg)
         return self
 
+    @methods.add(name='__sub__')
     def m_sub(self, other: 'ProxySort', ctx: 'Context') -> 'StrSort':
         return self._bad_bin_op(other, op='-', ctx=ctx)
 
+    @methods.add(name='__pos__')
     def m_pos(self, ctx: 'Context') -> 'StrSort':
         return self._bad_un_op(op='+', ctx=ctx)
 
+    @methods.add(name='__neg__')
     def m_neg(self, ctx: 'Context') -> 'StrSort':
         return self._bad_un_op(op='-', ctx=ctx)
-
-    def m_inv(self, ctx: 'Context') -> 'StrSort':
-        return self._bad_un_op(op='~', ctx=ctx)

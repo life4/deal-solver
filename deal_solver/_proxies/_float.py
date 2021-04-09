@@ -86,6 +86,7 @@ class FloatSort(ProxySort):
     def is_nan(self) -> 'BoolSort':
         raise NotImplementedError
 
+    @methods.add(name='__pow__')
     def m_pow(self, other: ProxySort, ctx: 'Context') -> 'ProxySort':
         if isinstance(other, registry.bool):
             other = other.m_int(ctx=ctx)
@@ -93,6 +94,7 @@ class FloatSort(ProxySort):
             return self._bad_bin_op(other, op='** or pow()', ctx=ctx)
         return self._math_op(other=other, handler=operator.__pow__, ctx=ctx)
 
+    @methods.add(name='__floordiv__')
     def m_floordiv(self, other: ProxySort, ctx: 'Context') -> 'FloatSort':
         if isinstance(other, registry.bool):
             other = other.m_int(ctx=ctx)
@@ -121,6 +123,7 @@ class FloatSort(ProxySort):
 
         return result
 
+    @methods.add(name='__mul__')
     def m_mul(self, other: ProxySort, ctx: 'Context') -> 'FloatSort':
         if isinstance(other, (registry.str, registry.list)):
             msg = "can't multiply sequence by non-int of type '{}'"
@@ -133,6 +136,7 @@ class FloatSort(ProxySort):
             return self._bad_bin_op(other, op='*', ctx=ctx)
         return self._math_op(other=other, handler=operator.__mul__, ctx=ctx)  # type: ignore
 
+    @methods.add(name='__add__')
     def m_add(self, other: ProxySort, ctx: 'Context') -> 'ProxySort':
         if isinstance(other, registry.bool):
             other = other.m_int(ctx=ctx)
@@ -140,6 +144,7 @@ class FloatSort(ProxySort):
             return self._bad_bin_op(other, op='+', ctx=ctx)
         return self._math_op(other=other, handler=operator.__add__, ctx=ctx)
 
+    @methods.add(name='__sub__')
     def m_sub(self, other: ProxySort, ctx: 'Context') -> 'ProxySort':
         if isinstance(other, registry.bool):
             other = other.m_int(ctx=ctx)
@@ -147,6 +152,7 @@ class FloatSort(ProxySort):
             return self._bad_bin_op(other, op='-', ctx=ctx)
         return self._math_op(other=other, handler=operator.__sub__, ctx=ctx)
 
+    @methods.add(name='__mod__')
     def m_mod(self, other: ProxySort, ctx: 'Context') -> 'ProxySort':
         if isinstance(other, registry.bool):
             other = other.m_int(ctx=ctx)
@@ -203,6 +209,7 @@ class RealSort(FloatSort):
             return handler(self.expr, other.m_real(ctx=ctx).expr)
         return handler(self.m_fp(ctx=ctx).expr, other.expr)
 
+    @methods.add(name='__mod__')
     def m_mod(self, other: ProxySort, ctx: 'Context') -> ProxySort:
         if isinstance(other, registry.float):
             return self.m_fp(ctx=ctx).m_mod(other.m_fp(ctx=ctx), ctx=ctx)
@@ -210,6 +217,7 @@ class RealSort(FloatSort):
             return self.m_fp(ctx=ctx).m_mod(other, ctx=ctx)
         return self._bad_bin_op(other, op='%', ctx=ctx)
 
+    @methods.add(name='__truediv__')
     def m_truediv(self, other: ProxySort, ctx: 'Context') -> FloatSort:
         if isinstance(other, (registry.int, registry.bool)):
             return RealSort(expr=self.m_real(ctx=ctx).expr / other.m_real(ctx=ctx).expr)
@@ -278,6 +286,7 @@ class FPSort(FloatSort):
             return real_handler(self.m_real(ctx=ctx).expr, other.expr)
         return fp_handler(self.expr, other.m_fp(ctx=ctx).expr)
 
+    @methods.add(name='__truediv__')
     def m_truediv(self, other: ProxySort, ctx: 'Context') -> 'FloatSort':
         if isinstance(other, (registry.int, registry.bool)):
             return type(self)(expr=self.m_fp(ctx=ctx).expr / other.m_fp(ctx=ctx).expr)

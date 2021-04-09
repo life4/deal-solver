@@ -73,6 +73,7 @@ class ListSort(ProxySort):
     def r_extend(self, other: ProxySort, ctx: 'Context') -> 'ProxySort':
         return self.m_add(other, ctx=ctx)
 
+    @methods.add(name='__contains__')
     def m_contains(self, item: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         if not self.expr.sort().basis().eq(item.expr.sort()):
             return registry.bool.val(False)
@@ -87,6 +88,7 @@ class ListSort(ProxySort):
         unit = z3.Unit(unwrap(other))
         return registry.int(expr=z3.IndexOf(self.expr, unit, unwrap(start)))
 
+    @methods.add(name='__len__')
     def m_len(self, ctx: 'Context') -> 'IntSort':
         if self.expr is None:
             return registry.int(expr=z3.IntVal(0))
@@ -112,6 +114,7 @@ class ListSort(ProxySort):
         result = f(z3.Length(self.expr) - one)
         return registry.int(result)
 
+    @methods.add(name='__add__')
     def m_add(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         if not isinstance(other, registry.list):
             msg = 'can only concatenate {s} (not "{o}") to {s}'
@@ -120,6 +123,7 @@ class ListSort(ProxySort):
             return self
         return self._math_op(other=other, handler=operator.__add__, ctx=ctx)
 
+    @methods.add(name='__mul__')
     def m_mul(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         if not isinstance(other, registry.int):
             msg = "can't multiply sequence by non-int of type '{}'"
@@ -128,11 +132,14 @@ class ListSort(ProxySort):
             return self
         raise UnsupportedError('cannot multiply list')
 
+    @methods.add(name='__pos__')
     def m_pos(self, ctx: 'Context') -> 'ListSort':
         return self._bad_un_op(op='+', ctx=ctx)
 
+    @methods.add(name='__neg__')
     def m_neg(self, ctx: 'Context') -> 'ListSort':
         return self._bad_un_op(op='-', ctx=ctx)
 
+    @methods.add(name='__inv__')
     def m_inv(self, ctx: 'Context') -> 'ListSort':
         return self._bad_un_op(op='~', ctx=ctx)

@@ -51,41 +51,50 @@ class BoolSort(ProxySort):
     def m_fp(self, ctx: 'Context') -> 'FPSort':
         return self.m_int(ctx=ctx).m_fp(ctx=ctx)
 
+    @methods.add(name='__add__')
     def m_add(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         if not isinstance(other, (registry.bool, registry.float, registry.int)):
             return self._bad_bin_op(other, op='+', ctx=ctx)
         return self.m_int(ctx=ctx).m_add(other, ctx=ctx)
 
+    @methods.add(name='__mod__')
     def m_mod(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         if not isinstance(other, (registry.bool, registry.float, registry.int)):
             return self._bad_bin_op(other, op='%', ctx=ctx)
         return self.m_int(ctx=ctx).m_mod(other, ctx=ctx)
 
+    @methods.add(name='__sub__')
     def m_sub(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         if not isinstance(other, (registry.bool, registry.float, registry.int)):
             return self._bad_bin_op(other, op='-', ctx=ctx)
         return self.m_int(ctx=ctx).m_sub(other, ctx=ctx)
 
+    @methods.add(name='__mul__')
     def m_mul(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         if not isinstance(other, (registry.bool, registry.float, registry.int)):
             return self._bad_bin_op(other, op='*', ctx=ctx)
         return self.m_int(ctx=ctx).m_mul(other, ctx=ctx)
 
+    @methods.add(name='__truediv__')
     def m_truediv(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         if not isinstance(other, (registry.bool, registry.float, registry.int)):
             return self._bad_bin_op(other, op='/', ctx=ctx)
         return self.m_int(ctx=ctx).m_truediv(other, ctx=ctx)
 
+    @methods.add(name='__floordiv__')
     def m_floordiv(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         if not isinstance(other, (registry.bool, registry.float, registry.int)):
             return self._bad_bin_op(other, op='//', ctx=ctx)
         return self.m_int(ctx=ctx).m_floordiv(other, ctx=ctx)
 
+    @methods.add(name='__neg__')
     def m_neg(self, ctx: 'Context') -> 'ProxySort':
         return self.m_int(ctx=ctx).m_neg(ctx=ctx)
 
+    @methods.add(name='__pos__')
     def m_pos(self, ctx: 'Context') -> 'ProxySort':
         return self.m_int(ctx=ctx).m_pos(ctx=ctx)
 
+    @methods.add(name='__inv__')
     def m_inv(self, ctx: 'Context') -> 'ProxySort':
         return self.m_int(ctx=ctx).m_inv(ctx=ctx)

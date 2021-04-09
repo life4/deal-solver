@@ -17,12 +17,14 @@ class LambdaSort(ProxySort):
     ctx: 'Context'
     args: astroid.Arguments
     body: astroid.Expr
+    methods = ProxySort.methods.copy()
 
     def __init__(self, *, ctx: 'Context', args: astroid.Arguments, body) -> None:
         self.ctx = ctx
         self.args = args
         self.body = body
 
+    @methods.add(name='__call__')
     def m_call(self, *values, **kwargs) -> ProxySort:
         # app
         from .._eval_expr import eval_expr
