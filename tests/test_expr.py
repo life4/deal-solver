@@ -5,6 +5,7 @@ import math
 import hypothesis
 import hypothesis.strategies
 import pytest
+from z3 import Z3Exception
 
 # project
 from deal_solver import Conclusion
@@ -303,8 +304,12 @@ def test_assert_ok_fp_only(check: str):
         assert theorem.conclusion is Conclusion.OK
 
         FloatSort.prefer_real = True
-        theorem = prove_f(text)
-        assert theorem.conclusion in (Conclusion.SKIP, Conclusion.FAIL)
+        try:
+            theorem = prove_f(text)
+        except Z3Exception:
+            pass
+        else:
+            assert theorem.conclusion in (Conclusion.SKIP, Conclusion.FAIL)
     finally:
         FloatSort.prefer_real = old_prefer_real
 

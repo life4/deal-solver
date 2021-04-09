@@ -40,21 +40,21 @@ COMAPARISON = {
 BIN_OPERATIONS: typing.Mapping[str, str]
 BIN_OPERATIONS = {
     # math
-    '+':  'm_add',
-    '-':  'm_sub',
-    '*':  'm_mul',
-    '/':  'm_truediv',
-    '//': 'm_floordiv',
-    '**': 'm_pow',
-    '%':  'm_mod',
-    '@':  'm_matmul',
+    '+':  '__add__',
+    '-':  '__sub__',
+    '*':  '__mul__',
+    '/':  '__truediv__',
+    '//': '__floordiv__',
+    '**': '__pow__',
+    '%':  '__mod__',
+    '@':  '__matmul__',
 
     # bitwise
-    '&':  'm_and',
-    '|':  'm_or',
-    '^':  'm_xor',
-    '<<': 'm_lshift',
-    '>>': 'm_rshift',
+    '&':  '__and__',
+    '|':  '__or__',
+    '^':  '__xor__',
+    '<<': '__lshift__',
+    '>>': '__rshift__',
 }
 BOOL_OPERATIONS: typing.Mapping[str, typing.Callable[..., ProxySort]]
 BOOL_OPERATIONS = {
@@ -79,11 +79,8 @@ def eval_bin_op(node: astroid.BinOp, ctx: Context) -> ProxySort:
     assert op_name, 'unsupported binary operator'
     left = eval_expr(node=node.left, ctx=ctx)
     right = eval_expr(node=node.right, ctx=ctx)
-    operation = getattr(left, op_name)
-    try:
-        result = operation(right, ctx=ctx)
-    except z3.Z3Exception:
-        raise UnsupportedError(f'cannot perform operation: {left.type_name}{node.op}{right.type_name}')
+    method = left.m_getattr(op_name, ctx=ctx)
+    result = method.m_call(right, ctx=ctx)
     return wrap(result)
 
 
