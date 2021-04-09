@@ -41,9 +41,3 @@ class Scope:
 
     def set(self, name: str, value: 'ProxySort') -> None:
         self.layer[name] = value
-
-    def __repr__(self) -> str:
-        return '{n}({r})'.format(
-            n=type(self).__name__,
-            r=repr(self.layer),
-        )

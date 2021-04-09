@@ -24,7 +24,7 @@ class Model:
         return len(self._model) != 0
 
     def __str__(self) -> str:
-        return ', '.join(f'k={v!r}' for k, v in self)
+        return ', '.join(f'{k}={v!r}' for k, v in sorted(self))
 
     def __repr__(self) -> str:
         return f'{type(self).__name__}({repr(self._model)})'

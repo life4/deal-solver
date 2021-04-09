@@ -73,6 +73,7 @@ def test_unsupported(expr, err):
     ('v: list[UNKNOWN]',    'unsupported annotation type list[UNKNOWN]'),
     ('v: int[int]',         'unsupported annotation type int[int]'),
     ('v: []',               'unsupported annotation type []'),
+    ('v',                   'missed annotation for v'),
 ])
 def test_unsupported_annotations(expr, err):
     proof = prove_f(f"""

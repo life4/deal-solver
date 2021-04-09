@@ -26,3 +26,25 @@ def test_model(xtype, xvalue):
     model = dict(proof.example)
     assert type(model['x']) is xtype
     assert model['x'] == xvalue
+
+
+def test_model_str():
+    proof = prove_f("""
+        def f(b: bool, i: int):
+            assert not b or i
+    """)
+    assert proof.conclusion == Conclusion.FAIL
+    assert proof.example is not None
+    assert proof.example
+    assert str(proof.example) == 'b=True, i=0'
+
+
+def test_model_bool():
+    proof = prove_f("""
+        def f():
+            assert False
+    """)
+    assert proof.conclusion == Conclusion.FAIL
+    assert proof.example is not None
+    assert not proof.example
+    assert str(proof.example) == ''

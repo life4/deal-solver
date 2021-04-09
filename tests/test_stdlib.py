@@ -101,6 +101,23 @@ def test_os_path_module(check: str) -> None:
     assert theorem.conclusion is Conclusion.OK
 
 
+@pytest.mark.parametrize('expr, err', [
+    ('os.path.join("", 123)', 'expected str, bytes or os.PathLike object, not int'),
+    ('os.path.join(123, "")', 'expected str, bytes or os.PathLike object, not int'),
+])
+def test_os_path_module_type_error(expr: str, err: str) -> None:
+    text = """
+        import os
+
+        def f():
+            assert {}
+    """
+    text = text.format(expr)
+    proof = prove_f(text)
+    assert proof.conclusion is Conclusion.FAIL
+    assert proof.description == f'TypeError: {err}'
+
+
 @pytest.mark.parametrize('check', [
     # empty
     're.fullmatch("", "")',
