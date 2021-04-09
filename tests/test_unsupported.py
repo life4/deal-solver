@@ -67,6 +67,23 @@ def test_unsupported(expr, err):
     assert str(proof.error) == err
 
 
+@pytest.mark.parametrize('expr, err', [
+    ('v: UNKNOWN',          'unsupported annotation type UNKNOWN'),
+    ('v: List[int]',        'unsupported annotation type List[int]'),
+    ('v: list[UNKNOWN]',    'unsupported annotation type list[UNKNOWN]'),
+    ('v: int[int]',         'unsupported annotation type int[int]'),
+    ('v: []',               'unsupported annotation type []'),
+])
+def test_unsupported_annotations(expr, err):
+    proof = prove_f(f"""
+        def f({expr}):
+            ...
+    """)
+    assert proof.conclusion == Conclusion.SKIP
+    assert type(proof.error) is UnsupportedError
+    assert str(proof.error) == err
+
+
 def test_partial_proof():
     proof = prove_f("""
         def f():
