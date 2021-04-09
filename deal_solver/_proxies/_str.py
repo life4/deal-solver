@@ -23,6 +23,7 @@ if typing.TYPE_CHECKING:
 @registry.add
 class StrSort(ProxySort):
     type_name = 'str'
+    methods = ProxySort.methods.copy()
 
     def __init__(self, expr) -> None:
         assert z3.is_string(expr)
@@ -65,17 +66,20 @@ class StrSort(ProxySort):
         expr = z3.Contains(self.expr, unwrap(item))
         return registry.bool(expr=expr)
 
-    def startswith(self, prefix: 'ProxySort') -> 'BoolSort':
+    @methods.add(name='startswith')
+    def r_startswith(self, prefix: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         assert self.expr is not None
         expr = z3.PrefixOf(unwrap(prefix), self.expr)
         return registry.bool(expr=expr)
 
-    def endswith(self, suffix: 'ProxySort') -> 'BoolSort':
+    @methods.add(name='endswith')
+    def r_endswith(self, suffix: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         assert self.expr is not None
         expr = z3.SuffixOf(unwrap(suffix), self.expr)
         return registry.bool(expr=expr)
 
-    def index(self, other: 'ProxySort', start=None) -> 'IntSort':
+    @methods.add(name='index')
+    def r_index(self, other: 'ProxySort', start=None, *, ctx: 'Context') -> 'IntSort':
         assert self.expr is not None
         if start is None:
             start = z3.IntVal(0)

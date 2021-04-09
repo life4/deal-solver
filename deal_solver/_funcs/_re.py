@@ -35,23 +35,3 @@ def re_compile(
 ) -> PatternSort:
     pat_str = pattern.expr.as_string()
     return PatternSort.from_str(pat_str, flags=0)
-
-
-@register('re.Pattern.fullmatch')
-def re_pattern_fullmatch(
-    pattern: PatternSort,
-    string: ProxySort,
-    ctx: Context,
-    **kwargs,
-) -> BoolSort:
-    return pattern.fullmatch(string, ctx=ctx)
-
-
-@register('re.Pattern.match')
-def re_pattern_match(
-    pattern: PatternSort,
-    string: ProxySort,
-    ctx: Context,
-    **kwargs,
-) -> BoolSort:
-    return pattern.match(string, ctx=ctx)

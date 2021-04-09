@@ -19,6 +19,7 @@ if typing.TYPE_CHECKING:
 class PatternSort(ProxySort):
     module_name = 're'
     type_name = 'Pattern'
+    methods = ProxySort.methods.copy()
 
     expr: z3.ReRef
     pattern: str
@@ -92,11 +93,13 @@ class PatternSort(ProxySort):
 
         raise UnsupportedError('cannot interpret regexp')
 
+    @methods.add(name='fullmatch')
     def fullmatch(self, string: ProxySort, ctx: 'Context') -> 'BoolSort':
         if not isinstance(string, registry.str):
             ctx.add_exception(TypeError, "expected string or bytes-like object")
         return registry.bool(expr=z3.InRe(string.expr, self.expr))
 
+    @methods.add(name='match')
     def match(self, string: ProxySort, ctx: 'Context') -> 'BoolSort':
         if not isinstance(string, registry.str):
             ctx.add_exception(TypeError, "expected string or bytes-like object")

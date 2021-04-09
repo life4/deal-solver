@@ -8,6 +8,7 @@ import z3
 # app
 from .._exceptions import UnsupportedError
 from ._funcs import not_expr, unwrap, wrap
+from ._methods import Methods
 
 
 if typing.TYPE_CHECKING:
@@ -26,6 +27,7 @@ class ProxySort:
     module_name: str = 'builtins'
     type_name: str
     expr: z3.Z3PPObject
+    methods: 'Methods' = Methods()
 
     @staticmethod
     def make_empty_expr(sort):

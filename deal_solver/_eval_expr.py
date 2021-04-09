@@ -1,6 +1,5 @@
 # stdlib
 import typing
-from functools import partial
 
 # external
 import astroid
@@ -122,7 +121,7 @@ def eval_list(node: astroid.List, ctx: Context) -> ProxySort:
     container = ListSort.make_empty()
     for subnode in node.elts:
         item = eval_expr(node=subnode, ctx=ctx)
-        container = ListSort.append(container, item)
+        container = ListSort.r_append(container, item, ctx=ctx)
     return container
 
 
@@ -285,16 +284,15 @@ def eval_attr(node: astroid.Attribute, ctx: Context) -> ProxySort:
         # resolve constants defined outside of the scope
         return eval_expr(node=target, ctx=ctx)
 
-    # resolve methods for variables defined in the scope
-    target = '{m}.{t}.{a}'.format(
-        m=expr_ref.module_name,
-        t=expr_ref.type_name,
-        a=node.attrname,
-    )
-    func = FUNCTIONS.get(target)
-    if func is None:
+    method = expr_ref.methods.get(node.attrname)
+    if method is None:
+        target = '{m}.{t}.{a}'.format(
+            m=expr_ref.module_name,
+            t=expr_ref.type_name,
+            a=node.attrname,
+        )
         raise UnsupportedError('no definition for', target)
-    return FuncSort(partial(func, expr_ref))
+    return method.with_obj(expr_ref)
 
 
 @eval_expr.register(astroid.UnaryOp)

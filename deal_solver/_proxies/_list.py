@@ -23,6 +23,7 @@ if typing.TYPE_CHECKING:
 class ListSort(ProxySort):
     expr: z3.SeqRef
     type_name = 'list'
+    methods = ProxySort.methods.copy()
 
     def __init__(self, expr) -> None:
         # assert z3.is_seq(expr)
@@ -61,11 +62,16 @@ class ListSort(ProxySort):
             length=stop_expr - start_expr,
         ))
 
-    def append(self, item: z3.ExprRef) -> 'ListSort':
+    @methods.add(name='append', pure=False)
+    def r_append(self, item: ProxySort, ctx: 'Context') -> 'ListSort':
         cls = type(self)
         unit = z3.Unit(unwrap(item))
         self._ensure(item)
         return cls(expr=self.expr + unit)
+
+    @methods.add(name='extend', pure=False)
+    def r_extend(self, other: ProxySort, ctx: 'Context') -> 'ProxySort':
+        return self.m_add(other, ctx=ctx)
 
     def m_contains(self, item: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         if not self.expr.sort().basis().eq(item.expr.sort()):
@@ -74,7 +80,8 @@ class ListSort(ProxySort):
         unit = z3.Unit(unwrap(item))
         return registry.bool(expr=z3.Contains(self.expr, unit))
 
-    def index(self, other: 'ProxySort', start: 'ProxySort' = None) -> 'IntSort':
+    @methods.add(name='index')
+    def r_index(self, other: 'ProxySort', start: 'ProxySort' = None, *, ctx: 'Context') -> 'IntSort':
         if start is None:
             start = z3.IntVal(0)
         unit = z3.Unit(unwrap(other))
@@ -85,7 +92,8 @@ class ListSort(ProxySort):
             return registry.int(expr=z3.IntVal(0))
         return registry.int(expr=z3.Length(self.expr))
 
-    def count(self, item: 'ProxySort') -> 'IntSort':
+    @methods.add(name='count')
+    def r_count(self, item: 'ProxySort', ctx: 'Context') -> 'IntSort':
         if self.expr is None:
             return registry.int(expr=z3.IntVal(0))
         item_expr = unwrap(item)
