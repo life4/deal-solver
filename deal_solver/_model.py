@@ -20,5 +20,11 @@ class Model:
             py_val = eval(repr(z3_val))
             yield name, py_val
 
+    def __bool__(self) -> bool:
+        return len(self._model) != 0
+
+    def __str__(self) -> str:
+        return ', '.join(f'k={v!r}' for k, v in self)
+
     def __repr__(self) -> str:
         return f'{type(self).__name__}({repr(self._model)})'

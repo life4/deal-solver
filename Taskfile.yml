@@ -5,10 +5,7 @@ vars:
   PYTHON_BIN: python3.7
   VENVS: ./venvs/
   FLIT_ENV:   "{{.VENVS}}flit"
-  FLAKE8_ENV: "{{.VENVS}}tests"
-  MYPY_ENV:   "{{.VENVS}}tests"
-  PYTEST_ENV: "{{.VENVS}}tests"
-  ISORT_ENV:  "{{.VENVS}}tests"
+  TEST_ENV: "{{.VENVS}}tests"
 
   TESTS_PATH: tests/
   NPROC:
@@ -51,20 +48,20 @@ tasks:
 
   flake8:install:
     status:
-      - "test -f {{.FLAKE8_ENV}}/bin/flake8"
+      - "test -f {{.TEST_ENV}}/bin/flake8"
     deps:
       - task: venv:create
         vars:
-          ENV: "{{.FLAKE8_ENV}}"
+          ENV: "{{.TEST_ENV}}"
     cmds:
-      - "{{.FLAKE8_ENV}}/bin/python3 -m pip install -r requirements-flake.txt"
+      - "{{.TEST_ENV}}/bin/python3 -m pip install -r requirements-flake.txt"
   flake8:run:
     sources:
       - "**/*.py"
     deps:
       - flake8:install
     cmds:
-      - "{{.FLAKE8_ENV}}/bin/flake8 ."
+      - "{{.TEST_ENV}}/bin/flake8 ."
 
   mypy:run:
     sources:
@@ -72,19 +69,19 @@ tasks:
     deps:
       - task: flit:install
         vars:
-          ENV: "{{.MYPY_ENV}}"
+          ENV: "{{.TEST_ENV}}"
           EXTRA: tests
     cmds:
-      - "{{.MYPY_ENV}}/bin/mypy --ignore-missing-imports --allow-redefinition deal_solver/"
+      - "{{.TEST_ENV}}/bin/mypy --ignore-missing-imports --allow-redefinition deal_solver/"
 
   pytest:run:
     deps:
       - task: flit:install
         vars:
-          ENV: "{{.PYTEST_ENV}}"
+          ENV: "{{.TEST_ENV}}"
           EXTRA: tests
     cmds:
-      - "{{.PYTEST_ENV}}/bin/pytest -n {{.NPROC}} {{.ARGS}} {{.TESTS_PATH}}"
+      - "{{.TEST_ENV}}/bin/pytest -n {{.NPROC}} {{.ARGS}} {{.TESTS_PATH}}"
 
   isort:run:
     sources:
@@ -92,7 +89,7 @@ tasks:
     deps:
       - task: flit:install
         vars:
-          ENV: "{{.ISORT_ENV}}"
+          ENV: "{{.TEST_ENV}}"
           EXTRA: tests
     cmds:
-      - "{{.ISORT_ENV}}/bin/isort ."
+      - "{{.TEST_ENV}}/bin/isort ."

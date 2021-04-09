@@ -215,3 +215,8 @@ class IntSort(ProxySort):
         if not isinstance(other, registry.int):
             return self._bad_bin_op(other, op='>>', ctx=ctx)
         return self._bitwise_op(other=other, handler=operator.__rshift__, ctx=ctx)
+
+    def _comp_op(self, other: 'ProxySort', handler: typing.Callable, ctx: 'Context') -> 'BoolSort':
+        if isinstance(other, registry.float):
+            return self.m_float(ctx=ctx)._comp_op(other=other, handler=handler, ctx=ctx)
+        return super()._comp_op(other=other, handler=handler, ctx=ctx)

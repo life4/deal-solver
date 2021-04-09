@@ -45,6 +45,14 @@ class Proof(typing.NamedTuple):
     def evolve(self, **kwargs) -> 'Proof':
         return self._replace(**kwargs)
 
+    def __str__(self) -> str:
+        msg = f'{self.description}'
+        if self.error:
+            msg += f' ({self.error})'
+        if self.example:
+            msg += f'. Example: {self.example}.'
+        return msg
+
 
 class Constraint(typing.NamedTuple):
     condition: BoolSort
@@ -172,6 +180,16 @@ class Theorem:
             )
 
     def prove(self) -> Proof:
+        try:
+            self.arguments
+        except UnsupportedError as exc:
+            return Proof(
+                conclusion=Conclusion.SKIP,
+                description='failed to interpret function arguments',
+                error=exc,
+                example=None,
+            )
+
         proofs = []
         for constraint in self.constraints:
             solver = z3.Solver(ctx=self._z3_context)
@@ -181,11 +199,11 @@ class Theorem:
             if proof.conclusion == Conclusion.FAIL:
                 return proof
             proofs.append(proof)
-        for exc in self._context.skips:
+        for skip in self._context.skips:
             proofs.append(Proof(
                 conclusion=Conclusion.SKIP,
                 description='failed to interpret statement',
-                error=exc,
+                error=skip,
                 example=None,
             ))
         return self._select_proof(proofs=proofs)

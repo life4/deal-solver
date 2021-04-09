@@ -170,7 +170,7 @@ from .helpers import prove_f
     'int(4.2) == 4',
     'float(4.2) == 4.2',
     'float(10 / 2) == 5.0',
-    'float("Inf") > 100000',
+    'float("Inf") > 10000',
     'abs(-4.2) == 4.2',
     # 'str(4.2) == "4.2"',
 
@@ -269,6 +269,22 @@ from .helpers import prove_f
     '[i + i for i in [4, 5, 6]] == [8, 10, 12]',
     '[i for i in [4, 5, 6] if i != 5] == [4, 6]',
     '[i+i for i in [4, 5, 6, 7, 8] if i % 2 == 0] == [8, 12, 16]',
+
+    # compare int and float
+    '2 > 1.5',
+    '2 >= 1.5',
+    '1 < 1.5',
+    '1 <= 1.5',
+    '1 != 1.5',
+    '0 == 0.0',
+
+    # compare float and int
+    '1.5 > 1',
+    '1.5 >= 1',
+    '1.5 < 2',
+    '1.5 <= 2',
+    '1.5 != 2',
+    '0.0 == 0',
 ])
 def test_asserts_ok(prefer_real: bool, check: str) -> None:
     assert eval(check)
