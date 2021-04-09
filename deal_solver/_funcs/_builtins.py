@@ -38,7 +38,7 @@ def builtins_sum(items, ctx: Context, **kwargs) -> ProxySort:
 @register('builtins.min')
 def builtins_min(a: ProxySort, b: ProxySort = None, *, ctx: Context, **kwargs) -> ProxySort:
     if b is not None:
-        return if_expr(a.m_lt(b, ctx=ctx), a, b)
+        return if_expr(a.m_lt(b, ctx=ctx), a, b, ctx=ctx)
 
     items = unwrap(a)
     f = z3.RecFunction(
@@ -66,7 +66,7 @@ def builtins_min(a: ProxySort, b: ProxySort = None, *, ctx: Context, **kwargs) -
 @register('builtins.max')
 def builtins_max(a: ProxySort, b: ProxySort = None, *, ctx: Context, **kwargs) -> ProxySort:
     if b is not None:
-        return if_expr(a.m_gt(b, ctx=ctx), a, b, ctx=ctx.z3_ctx,)
+        return if_expr(a.m_gt(b, ctx=ctx), a, b, ctx=ctx)
 
     items = unwrap(a)
     f = z3.RecFunction(
@@ -111,7 +111,7 @@ def builtins_ord(val: ProxySort, ctx: Context, **kwargs) -> IntSort:
 
 
 @register('builtins.abs')
-def builtins_abs(a: ProxySort, **kwargs) -> ProxySort:
+def builtins_abs(a: ProxySort, ctx: Context, **kwargs) -> ProxySort:
     return a.abs
 
 
@@ -122,22 +122,22 @@ def builtins_len(items: ProxySort, ctx: 'Context', **kwargs) -> IntSort:
 
 @register('builtins.int')
 def builtins_int(a: ProxySort, *, ctx: Context, **kwargs) -> ProxySort:
-    return a.as_int
+    return a.m_int(ctx=ctx)
 
 
 @register('builtins.float')
-def builtins_float(a: ProxySort, **kwargs) -> ProxySort:
-    return a.as_float
+def builtins_float(a: ProxySort, ctx: Context, **kwargs) -> ProxySort:
+    return a.m_float(ctx=ctx)
 
 
 @register('builtins.str')
-def builtins_str(obj: ProxySort, **kwargs) -> StrSort:
-    return obj.as_str
+def builtins_str(obj: ProxySort, ctx: Context, **kwargs) -> StrSort:
+    return obj.m_str(ctx=ctx)
 
 
 @register('builtins.bool')
-def builtins_bool(obj: ProxySort, **kwargs) -> BoolSort:
-    return obj.as_bool
+def builtins_bool(obj: ProxySort, ctx: Context, **kwargs) -> BoolSort:
+    return obj.m_bool(ctx=ctx)
 
 
 @register('builtins.set')

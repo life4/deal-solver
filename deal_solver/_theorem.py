@@ -147,6 +147,7 @@ class Theorem:
                     *contracts.pre,
                     *self._context.given,
                     exc.cond,
+                    ctx=self._context,
                 ),
             )
         for constraint in self._context.expected:
@@ -155,7 +156,8 @@ class Theorem:
                 condition=and_expr(
                     *contracts.pre,
                     *self._context.given,
-                    not_expr(constraint),
+                    not_expr(constraint, ctx=self._context),
+                    ctx=self._context,
                 ),
             )
         for constraint in contracts.post:
@@ -164,7 +166,8 @@ class Theorem:
                 condition=and_expr(
                     *contracts.pre,
                     *self._context.given,
-                    not_expr(constraint),
+                    not_expr(constraint, ctx=self._context),
+                    ctx=self._context,
                 ),
             )
 

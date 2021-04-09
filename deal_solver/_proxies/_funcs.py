@@ -7,6 +7,7 @@ from string import ascii_letters
 import z3
 
 # app
+from .._context import Context
 from ._registry import registry
 
 
@@ -59,13 +60,13 @@ def if_expr(
     test: typing.Any,
     val_then: T,
     val_else: T,
-    ctx: typing.Optional[z3.Context] = None,
+    ctx: Context,
 ) -> T:
     expr = z3.If(
-        wrap(test).as_bool.expr,
+        wrap(test).m_bool(ctx=ctx).expr,
         unwrap(val_then),
         unwrap(val_else),
-        ctx=ctx,
+        ctx=ctx.z3_ctx,
     )
     return wrap(expr)  # type: ignore
 
@@ -75,20 +76,20 @@ def random_name(prefix: str = 'v') -> str:
     return prefix + '__' + suffix
 
 
-def switch(*cases: typing.Tuple[typing.Any, T], default) -> T:
+def switch(*cases: typing.Tuple[typing.Any, T], default, ctx: Context) -> T:
     result = default
     for cond, then in reversed(cases):
-        result = if_expr(cond, then, result)
+        result = if_expr(cond, then, result, ctx=ctx)
     return result
 
 
-def and_expr(*args: 'ProxySort') -> 'BoolSort':
-    return registry.bool(z3.And(*[arg.as_bool.expr for arg in args]))
+def and_expr(*args: 'ProxySort', ctx: Context) -> 'BoolSort':
+    return registry.bool(z3.And(*[arg.m_bool(ctx=ctx).expr for arg in args]))
 
 
-def or_expr(*args: 'ProxySort') -> 'BoolSort':
-    return registry.bool(z3.Or(*[wrap(arg).as_bool.expr for arg in args]))
+def or_expr(*args: 'ProxySort', ctx: Context) -> 'BoolSort':
+    return registry.bool(z3.Or(*[wrap(arg).m_bool(ctx=ctx).expr for arg in args]))
 
 
-def not_expr(cond: 'ProxySort') -> 'BoolSort':
-    return registry.bool(z3.Not(wrap(cond).as_bool.expr))
+def not_expr(cond: 'ProxySort', *, ctx: Context) -> 'BoolSort':
+    return registry.bool(z3.Not(wrap(cond).m_bool(ctx=ctx).expr))

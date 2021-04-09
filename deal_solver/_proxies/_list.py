@@ -41,8 +41,8 @@ class ListSort(ProxySort):
     def make_empty_expr(sort):
         return z3.Empty(z3.SeqSort(sort))
 
-    @property
-    def as_bool(self) -> 'BoolSort':
+    @methods.add(name='__bool__')
+    def m_bool(self, ctx: 'Context') -> 'BoolSort':
         if self.expr is None:
             return registry.bool.val(False)
         expr = z3.Length(self.expr) != z3.IntVal(0)

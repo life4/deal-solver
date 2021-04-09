@@ -10,27 +10,40 @@ F = typing.TypeVar('F', bound=typing.Callable)
 
 class Methods:
     _registry: typing.Dict[str, 'Method']
+    _raw: typing.List[dict]
+    _final: bool
 
     def __init__(self) -> None:
         self._registry = dict()
+        self._raw = []
+        self._final = False
 
     def add(self, *, name: str, pure: bool = True) -> typing.Callable[[F], F]:
-        from ._method import Method
-        assert name not in self._registry
-
         def wrapper(f: F) -> F:
-            self._registry[name] = Method(
+            assert not self._final
+            self._raw.append(dict(
                 name=name,
                 impl=f,
                 pure=pure,
-            )
+            ))
             return f
         return wrapper
 
+    def _finalize(self) -> None:
+        if self._final:
+            return
+        from ._method import Method
+        for raw in self._raw:
+            self._registry[raw['name']] = Method(**raw)
+        self._final = True
+        self._raw = []
+
     def get(self, name: str) -> typing.Optional['Method']:
+        self._finalize()
         return self._registry.get(name)
 
     def copy(self) -> 'Methods':
         new = type(self)()
         new._registry = self._registry.copy()
+        new._raw = self._raw.copy()
         return new

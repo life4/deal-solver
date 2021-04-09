@@ -32,25 +32,25 @@ class StrSort(ProxySort):
     def _ensure(self, item, seq=False):
         pass
 
-    @property
-    def as_int(self) -> 'IntSort':
+    @methods.add(name='__int__')
+    def m_int(self, ctx: 'Context') -> 'IntSort':
         assert self.expr is not None
         return registry.int(expr=z3.StrToInt(self.expr))
 
-    @property
-    def as_str(self) -> 'StrSort':
+    @methods.add(name='__str__')
+    def m_str(self, ctx: 'Context') -> 'StrSort':
         return self
 
-    @property
-    def as_float(self) -> 'FloatSort':
+    @methods.add(name='__float__')
+    def m_float(self, ctx: 'Context') -> 'FloatSort':
         assert self.expr is not None
         if z3.is_string_value(self.expr):
             val = float(self.expr.as_string())
             return registry.float.val(val)
         raise UnsupportedError('cannot convert str to float')
 
-    @property
-    def as_bool(self) -> 'BoolSort':
+    @methods.add(name='__bool__')
+    def m_bool(self, ctx: 'Context') -> 'BoolSort':
         assert self.expr is not None
         expr = self.expr != z3.Empty(z3.StringSort())
         return registry.bool(expr=expr)

@@ -72,8 +72,8 @@ class ProxySort:
 
     # abstract methods
 
-    @property
-    def as_bool(self) -> 'BoolSort':
+    @methods.add(name='__bool__')
+    def m_bool(self, ctx: 'Context') -> 'BoolSort':
         """bool(self)
         """
         raise NotImplementedError
@@ -84,30 +84,28 @@ class ProxySort:
         """
         raise UnsupportedError('{}.__abs__ is not defined'.format(self.type_name))
 
-    @property
-    def as_int(self) -> 'IntSort':
+    @methods.add(name='__int__')
+    def m_int(self, ctx: 'Context') -> 'IntSort':
         """int(self)
         """
         raise UnsupportedError('cannot convert {} to int'.format(self.type_name))
 
-    @property
-    def as_str(self) -> 'StrSort':
+    @methods.add(name='__str__')
+    def m_str(self, ctx: 'Context') -> 'StrSort':
         """str(self)
         """
         raise UnsupportedError('cannot convert {} to str'.format(self.type_name))
 
-    @property
-    def as_float(self) -> 'FloatSort':
+    @methods.add(name='__float__')
+    def m_float(self, ctx: 'Context') -> 'FloatSort':
         """float(self)
         """
         raise UnsupportedError('cannot convert {} to float'.format(self.type_name))
 
-    @property
-    def as_real(self) -> 'RealSort':
+    def m_real(self, ctx: 'Context') -> 'RealSort':
         raise UnsupportedError('cannot convert {} to float'.format(self.type_name))
 
-    @property
-    def as_fp(self) -> 'FPSort':
+    def m_fp(self, ctx: 'Context') -> 'FPSort':
         raise UnsupportedError('cannot convert {} to float'.format(self.type_name))
 
     def m_call(self, *args, ctx: 'Context', var_name: str, **kwargs) -> 'ProxySort':
@@ -201,7 +199,7 @@ class ProxySort:
     def m_not_in(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         """self in other
         """
-        return not_expr(other.m_contains(self, ctx=ctx))
+        return not_expr(other.m_contains(self, ctx=ctx), ctx=ctx)
 
     # unary operations
 

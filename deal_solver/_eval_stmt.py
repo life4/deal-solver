@@ -50,9 +50,9 @@ def eval_assert(node: astroid.Assert, ctx: Context) -> None:
     assert node.test is not None, 'assert without condition'
     expr = eval_expr(node=node.test, ctx=ctx)
     if isinstance(expr, ProxySort):
-        expr = expr.as_bool
+        expr = expr.m_bool(ctx=ctx)
     true = BoolSort.val(True)
-    expr = if_expr(ctx.interrupted, true, expr, ctx=ctx.z3_ctx)
+    expr = if_expr(ctx.interrupted, true, expr, ctx=ctx)
     ctx.expected.add(expr)
 
 
@@ -79,7 +79,7 @@ def eval_assign(node: astroid.Assign, ctx: Context) -> None:
 def eval_return(node: astroid.Return, ctx: Context) -> None:
     ctx.returns.add(ReturnInfo(
         value=eval_expr(node=node.value, ctx=ctx),
-        cond=not_expr(ctx.interrupted),
+        cond=not_expr(ctx.interrupted, ctx=ctx),
     ))
 
 
@@ -105,15 +105,15 @@ def eval_if_else(node: astroid.If, ctx: Context) -> None:
         if val_then is None or val_else is None:
             raise UnsupportedError('unbound variable', var_name)
 
-        value = if_expr(test_ref, val_then, val_else)
+        value = if_expr(test_ref, val_then, val_else, ctx=ctx)
         ctx.scope.set(name=var_name, value=value)
 
     # update new assertions
     true = BoolSort.val(True)
     for constr in ctx_then.expected.layer:
-        ctx.expected.add(if_expr(test_ref, constr, true))
+        ctx.expected.add(if_expr(test_ref, constr, true, ctx=ctx))
     for constr in ctx_else.expected.layer:
-        ctx.expected.add(if_expr(test_ref, true, constr))
+        ctx.expected.add(if_expr(test_ref, true, constr, ctx=ctx))
 
     # update new exceptions
     false = BoolSort.val(False)
@@ -121,14 +121,14 @@ def eval_if_else(node: astroid.If, ctx: Context) -> None:
         ctx.exceptions.add(ExceptionInfo(
             name=exc.name,
             names=exc.names,
-            cond=if_expr(test_ref, exc.cond, false),
+            cond=if_expr(test_ref, exc.cond, false, ctx=ctx),
             message=exc.message,
         ))
     for exc in ctx_else.exceptions.layer:
         ctx.exceptions.add(ExceptionInfo(
             name=exc.name,
             names=exc.names,
-            cond=if_expr(test_ref, false, exc.cond),
+            cond=if_expr(test_ref, false, exc.cond, ctx=ctx),
             message=exc.message,
         ))
 
@@ -137,12 +137,12 @@ def eval_if_else(node: astroid.If, ctx: Context) -> None:
     for ret in ctx_then.returns.layer:
         ctx.returns.add(ReturnInfo(
             value=ret.value,
-            cond=if_expr(test_ref, ret.cond, false),
+            cond=if_expr(test_ref, ret.cond, false, ctx=ctx),
         ))
     for ret in ctx_else.returns.layer:
         ctx.returns.add(ReturnInfo(
             value=ret.value,
-            cond=if_expr(test_ref, false, ret.cond),
+            cond=if_expr(test_ref, false, ret.cond, ctx=ctx),
         ))
 
 
@@ -156,7 +156,7 @@ def eval_raise(node: astroid.Raise, ctx: Context) -> None:
     ctx.exceptions.add(ExceptionInfo(
         name=next(_get_all_bases(node.exc)),
         names=names,
-        cond=not_expr(ctx.interrupted),
+        cond=not_expr(ctx.interrupted, ctx=ctx),
     ))
 
 

@@ -68,8 +68,9 @@ class Context(typing.NamedTuple):
         false = BoolSort.val(False)
         return or_expr(
             false,
-            *[exc.cond.as_bool for exc in self.exceptions],
-            *[ret.cond.as_bool for ret in self.returns],
+            *[exc.cond.m_bool(ctx=self) for exc in self.exceptions],
+            *[ret.cond.m_bool(ctx=self) for ret in self.returns],
+            ctx=self,
         )
 
     def add_exception(self, exc: type, msg: str) -> None:
@@ -90,7 +91,7 @@ class Context(typing.NamedTuple):
             return None
         result = returns[0]
         for other in returns[1:]:
-            result = result.merge(other)
+            result = result.merge(other, ctx=self)
         return result.value
 
     @property

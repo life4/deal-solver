@@ -112,8 +112,8 @@ def eval_bool_op(node: astroid.BoolOp, ctx: Context) -> ProxySort:
     subnodes = []
     for subnode in node.values:
         right = eval_expr(node=subnode, ctx=ctx)
-        subnodes.append(right.as_bool)
-    return operation(*subnodes)
+        subnodes.append(right.m_bool(ctx=ctx))
+    return operation(*subnodes, ctx=ctx)
 
 
 @eval_expr.register(astroid.List)
@@ -168,7 +168,7 @@ def _compr_apply_ifs(
     conds = []
     for cond_node in comp.ifs:
         cond = eval_expr(node=cond_node, ctx=body_ctx)
-        conds.append(cond.as_bool.expr)
+        conds.append(cond.m_bool(ctx=ctx).expr)
 
     f = z3.RecFunction(
         random_name('compr_cond'),
@@ -305,7 +305,7 @@ def eval_unary_op(node: astroid.UnaryOp, ctx: Context) -> ProxySort:
     if node.op == '~':
         return value_ref.m_inv(ctx=ctx)
     if node.op == 'not':
-        return not_expr(value_ref)
+        return not_expr(value_ref, ctx=ctx)
     raise RuntimeError('unsupported unary operation')
 
 
@@ -320,7 +320,7 @@ def eval_ternary_op(node: astroid.IfExp, ctx: Context) -> ProxySort:
     then_ref = eval_expr(node=node.body, ctx=ctx)
     else_ref = eval_expr(node=node.orelse, ctx=ctx)
 
-    return if_expr(test_ref, then_ref, else_ref)
+    return if_expr(test_ref, then_ref, else_ref, ctx=ctx)
 
 
 @eval_expr.register(astroid.Call)
@@ -364,8 +364,8 @@ def _call_function(node: astroid.FunctionDef, ctx: Context, call_args=typing.Lis
     # we ask pre-conditions to be true
     # and promise post-condition to be true
     contracts = eval_contracts(func=node, ctx=func_ctx)
-    ctx.expected.add(and_expr(*contracts.pre))
-    ctx.given.add(and_expr(*contracts.post))
+    ctx.expected.add(and_expr(*contracts.pre, ctx=ctx))
+    ctx.given.add(and_expr(*contracts.post, ctx=ctx))
 
     return result
 

@@ -25,6 +25,7 @@ INT_BITS = 64
 @registry.add
 class IntSort(ProxySort):
     type_name = 'int'
+    methods = ProxySort.methods.copy()
 
     def __init__(self, expr) -> None:
         assert z3.is_int(expr), f'expected int, given {type(expr)}'
@@ -34,30 +35,28 @@ class IntSort(ProxySort):
     def val(cls, x: int) -> 'IntSort':
         return cls(expr=z3.IntVal(x))
 
-    @property
-    def as_int(self) -> 'IntSort':
+    @methods.add(name='__int__')
+    def m_int(self, ctx: 'Context') -> 'IntSort':
         return self
 
-    @property
-    def as_float(self) -> 'RealSort':
+    @methods.add(name='__float__')
+    def m_float(self, ctx: 'Context') -> 'RealSort':
         # TODO: int to fp?
-        return self.as_real
+        return self.m_real(ctx=ctx)
 
-    @property
-    def as_real(self) -> 'RealSort':
-        return wrap(z3.ToReal(self.expr)).as_real
+    def m_real(self, ctx: 'Context') -> 'RealSort':
+        return wrap(z3.ToReal(self.expr)).m_real(ctx=ctx)
 
-    @property
-    def as_fp(self):
+    def m_fp(self, ctx: 'Context'):
         expr = z3.ToReal(self.expr)
-        return wrap(expr).as_fp
+        return wrap(expr).m_fp(ctx=ctx)
 
-    @property
-    def as_str(self) -> 'StrSort':
+    @methods.add(name='__str__')
+    def m_str(self, ctx: 'Context') -> 'StrSort':
         return registry.str(expr=z3.IntToStr(self.expr))
 
-    @property
-    def as_bool(self) -> 'BoolSort':
+    @methods.add(name='__bool__')
+    def m_bool(self, ctx: 'Context') -> 'BoolSort':
         return registry.bool(expr=self.expr != z3.IntVal(0))
 
     @property
@@ -68,29 +67,29 @@ class IntSort(ProxySort):
     def _math_op(self, other: ProxySort, handler: typing.Callable, ctx: 'Context') -> ProxySort:
         as_float = isinstance(other, registry.float)
         if as_float:
-            other = other.as_int
+            other = other.m_int(ctx=ctx)
         result = super()._math_op(other=other, handler=handler, ctx=ctx)
         if as_float:
-            return result.as_float
+            return result.m_float(ctx=ctx)
         return result
 
     def m_add(self, other: ProxySort, ctx: 'Context') -> 'ProxySort':
         if isinstance(other, registry.bool):
-            other = other.as_int
+            other = other.m_int(ctx=ctx)
         if not isinstance(other, (registry.int, registry.float)):
             return self._bad_bin_op(other, op='+', ctx=ctx)
         return self._math_op(other=other, handler=operator.__add__, ctx=ctx)
 
     def m_sub(self, other: ProxySort, ctx: 'Context') -> 'ProxySort':
         if isinstance(other, registry.bool):
-            other = other.as_int
+            other = other.m_int(ctx=ctx)
         if not isinstance(other, (registry.int, registry.float)):
             return self._bad_bin_op(other, op='-', ctx=ctx)
         return self._math_op(other=other, handler=operator.__sub__, ctx=ctx)
 
     def m_mul(self, other: ProxySort, ctx: 'Context') -> 'ProxySort':
         if isinstance(other, registry.bool):
-            other = other.as_int
+            other = other.m_int(ctx=ctx)
         if isinstance(other, (registry.str, registry.list)):
             return other.m_mul(self, ctx=ctx)
         if isinstance(other, (registry.int, registry.float)):
@@ -99,7 +98,7 @@ class IntSort(ProxySort):
 
     def m_pow(self, other: ProxySort, ctx: 'Context') -> 'ProxySort':
         if isinstance(other, registry.bool):
-            other = other.as_int
+            other = other.m_int(ctx=ctx)
         if not isinstance(other, (registry.int, registry.float)):
             return self._bad_bin_op(other, op='** or pow()', ctx=ctx)
         return self._math_op(other=other, handler=operator.__pow__, ctx=ctx)
@@ -107,50 +106,52 @@ class IntSort(ProxySort):
     def m_truediv(self, other: ProxySort, ctx: 'Context') -> 'FloatSort':
         real = z3.ToReal(self.expr)
         if isinstance(other, (registry.int, registry.bool)):
-            return registry.float(expr=real / other.as_real.expr)
+            return registry.float(expr=real / other.m_real(ctx=ctx).expr)
         if not isinstance(other, registry.float):
             self._bad_bin_op(other, op='/', ctx=ctx)
-            return self.as_float
+            return self.m_float(ctx=ctx)
         if other.is_real:
-            expr = real / other.as_real.expr
+            expr = real / other.m_real(ctx=ctx).expr
         else:
-            expr = self.as_fp.expr / other.as_fp.expr
+            expr = self.m_fp(ctx=ctx).expr / other.m_fp(ctx=ctx).expr
         return registry.float(expr=expr)
 
     def m_floordiv(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         if isinstance(other, registry.bool):
-            other = other.as_int
+            other = other.m_int(ctx=ctx)
         if not isinstance(other, (registry.int, registry.float)):
             return self._bad_bin_op(other, op='//', ctx=ctx)
         as_float = isinstance(other, registry.float)
         if as_float:
-            other = other.as_int
+            other = other.m_int(ctx=ctx)
         zero = self.val(0).expr
         result = if_expr(
             test=other.expr >= zero,
             val_then=self.expr / other.expr,
             val_else=-self.expr / -other.expr,
+            ctx=ctx,
         )
         if as_float:
-            return result.as_float
+            return result.m_float(ctx=ctx)
         return result
 
     def m_mod(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         if isinstance(other, registry.bool):
-            other = other.as_int
+            other = other.m_int(ctx=ctx)
         if not isinstance(other, (registry.int, registry.float)):
             return self._bad_bin_op(other, op='%', ctx=ctx)
         as_float = isinstance(other, registry.float)
         if as_float:
-            other = other.as_int
+            other = other.m_int(ctx=ctx)
         zero = self.val(0).expr
         result = if_expr(
             test=other.expr >= zero,
             val_then=self.expr % other.expr,
             val_else=-(-self.expr % -other.expr),
+            ctx=ctx,
         )
         if as_float:
-            return result.as_float
+            return result.m_float(ctx=ctx)
         return result
 
     def m_inv(self, ctx: 'Context') -> 'IntSort':

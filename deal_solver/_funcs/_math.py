@@ -20,31 +20,32 @@ def math_isclose(
         return left.m_eq(right, ctx=ctx)
 
     if isinstance(left, IntSort):
-        left = left.as_float
+        left = left.m_float(ctx=ctx)
     if isinstance(right, IntSort):
-        right = right.as_float
+        right = right.m_float(ctx=ctx)
 
     if rel_tol is None:
         rel_tol = FloatSort.val(1e-09)
-    rel_tol = rel_tol.as_float
+    rel_tol = rel_tol.m_float(ctx=ctx)
     if abs_tol is None:
         abs_tol = FloatSort.val(0.0)
-    abs_tol = abs_tol.as_float
+    abs_tol = abs_tol.m_float(ctx=ctx)
 
     if FloatSort.prefer_real:
-        left = left.as_real
-        right = right.as_real
+        left = left.m_real(ctx=ctx)
+        right = right.m_real(ctx=ctx)
     else:
-        left = left.as_fp
-        right = right.as_fp
+        left = left.m_fp(ctx=ctx)
+        right = right.m_fp(ctx=ctx)
 
     builtin_max = FUNCTIONS['builtins.max']
     abs_max = builtin_max(left.abs, right.abs, ctx=ctx)
     delta = builtin_max(rel_tol.m_mul(abs_max, ctx=ctx), abs_tol, ctx=ctx)
     return if_expr(
-        and_expr(left.is_nan, right.is_nan),
+        and_expr(left.is_nan, right.is_nan, ctx=ctx),
         BoolSort.val(True),
         left.m_sub(right, ctx=ctx).abs.m_le(delta, ctx=ctx),
+        ctx=ctx,
     )
 
 
@@ -71,7 +72,7 @@ def math_sin(x: ProxySort, ctx: Context, **kwargs) -> ProxySort:
     """Taylor's Series of sin x
     """
     if not isinstance(x, FloatSort):
-        x = x.as_float
+        x = x.m_float(ctx=ctx)
 
     series = [
         (False, 3),
@@ -96,13 +97,15 @@ def math_sin(x: ProxySort, ctx: Context, **kwargs) -> ProxySort:
 @register('math.trunc')
 def math_trunc(x: ProxySort, ctx: Context, **kwargs) -> ProxySort:
     if not isinstance(x, FloatSort):
-        return x.as_int
+        return x.m_int(ctx=ctx)
     return if_expr(
-        x.as_int.as_float.m_eq(x, ctx=ctx),
-        x.as_int,
+        x.m_int(ctx=ctx).m_float(ctx=ctx).m_eq(x, ctx=ctx),
+        x.m_int(ctx=ctx),
         if_expr(
             x.m_gt(FloatSort.val(0, ctx=ctx.z3_ctx), ctx=ctx),
-            x.as_int,
-            x.as_int.m_add(IntSort.val(1), ctx=ctx),
+            x.m_int(ctx=ctx),
+            x.m_int(ctx=ctx).m_add(IntSort.val(1), ctx=ctx),
+            ctx=ctx,
         ),
+        ctx=ctx,
     )

@@ -8,6 +8,7 @@ import z3
 if typing.TYPE_CHECKING:
     # app
     from .._proxies import BoolSort
+    from .._context import Context
 
 
 T = typing.TypeVar('T')
@@ -24,15 +25,15 @@ class ReturnInfo(typing.NamedTuple):
     value: typing.Any
     cond: 'BoolSort'
 
-    def merge(self, other: 'ReturnInfo') -> 'ReturnInfo':
+    def merge(self, other: 'ReturnInfo', ctx: 'Context') -> 'ReturnInfo':
         # app
         from .._proxies import if_expr
 
         true = z3.BoolVal(True)
         cls = type(self)
         return cls(
-            cond=if_expr(self.cond, true, other.cond),
-            value=if_expr(self.cond, self.value, other.value),
+            cond=if_expr(self.cond, true, other.cond, ctx=ctx),
+            value=if_expr(self.cond, self.value, other.value, ctx=ctx),
         )
 
 
