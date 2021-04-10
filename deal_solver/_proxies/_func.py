@@ -24,7 +24,7 @@ class FuncSort(ProxySort):
         self.impl = impl  # type: ignore
 
     @methods.add(name='__call__')
-    def m_call(self, *args, ctx: 'Context', var_name: str, **kwargs) -> 'ProxySort':
+    def m_call(self, *args, ctx: 'Context', **kwargs) -> 'ProxySort':
         """self(*args, **kwargs)
         """
-        return self.impl(*args, ctx=ctx, var_name=var_name, **kwargs)
+        return self.impl(*args, ctx=ctx, **kwargs)

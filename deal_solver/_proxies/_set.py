@@ -71,10 +71,27 @@ class SetSort(ProxySort):
     def m_inv(self, ctx: 'Context') -> 'SetSort':
         return self._bad_un_op(op='~', ctx=ctx)
 
+    @methods.add(name='union')
+    @methods.add(name='__or__')
+    def m_or(self, other: 'ProxySort', ctx: 'Context') -> 'SetSort':
+        # TODO: `set.union` supports any iterable
+        if not isinstance(other, registry.set):
+            return self._bad_bin_op(other=other, op='|', ctx=ctx)
+        expr = z3.SetUnion(self.expr, other.expr)
+        return registry.set(expr=expr)
+
+    @methods.add(name='intersection')
+    @methods.add(name='__and__')
+    def m_and(self, other: 'ProxySort', ctx: 'Context') -> 'SetSort':
+        # TODO: `set.intersection` supports any iterable
+        if not isinstance(other, registry.set):
+            return self._bad_bin_op(other=other, op='|', ctx=ctx)
+        expr = z3.SetIntersect(self.expr, other.expr)
+        return registry.set(expr=expr)
+
     @methods.add(name='difference')
     @methods.add(name='difference_update', pure=False)
     @methods.add(name='discard', pure=False)
-    @methods.add(name='intersection')
     @methods.add(name='intersection_update', pure=False)
     @methods.add(name='isdisjoint')
     @methods.add(name='issubset')
@@ -83,7 +100,6 @@ class SetSort(ProxySort):
     @methods.add(name='remove')
     @methods.add(name='symmetric_difference')
     @methods.add(name='symmetric_difference_update', pure=False)
-    @methods.add(name='union')
     @methods.add(name='update', pure=False)
     def unsupported(self, *args, **kwargs):
         msg = 'unsupported attribute for type {}'.format(self.type_name)
