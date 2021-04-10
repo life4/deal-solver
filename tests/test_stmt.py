@@ -97,3 +97,15 @@ def test_no_effect_statements():
             pass
     """)
     assert theorem.conclusion is Conclusion.OK
+
+
+def test_list_clear():
+    theorem = prove_f("""
+        def f():
+            a = [1, 2, 3]
+            a.clear()
+            assert a == []
+            a.append(1)
+            assert a == [1]
+    """)
+    assert theorem.conclusion is Conclusion.OK
