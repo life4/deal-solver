@@ -8,6 +8,7 @@ import z3
 from ._funcs import unwrap
 from ._proxy import ProxySort
 from ._registry import registry
+from .._exceptions import UnsupportedError
 
 
 if typing.TYPE_CHECKING:
@@ -60,3 +61,23 @@ class SetSort(ProxySort):
     @methods.add(name='__inv__')
     def m_inv(self, ctx: 'Context') -> 'SetSort':
         return self._bad_un_op(op='~', ctx=ctx)
+
+    @methods.add(name='clear', pure=False)
+    @methods.add(name='copy')
+    @methods.add(name='difference')
+    @methods.add(name='difference_update', pure=False)
+    @methods.add(name='discard', pure=False)
+    @methods.add(name='intersection')
+    @methods.add(name='intersection_update', pure=False)
+    @methods.add(name='isdisjoint')
+    @methods.add(name='issubset')
+    @methods.add(name='issuperset')
+    @methods.add(name='pop')
+    @methods.add(name='remove')
+    @methods.add(name='symmetric_difference')
+    @methods.add(name='symmetric_difference_update', pure=False)
+    @methods.add(name='union')
+    @methods.add(name='update', pure=False)
+    def unsupported(self, *args, **kwargs):
+        msg = 'unsupported attribute for type {}'.format(self.type_name)
+        raise UnsupportedError(msg)

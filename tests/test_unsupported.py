@@ -60,6 +60,9 @@ def test_timeout():
     # unsupported attributes
     ('"Ab".swapcase()',     'unsupported attribute for type str'),
     ('(12).bit_length()',   'unsupported attribute for type int'),
+    ('(12.1).hex()',        'unsupported attribute for type float'),
+    ('set().union()',       'unsupported attribute for type set'),
+    ('[].sort()',           'unsupported attribute for type list'),
 ])
 def test_unsupported(expr, err):
     proof = prove_f(f"""

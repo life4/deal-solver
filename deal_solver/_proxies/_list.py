@@ -159,8 +159,8 @@ class ListSort(ProxySort):
     @methods.add(name='insert')
     @methods.add(name='pop')
     @methods.add(name='remove')
-    @methods.add(name='reverse')
-    @methods.add(name='sort')
+    @methods.add(name='reverse', pure=False)
+    @methods.add(name='sort', pure=False)
     def unsupported(self, *args, **kwargs):
         msg = 'unsupported attribute for type {}'.format(self.type_name)
         raise UnsupportedError(msg)
