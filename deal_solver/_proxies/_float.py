@@ -67,6 +67,8 @@ class FloatSort(ProxySort):
         raise RuntimeError('unreachable')  # pragma: no cover
 
     @methods.add(name='__float__')
+    @methods.add(name='conjugate')
+    @methods.add(name='real', prop=True)
     def m_float(self, ctx: 'Context') -> 'FloatSort':
         return self
 
@@ -159,6 +161,21 @@ class FloatSort(ProxySort):
         if not isinstance(other, (registry.float, registry.int)):
             return self._bad_bin_op(other, op='%', ctx=ctx)
         return self._math_op(other=other, handler=operator.__mod__, ctx=ctx)
+
+    @methods.add(name='imag', prop=True)
+    def m_imag(self, ctx: 'Context') -> 'FloatSort':
+        return self.val(0)
+
+    @methods.add(name='is_integer')
+    def m_is_integer(self, ctx: 'Context') -> 'BoolSort':
+        return self.m_eq(self.m_int(ctx=ctx).m_float(ctx=ctx), ctx=ctx)
+
+    @methods.add(name='as_integer_ratio')
+    @methods.add(name='from_hex')
+    @methods.add(name='hex')
+    def unsupported(self, *args, **kwargs):
+        msg = 'unsupported attribute for type {}'.format(self.type_name)
+        raise UnsupportedError(msg)
 
 
 class RealSort(FloatSort):

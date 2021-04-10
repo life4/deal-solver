@@ -186,6 +186,13 @@ from .helpers import prove_f
     'abs(-4.2) == 4.2',
     # 'str(4.2) == "4.2"',
 
+    # float methods
+    '(12.1).conjugate() == 12.1',
+    '(12.1).real == 12.1',
+    '(12.1).imag == 0',
+    '(12.1).is_integer() == False',
+    '(12.0).is_integer() == True',
+
     # bool functions
     'int(True) == 1',
     'int(False) == 0',
