@@ -26,8 +26,9 @@ class ListSort(ProxySort):
     methods = ProxySort.methods.copy()
 
     def __init__(self, expr) -> None:
-        # assert z3.is_seq(expr)
-        assert not z3.is_string(expr)
+        if expr is not None:
+            assert z3.is_seq(expr)
+            assert not z3.is_string(expr)
         self.expr = expr
 
     @classmethod

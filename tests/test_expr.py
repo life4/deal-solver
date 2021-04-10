@@ -245,6 +245,9 @@ from .helpers import prove_f
     '{1, 2}.union({2, 3}) == {1, 2, 3}',
     '{1, 2} & {2, 3} == {2}',
     '{1, 2}.intersection({2, 3}) == {2}',
+    '{1, 2} ^ {2, 3} == {1, 3}',
+    '{1, 2}.symmetric_difference({2, 3}) == {1, 3}',
+    '{1, 2}.difference({2, 3}) == {1}',
 
     # set methods
     '{1, 2}.copy() == {1, 2}',

@@ -24,7 +24,8 @@ class SetSort(ProxySort):
     expr: z3.ArrayRef
 
     def __init__(self, expr) -> None:
-        # assert z3.is_array(expr)
+        if expr is not None:
+            assert z3.is_array(expr)
         self.expr = expr
 
     @staticmethod
@@ -85,11 +86,30 @@ class SetSort(ProxySort):
     def m_and(self, other: 'ProxySort', ctx: 'Context') -> 'SetSort':
         # TODO: `set.intersection` supports any iterable
         if not isinstance(other, registry.set):
-            return self._bad_bin_op(other=other, op='|', ctx=ctx)
+            return self._bad_bin_op(other=other, op='&', ctx=ctx)
         expr = z3.SetIntersect(self.expr, other.expr)
         return registry.set(expr=expr)
 
+    @methods.add(name='symmetric_difference')
+    @methods.add(name='__xor__')
+    def m_xor(self, other: 'ProxySort', ctx: 'Context') -> 'SetSort':
+        # TODO: `set.symmetric_difference` supports any iterable
+        if not isinstance(other, registry.set):
+            return self._bad_bin_op(other=other, op='^', ctx=ctx)
+        expr = z3.SetUnion(
+            z3.SetDifference(self.expr, other.expr),
+            z3.SetDifference(other.expr, self.expr),
+        )
+        return registry.set(expr=expr)
+
     @methods.add(name='difference')
+    def r_difference(self, other: 'ProxySort', ctx: 'Context') -> 'SetSort':
+        # TODO: `set.difference` supports any iterable
+        if not isinstance(other, registry.set):
+            return self._bad_bin_op(other=other, op='^', ctx=ctx)
+        expr = z3.SetDifference(self.expr, other.expr)
+        return registry.set(expr=expr)
+
     @methods.add(name='difference_update', pure=False)
     @methods.add(name='discard', pure=False)
     @methods.add(name='intersection_update', pure=False)
@@ -98,7 +118,6 @@ class SetSort(ProxySort):
     @methods.add(name='issuperset')
     @methods.add(name='pop')
     @methods.add(name='remove')
-    @methods.add(name='symmetric_difference')
     @methods.add(name='symmetric_difference_update', pure=False)
     @methods.add(name='update', pure=False)
     def unsupported(self, *args, **kwargs):
