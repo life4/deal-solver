@@ -14,12 +14,14 @@ class Method(ProxySort):
     name: str
     impl: typing.Callable
     pure: bool
+    prop: bool
     obj: typing.Optional[ProxySort]
 
-    def __init__(self, name, impl, pure, obj=None) -> None:
+    def __init__(self, name, impl, pure, prop, obj=None) -> None:
         self.name = name
         self.impl = impl  # type: ignore
         self.pure = pure
+        self.prop = prop
         self.obj = obj
 
     def with_obj(self, obj: ProxySort) -> 'Method':
@@ -27,6 +29,7 @@ class Method(ProxySort):
             name=self.name,
             impl=self.impl,
             pure=self.pure,
+            prop=self.prop,
             obj=obj,
         )
 

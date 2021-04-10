@@ -18,13 +18,19 @@ class Methods:
         self._raw = []
         self._final = False
 
-    def add(self, *, name: str, pure: bool = True) -> typing.Callable[[F], F]:
+    def add(
+        self, *,
+        name: str,
+        pure: bool = True,
+        prop: bool = False,
+    ) -> typing.Callable[[F], F]:
         def wrapper(f: F) -> F:
             assert not self._final
             self._raw.append(dict(
                 name=name,
                 impl=f,
                 pure=pure,
+                prop=prop,
             ))
             return f
         return wrapper

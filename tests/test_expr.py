@@ -147,7 +147,13 @@ from .helpers import prove_f
     'max(5, 13) == 13',
     'float(4) == 4.0',
     'str(42) == "42"',
+
+    # int methods
     '(12).conjugate() == 12',
+    '(12).real == 12',
+    '(12).numerator == 12',
+    '(12).denominator == 1',
+    '(12).imag == 0',
 
     # string functions
     'min("ab", "cd") == "ab"',

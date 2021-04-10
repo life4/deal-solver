@@ -80,7 +80,10 @@ class ProxySort:
             msg = msg.format(self.type_name, name)
             ctx.add_exception(AttributeError, msg)
             return self
-        return method.with_obj(self)
+        result = method.with_obj(self)
+        if result.prop:
+            return result.m_call(ctx=ctx)
+        return result
 
     @methods.add(name='__bool__')
     def m_bool(self, ctx: 'Context') -> 'BoolSort':

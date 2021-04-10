@@ -37,6 +37,9 @@ class IntSort(ProxySort):
         return cls(expr=z3.IntVal(x))
 
     @methods.add(name='__int__')
+    @methods.add(name='conjugate')
+    @methods.add(name='numerator', prop=True)
+    @methods.add(name='real', prop=True)
     def m_int(self, ctx: 'Context') -> 'IntSort':
         return self
 
@@ -222,17 +225,17 @@ class IntSort(ProxySort):
             return self.m_float(ctx=ctx)._comp_op(other=other, handler=handler, ctx=ctx)
         return super()._comp_op(other=other, handler=handler, ctx=ctx)
 
-    @methods.add(name='conjugate')
-    def r_self(self, ctx: 'Context'):
-        return self
+    @methods.add(name='denominator', prop=True)
+    def m_denominator(self, ctx: 'Context') -> 'IntSort':
+        return self.val(1)
+
+    @methods.add(name='imag', prop=True)
+    def m_imag(self, ctx: 'Context') -> 'IntSort':
+        return self.val(0)
 
     @methods.add(name='as_integer_ratio')
     @methods.add(name='bit_length')
-    @methods.add(name='denominator')
     @methods.add(name='from_bytes')
-    @methods.add(name='imag')
-    @methods.add(name='numerator')
-    @methods.add(name='real')
     @methods.add(name='to_bytes')
     def unsupported(self, *args, **kwargs):
         msg = 'unsupported attribute for type {}'.format(self.type_name)
