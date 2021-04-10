@@ -109,3 +109,15 @@ def test_list_clear():
             assert a == [1]
     """)
     assert theorem.conclusion is Conclusion.OK
+
+
+def test_set_clear():
+    theorem = prove_f("""
+        def f():
+            a = {1, 2, 3}
+            a.clear()
+            assert a == set()
+            a.add(1)
+            assert a == {1}
+    """)
+    assert theorem.conclusion is Conclusion.OK

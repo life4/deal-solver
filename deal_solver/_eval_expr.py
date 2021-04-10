@@ -127,7 +127,7 @@ def eval_set(node: astroid.Set, ctx: Context) -> ProxySort:
     container = SetSort.make_empty()
     for subnode in node.elts:
         item = eval_expr(node=subnode, ctx=ctx)
-        container = SetSort.add(container, item)
+        container = container.r_add(item, ctx=ctx)
     return container
 
 

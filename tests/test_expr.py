@@ -242,6 +242,9 @@ from .helpers import prove_f
     # 'len({7, 9, 9, 9, 11}) == 3',
     '10 in {3, 6, 10, 17}',
 
+    # set methods
+    '{1, 2}.copy() == {1, 2}',
+
     # other expressions
     'True if True else False',
     'False if False else True',

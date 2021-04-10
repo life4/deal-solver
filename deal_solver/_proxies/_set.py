@@ -21,6 +21,7 @@ if typing.TYPE_CHECKING:
 class SetSort(ProxySort):
     type_name = 'set'
     methods = ProxySort.methods.copy()
+    expr: z3.ArrayRef
 
     def __init__(self, expr) -> None:
         # assert z3.is_array(expr)
@@ -37,13 +38,21 @@ class SetSort(ProxySort):
             expr = cls.make_empty_expr(sort)
         return cls(expr=expr)
 
-    @methods.add(name='add')
-    def add(self, item: 'ProxySort') -> 'SetSort':
+    @methods.add(name='add', pure=False)
+    def r_add(self, item: 'ProxySort', ctx: 'Context') -> 'SetSort':
         self._ensure(item)
-        cls = type(self)
-        return cls(
+        return registry.set(
             expr=z3.SetAdd(s=self.expr, e=unwrap(item)),
         )
+
+    @methods.add(name='copy')
+    def r_copy(self, ctx: 'Context') -> 'SetSort':
+        return self
+
+    @methods.add(name='clear', pure=False)
+    def r_clear(self, ctx: 'Context') -> 'SetSort':
+        sort = self.expr.sort().domain()
+        return self.make_empty(sort=sort)
 
     @methods.add(name='__contains__')
     def m_contains(self, item: 'ProxySort', ctx: 'Context') -> 'BoolSort':
@@ -62,8 +71,6 @@ class SetSort(ProxySort):
     def m_inv(self, ctx: 'Context') -> 'SetSort':
         return self._bad_un_op(op='~', ctx=ctx)
 
-    @methods.add(name='clear', pure=False)
-    @methods.add(name='copy')
     @methods.add(name='difference')
     @methods.add(name='difference_update', pure=False)
     @methods.add(name='discard', pure=False)
