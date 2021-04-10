@@ -35,7 +35,7 @@ def random_choice(seq, ctx: Context, **kwargs):
         b=seq.m_len(ctx=ctx).m_sub(one, ctx=ctx),
         ctx=ctx,
     )
-    return seq.get_item(index, ctx=ctx)
+    return seq.m_getitem(index, ctx=ctx)
 
 
 @register('random.Random.random')

@@ -218,7 +218,7 @@ def eval_getitem(node: astroid.Subscript, ctx: Context) -> ProxySort:
 
     if not isinstance(node.slice, astroid.Slice):
         item_ref = eval_expr(node=node.slice, ctx=ctx)
-        return value_ref.get_item(item_ref, ctx=ctx)
+        return value_ref.m_getitem(item_ref, ctx=ctx)
 
     if node.slice.step:
         raise UnsupportedError('slice step is not supported')

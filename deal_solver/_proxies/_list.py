@@ -48,8 +48,10 @@ class ListSort(ProxySort):
         expr = z3.Length(self.expr) != z3.IntVal(0)
         return registry.bool(expr=expr)
 
-    def get_item(self, index: 'ProxySort', ctx: 'Context') -> 'ProxySort':
-        return wrap(self.expr[unwrap(index)])
+    @methods.add(name='__getitem__')
+    def m_getitem(self, index: 'ProxySort', ctx: 'Context') -> 'ProxySort':
+        # TODO: emit IndexError
+        return wrap(self.expr[index.expr])
 
     def get_slice(self, start: 'ProxySort', stop: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         if self.expr is None:

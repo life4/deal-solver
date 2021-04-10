@@ -56,6 +56,16 @@ class StrSort(ProxySort):
         expr = self.expr != z3.Empty(z3.StringSort())
         return registry.bool(expr=expr)
 
+    @methods.add(name='__getitem__')
+    def m_getitem(self, index: 'ProxySort', ctx: 'Context') -> 'ProxySort':
+        # TODO: emit IndexError
+        expr = z3.SubString(
+            s=self.expr,
+            offset=index.expr,
+            length=z3.IntVal(1, ctx=ctx.z3_ctx),
+        )
+        return registry.str(expr=expr)
+
     @methods.add(name='__contains__')
     def m_contains(self, item: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         if not isinstance(item, registry.str):
@@ -85,6 +95,7 @@ class StrSort(ProxySort):
         assert self.expr is not None
         if start is None:
             start = registry.int.val(0)
+        # TODO: emit IndexError
         return registry.int(expr=z3.IndexOf(self.expr, other.expr, start.expr))
 
     @methods.add(name='find')

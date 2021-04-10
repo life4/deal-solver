@@ -136,7 +136,8 @@ class ProxySort:
         ctx.add_exception(TypeError, msg)
         return registry.int.val(0)
 
-    def get_item(self, item, ctx: 'Context') -> 'ProxySort':
+    @methods.add(name='__getitem__')
+    def m_getitem(self, item: 'ProxySort', ctx: 'Context') -> 'ProxySort':
         """self[item]
         """
         msg = "'{}' object is not subscriptable"

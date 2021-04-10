@@ -132,6 +132,7 @@ from .helpers import prove_f
     '"ab" + "cd" != "cdab"',
     '"bc" in "abcd"',
     # '"ab" * 3 == "ababab"',
+    '"abc"[1] == "b"',
 
     # int functions
     'bool(0) == False',
