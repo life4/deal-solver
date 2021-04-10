@@ -164,6 +164,10 @@ from .helpers import prove_f
     '"abcd".endswith("cd")',
     '"abcbcd".index("bc") == 1',
     '"abcbcd".index("bc", 2) == 3',
+    '"abcbcd".find("bc") == 1',
+    '"abcbcd".find("bc", 2) == 3',
+    '"abcbcd".find("bc", 4) == -1',
+    '"abcbcd".find("bd") == -1',
 
     # float functions
     'bool(2.1) == True',

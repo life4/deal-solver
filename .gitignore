@@ -6,4 +6,5 @@ __pycache__/
 /.hypothesis/
 /htmlcov/
 /.coverage
+/.coverage.*
 /coverage.xml

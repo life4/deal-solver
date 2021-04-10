@@ -24,6 +24,7 @@ if typing.TYPE_CHECKING:
 class StrSort(ProxySort):
     type_name = 'str'
     methods = ProxySort.methods.copy()
+    expr: z3.SeqRef
 
     def __init__(self, expr) -> None:
         assert z3.is_string(expr)
@@ -64,7 +65,7 @@ class StrSort(ProxySort):
             return registry.bool.val(True)
         assert self.expr is not None
         self._ensure(item)
-        expr = z3.Contains(self.expr, unwrap(item))
+        expr = z3.Contains(self.expr, item.expr)
         return registry.bool(expr=expr)
 
     @methods.add(name='startswith')
@@ -80,11 +81,26 @@ class StrSort(ProxySort):
         return registry.bool(expr=expr)
 
     @methods.add(name='index')
-    def r_index(self, other: 'ProxySort', start=None, *, ctx: 'Context') -> 'IntSort':
+    def r_index(self, other: 'ProxySort', start: 'ProxySort' = None, *, ctx: 'Context') -> 'IntSort':
         assert self.expr is not None
         if start is None:
-            start = z3.IntVal(0)
-        return registry.int(expr=z3.IndexOf(self.expr, unwrap(other), unwrap(start)))
+            start = registry.int.val(0)
+        return registry.int(expr=z3.IndexOf(self.expr, other.expr, start.expr))
+
+    @methods.add(name='find')
+    def r_find(self, other: 'ProxySort', start: 'ProxySort' = None, *, ctx: 'Context') -> 'IntSort':
+        assert self.expr is not None
+        if start is None:
+            start = registry.int.val(0)
+        expr = z3.If(
+            z3.Contains(
+                z3.SubString(self.expr, offset=start.expr, length=z3.Length(self.expr)),
+                other.expr,
+            ),
+            z3.IndexOf(self.expr, other.expr, start.expr),
+            z3.IntVal(-1, ctx=ctx.z3_ctx),
+        )
+        return registry.int(expr=expr)
 
     @methods.add(name='__len__')
     def m_len(self, ctx: 'Context') -> 'IntSort':
@@ -133,7 +149,6 @@ class StrSort(ProxySort):
     @methods.add(name='count')
     @methods.add(name='encode')
     @methods.add(name='expandtabs')
-    @methods.add(name='find')
     @methods.add(name='format')
     @methods.add(name='format_map')
     @methods.add(name='isalnum')
