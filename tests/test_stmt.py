@@ -121,3 +121,13 @@ def test_set_clear():
             assert a == {1}
     """)
     assert theorem.conclusion is Conclusion.OK
+
+
+def test_set_update():
+    theorem = prove_f("""
+        def f():
+            a = {1, 2}
+            a.update({2, 3})
+            assert a == {1, 2, 3}
+    """)
+    assert theorem.conclusion is Conclusion.OK
