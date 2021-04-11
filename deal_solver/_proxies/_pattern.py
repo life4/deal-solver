@@ -81,6 +81,8 @@ class PatternSort(ProxySort):
                 if start == 1:
                     return z3.Plus(sub_re)
                 return z3.Loop(sub_re, start)
+            if start == 0 and end == 1:
+                return z3.Option(sub_re)
             return z3.Loop(sub_re, start, end)
 
         if t_type == sre_constants.CATEGORY:

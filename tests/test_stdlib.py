@@ -198,6 +198,13 @@ def test_os_path_module_type_error(expr: str, err: str) -> None:
     'not re.fullmatch(r"[^a]", "ab")',
     'not re.fullmatch(r"[^a]", "bc")',
 
+    # question mark (zero or one)
+    're.fullmatch("ab?", "a")',
+    're.fullmatch("ab?", "ab")',
+    'not re.fullmatch("ab?", "abb")',
+    'not re.fullmatch("ab?", "b")',
+    'not re.fullmatch("ab?", "abc")',
+
     # star (zero or more)
     're.fullmatch("ab*", "a")',
     're.fullmatch("ab*", "ab")',
