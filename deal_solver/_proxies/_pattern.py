@@ -36,7 +36,7 @@ class PatternSort(ProxySort):
         return cls(expr=expr, pattern=pattern)
 
     @classmethod
-    def _parse_pattern(cls, pattern: sre_parse.SubPattern):
+    def _parse_pattern(cls, pattern: sre_parse.SubPattern) -> z3.ReRef:
         result = []
         for t_type, t_args in pattern.data:
             token = cls._parse_token(t_type, t_args)
@@ -66,8 +66,23 @@ class PatternSort(ProxySort):
             for st_type, st_args in t_args:
                 subpatterns.append(cls._parse_token(st_type, st_args))
             return z3.Union(*subpatterns)
+        if t_type == sre_constants.SUBPATTERN:
+            return cls._parse_pattern(t_args[-1])
         if t_type == sre_constants.ANY and t_args is None:
             return z3.Intersect(re_all, z3.Complement(z3.Re('\n')))
+
+        if t_type == sre_constants.MAX_REPEAT:
+            start = t_args[0]
+            end = t_args[1]
+            sub_re = cls._parse_pattern(t_args[2])
+            if end == sre_constants.MAXREPEAT:
+                if start == 0:
+                    return z3.Star(sub_re)
+                if start == 1:
+                    return z3.Plus(sub_re)
+                return z3.Loop(sub_re, start)
+            return z3.Loop(sub_re, start, end)
+
         if t_type == sre_constants.CATEGORY:
             # inclusive
             if t_args == sre_constants.CATEGORY_DIGIT:

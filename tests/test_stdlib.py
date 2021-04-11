@@ -198,6 +198,44 @@ def test_os_path_module_type_error(expr: str, err: str) -> None:
     'not re.fullmatch(r"[^a]", "ab")',
     'not re.fullmatch(r"[^a]", "bc")',
 
+    # star (zero or more)
+    're.fullmatch("ab*", "a")',
+    're.fullmatch("ab*", "ab")',
+    're.fullmatch("ab*", "abb")',
+    'not re.fullmatch("ab*", "b")',
+    'not re.fullmatch("ab*", "abc")',
+
+    # plus (one or more)
+    'not re.fullmatch("ab+", "a")',
+    're.fullmatch("ab+", "ab")',
+    're.fullmatch("ab+", "abb")',
+    'not re.fullmatch("ab+", "b")',
+    'not re.fullmatch("ab+", "abc")',
+
+    # N or more
+    'not re.fullmatch("ab{2,}", "a")',
+    'not re.fullmatch("ab{2,}", "ab")',
+    're.fullmatch("ab{2,}", "abb")',
+    're.fullmatch("ab{2,}", "abbb")',
+    'not re.fullmatch("ab{2,}", "b")',
+    'not re.fullmatch("ab{2,}", "abc")',
+
+    # range loop
+    'not re.fullmatch("ab{2,4}", "a")',
+    'not re.fullmatch("ab{2,4}", "ab")',
+    're.fullmatch("ab{2,4}", "abb")',
+    're.fullmatch("ab{2,4}", "abbb")',
+    're.fullmatch("ab{2,4}", "abbbb")',
+    'not re.fullmatch("ab{2,4}", "abbbbb")',
+    'not re.fullmatch("ab{2,4}", "b")',
+    'not re.fullmatch("ab{2,4}", "abc")',
+
+    # subpattern
+    're.fullmatch("a(bc)", "abc")',
+    'not re.fullmatch("a(bc)", "a")',
+    'not re.fullmatch("a(bc)", "ab")',
+    'not re.fullmatch("a(bc)", "bc")',
+
     # re.match
     're.match("[ab]", "a")',
     're.match("[ab]", "ac")',
