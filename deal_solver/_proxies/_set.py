@@ -5,7 +5,7 @@ import typing
 import z3
 
 # app
-from ._funcs import unwrap
+from ._funcs import unwrap, not_expr
 from ._proxy import ProxySort
 from ._registry import registry
 from .._exceptions import UnsupportedError
@@ -145,8 +145,24 @@ class SetSort(ProxySort):
         return self.m_and(other, ctx=ctx).m_eq(self.make_empty(), ctx=ctx)
 
     @methods.add(name='discard', pure=False)
+    def r_discard(self, item: 'ProxySort', ctx: 'Context') -> 'SetSort':
+        # TODO: check sort
+        expr = z3.SetDel(self.expr, item.expr)
+        return registry.set(expr=expr)
+
+    @methods.add(name='remove', pure=False)
+    def r_remove(self, item: 'ProxySort', ctx: 'Context') -> 'SetSort':
+        from .._context import ExceptionInfo
+        # TODO: check sort
+        ctx.exceptions.add(ExceptionInfo(
+            name='KeyError',
+            names={'KeyError', 'LookupError', 'Exception', 'BaseException'},
+            cond=not_expr(self.m_contains(item, ctx=ctx), ctx=ctx),
+        ))
+        expr = z3.SetDel(self.expr, item.expr)
+        return registry.set(expr=expr)
+
     @methods.add(name='pop')
-    @methods.add(name='remove')
     def unsupported(self, *args, **kwargs):
         msg = 'unsupported attribute for type {}'.format(self.type_name)
         raise UnsupportedError(msg)
