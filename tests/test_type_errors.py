@@ -104,10 +104,21 @@ from .helpers import prove_f
     ('{1} % 3',  "unsupported operand type(s) for %: 'set' and 'int'"),
     ('{1} + 3',  "unsupported operand type(s) for +: 'set' and 'int'"),
 
+    # bitwise operations for set
+    ('{1} | 3',  "unsupported operand type(s) for |: 'set' and 'int'"),
+    ('{1} & 3',  "unsupported operand type(s) for &: 'set' and 'int'"),
+    ('{1} ^ 3',  "unsupported operand type(s) for ^: 'set' and 'int'"),
+
     # unary operations for set
     ('-{1}',     "bad operand type for unary -: 'set'"),
     ('+{1}',     "bad operand type for unary +: 'set'"),
     ('~{1}',     "bad operand type for unary ~: 'set'"),
+
+    # methods of set
+    ('{1}.difference(3)',   "'int' object is not iterable"),
+    ('{1}.issuperset(3)',   "'int' object is not iterable"),
+    ('{1}.issubset(3)',     "'int' object is not iterable"),
+    ('{1}.isdisjoint(3)',   "'int' object is not iterable"),
 
     # binary operations for bool
     ('True - []',       "unsupported operand type(s) for -: 'bool' and 'list'"),

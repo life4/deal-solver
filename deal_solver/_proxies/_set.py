@@ -106,16 +106,43 @@ class SetSort(ProxySort):
     def r_difference(self, other: 'ProxySort', ctx: 'Context') -> 'SetSort':
         # TODO: `set.difference` supports any iterable
         if not isinstance(other, registry.set):
-            return self._bad_bin_op(other=other, op='^', ctx=ctx)
+            msg = "'{}' object is not iterable".format(other.type_name)
+            ctx.add_exception(TypeError, msg)
+            return self
         expr = z3.SetDifference(self.expr, other.expr)
         return registry.set(expr=expr)
+
+    @methods.add(name='issuperset')
+    def r_issuperset(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
+        # TODO: `set.issuperset` supports any iterable
+        if not isinstance(other, registry.set):
+            msg = "'{}' object is not iterable".format(other.type_name)
+            ctx.add_exception(TypeError, msg)
+            return registry.bool.val(False)
+        return other.r_issubset(self, ctx=ctx)
+
+    @methods.add(name='issubset')
+    def r_issubset(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
+        # TODO: `set.issubset` supports any iterable
+        if not isinstance(other, registry.set):
+            msg = "'{}' object is not iterable".format(other.type_name)
+            ctx.add_exception(TypeError, msg)
+            return registry.bool.val(False)
+        expr = z3.IsSubset(self.expr, other.expr)
+        return registry.bool(expr=expr)
+
+    @methods.add(name='isdisjoint')
+    def r_isdisjoint(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
+        # TODO: `set.isdisjoint` supports any iterable
+        if not isinstance(other, registry.set):
+            msg = "'{}' object is not iterable".format(other.type_name)
+            ctx.add_exception(TypeError, msg)
+            return registry.bool.val(False)
+        return self.m_and(other, ctx=ctx).m_eq(self.make_empty(), ctx=ctx)
 
     @methods.add(name='difference_update', pure=False)
     @methods.add(name='discard', pure=False)
     @methods.add(name='intersection_update', pure=False)
-    @methods.add(name='isdisjoint')
-    @methods.add(name='issubset')
-    @methods.add(name='issuperset')
     @methods.add(name='pop')
     @methods.add(name='remove')
     @methods.add(name='symmetric_difference_update', pure=False)
