@@ -143,6 +143,11 @@ class Theorem:
         eval_stmt(node=self._func, ctx=self._context)
         contracts = eval_contracts(func=self._func, ctx=self._context)
 
+        given = and_expr(
+            *contracts.pre,
+            *self._context.given,
+            ctx=self._context,
+        )
         for exc in self._context.exceptions:
             if exc.names & contracts.raises:
                 continue
@@ -151,33 +156,34 @@ class Theorem:
                 descr += ': {}'.format(exc.message)
             yield Constraint(
                 description=descr,
-                condition=and_expr(
-                    *contracts.pre,
-                    *self._context.given,
-                    exc.cond,
-                    ctx=self._context,
+                condition=self._imply(
+                    given=given,
+                    expected=exc.cond,
                 ),
             )
         for constraint in self._context.expected:
             yield Constraint(
                 description='assertion',
-                condition=and_expr(
-                    *contracts.pre,
-                    *self._context.given,
-                    not_expr(constraint, ctx=self._context),
-                    ctx=self._context,
+                condition=self._imply(
+                    given=given,
+                    expected=not_expr(constraint, ctx=self._context),
                 ),
             )
         for constraint in contracts.post:
             yield Constraint(
                 description='post-condition',
-                condition=and_expr(
-                    *contracts.pre,
-                    *self._context.given,
-                    not_expr(constraint, ctx=self._context),
-                    ctx=self._context,
+                condition=self._imply(
+                    given=given,
+                    expected=not_expr(constraint, ctx=self._context),
                 ),
             )
+
+    def _imply(self, given: BoolSort, expected: BoolSort) -> BoolSort:
+        expr = z3.And(
+            given.expr,
+            z3.Implies(given.expr, expected.expr, ctx=self._z3_context),
+        )
+        return BoolSort(expr=expr)
 
     def prove(self) -> Proof:
         try:
