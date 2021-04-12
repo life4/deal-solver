@@ -20,7 +20,7 @@ if typing.TYPE_CHECKING:
 T = typing.TypeVar('T', bound='ProxySort')
 
 
-def unwrap(obj: 'ProxySort') -> z3.Z3PPObject:
+def unwrap(obj: 'ProxySort') -> z3.ExprRef:
     # app
     from ._proxy import ProxySort
 

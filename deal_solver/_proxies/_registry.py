@@ -13,6 +13,7 @@ if typing.TYPE_CHECKING:
     from ._proxy import ProxySort
     from ._set import SetSort
     from ._str import StrSort
+    from ._var_tuple import VarTupleSort
 
 
 P = typing.TypeVar('P', bound=typing.Type['ProxySort'])
@@ -27,6 +28,7 @@ class Registry:
     list: typing.Type['ListSort']
     set: typing.Type['SetSort']
     str: typing.Type['StrSort']
+    tuple: typing.Type['VarTupleSort']
 
     # internal
     func: typing.Type['FuncSort']

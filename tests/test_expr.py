@@ -258,6 +258,17 @@ from .helpers import prove_f
     # set methods
     '{1, 2}.copy() == {1, 2}',
 
+    # tuple
+    '(1, 2) == (1, 2)',
+    '(1, 2) != (2, 1)',
+    '(1, 2) != (2, 1)',
+    '(1, 2) + (3,) == (1, 2, 3)',
+    '(1, 2) + () == (1, 2)',
+    '() + () == ()',
+    '()[:3] == ()',
+    '2 in (1, 2, 3)',
+    '4 not in (1, 2, 3)',
+
     # other expressions
     'True if True else False',
     'False if False else True',
@@ -286,6 +297,9 @@ from .helpers import prove_f
     'not bool([])',
     'bool([1, 2])',
     'bool([[]])',
+    'not bool(())',
+    'bool((1,))',
+    'bool(((),))',
     'int(1) == 1',
     'int(1.5) == 1',
     'int("12") == 12',

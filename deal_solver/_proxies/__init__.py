@@ -9,6 +9,7 @@ from ._list import ListSort
 from ._pattern import PatternSort
 from ._proxy import ProxySort
 from ._set import SetSort
+from ._var_tuple import VarTupleSort
 from ._str import StrSort
 
 
@@ -29,7 +30,8 @@ __all__ = [
     'FuncSort',
     'IntSort',
     'ListSort',
+    'PatternSort',
     'SetSort',
     'StrSort',
-    'PatternSort',
+    'VarTupleSort',
 ]

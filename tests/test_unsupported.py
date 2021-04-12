@@ -46,7 +46,6 @@ def test_timeout():
     # temporary unsupported
     ('None',                'unsupported constant None'),
     ('2+3j',                'unsupported constant 3j'),
-    ('()',                  'unsupported ast node Tuple'),
     ('{}',                  'unsupported ast node Dict'),
     ('dict()',              'cannot resolve name dict'),
     ('"ab" * 3',            'cannot multiply str'),

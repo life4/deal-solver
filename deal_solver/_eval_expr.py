@@ -11,7 +11,7 @@ from ._context import Context
 from ._exceptions import UnsupportedError
 from ._funcs import FUNCTIONS
 from ._proxies import (
-    FloatSort, FuncSort, LambdaSort, ListSort, ProxySort, SetSort,
+    FloatSort, FuncSort, LambdaSort, ListSort, ProxySort, SetSort, VarTupleSort,
     and_expr, if_expr, not_expr, or_expr, random_name, unwrap, wrap,
 )
 from ._registry import HandlersRegistry
@@ -116,10 +116,10 @@ def eval_bool_op(node: astroid.BoolOp, ctx: Context) -> ProxySort:
 @eval_expr.register(astroid.List)
 def eval_list(node: astroid.List, ctx: Context) -> ProxySort:
     container = ListSort.make_empty()
+    items = []
     for subnode in node.elts:
-        item = eval_expr(node=subnode, ctx=ctx)
-        container = ListSort.r_append(container, item, ctx=ctx)
-    return container
+        items.append(eval_expr(node=subnode, ctx=ctx))
+    return container.from_items(items, ctx=ctx)
 
 
 @eval_expr.register(astroid.Set)
@@ -129,6 +129,15 @@ def eval_set(node: astroid.Set, ctx: Context) -> ProxySort:
         item = eval_expr(node=subnode, ctx=ctx)
         container = container.r_add(item, ctx=ctx)
     return container
+
+
+@eval_expr.register(astroid.Tuple)
+def eval_tuple(node: astroid.Tuple, ctx: Context) -> ProxySort:
+    container = VarTupleSort.make_empty()
+    items = []
+    for subnode in node.elts:
+        items.append(eval_expr(node=subnode, ctx=ctx))
+    return container.from_items(items, ctx=ctx)
 
 
 @eval_expr.register(astroid.ListComp)
