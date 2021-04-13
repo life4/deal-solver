@@ -6,7 +6,7 @@ import astroid
 import z3
 
 # app
-from ._annotations import ann2sort
+from ._annotations import ann2type
 from ._ast import infer
 from ._context import Context, ExceptionInfo, ReturnInfo
 from ._eval_expr import eval_expr
@@ -27,7 +27,10 @@ def eval_func(node: astroid.FunctionDef, ctx: Context) -> None:
         sorts = [arg.sort() for arg in args]
         if not node.returns:
             raise UnsupportedError('no return type annotation for', node.name)
-        sorts.append(ann2sort(node.returns, ctx=ctx.z3_ctx))
+        sort = ann2type(name='_', node=node.returns, ctx=ctx.z3_ctx)
+        if sort is None:
+            raise UnsupportedError('unsupported type annotation', node.name)
+        sorts.append(sort.sort())
 
         func = z3.Function(node.name, *sorts)
         ctx.returns.add(ReturnInfo(

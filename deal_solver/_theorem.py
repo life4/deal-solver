@@ -8,14 +8,14 @@ import astroid
 import z3
 
 # app
-from ._annotations import ann2sort
+from ._annotations import ann2type
 from ._cached_property import cached_property
 from ._context import Context
 from ._eval_contracts import Contract, eval_contracts
 from ._eval_stmt import eval_stmt
 from ._exceptions import ProveError, UnsupportedError
 from ._model import Model
-from ._proxies import BoolSort, and_expr, not_expr, wrap
+from ._proxies import BoolSort, and_expr, not_expr
 
 
 DEFAULT_TIMEOUT = 5.0
@@ -132,10 +132,10 @@ class Theorem:
         for arg, annotation in zip(args.args, args.annotations):
             if annotation is None:
                 raise UnsupportedError('missed annotation for', arg.name)
-            sort = ann2sort(annotation, ctx=self._z3_context)
+            sort = ann2type(name=arg.name, node=annotation, ctx=self._z3_context)
             if sort is None:
                 raise UnsupportedError('unsupported annotation type', annotation.as_string())
-            result[arg.name] = wrap(z3.Const(name=arg.name, sort=sort))
+            result[arg.name] = sort
         return result
 
     @property
