@@ -1,8 +1,26 @@
+import re
+import pytest
+
 # project
 from deal_solver import Conclusion
 
 # app
 from .helpers import prove_f
+
+
+@pytest.mark.parametrize('expr, exc, err', [
+    ('[][0]',       IndexError, 'list index out of range'),
+    ('[4][1]',      IndexError, 'list index out of range'),
+])
+def test_type_error__table(prefer_real, expr, exc, err):
+    with pytest.raises(exc, match=re.escape(err)):
+        eval(expr)
+    proof = prove_f(f"""
+        def f():
+            {expr}
+    """)
+    assert proof.conclusion == Conclusion.FAIL
+    assert proof.description == f'{exc.__name__}: {err}'
 
 
 def test_ok():

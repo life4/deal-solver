@@ -24,7 +24,7 @@ T = typing.TypeVar('T', bound='VarTupleSort')
 
 @registry.add
 class VarTupleSort(ProxySort):
-    expr: z3.SeqRef
+    expr: typing.Optional[z3.SeqRef]
     type_name = 'tuple'
     methods = ProxySort.methods.copy()
 
@@ -33,6 +33,11 @@ class VarTupleSort(ProxySort):
             assert z3.is_seq(expr)
             assert not z3.is_string(expr)
         self.expr = expr
+
+    def sort(self) -> z3.SeqSortRef:
+        if self.expr is None:
+            return z3.SeqSort(z3.IntSort())
+        return self.expr.sort()
 
     @classmethod
     def from_items(cls: typing.Type[T], values: typing.List[ProxySort], ctx: 'Context') -> T:
@@ -64,7 +69,17 @@ class VarTupleSort(ProxySort):
 
     @methods.add(name='__getitem__')
     def m_getitem(self, index: 'ProxySort', ctx: 'Context') -> 'ProxySort':
-        # TODO: emit IndexError
+        from .._context import ExceptionInfo
+        if self.expr is None:
+            msg = '{} index out of range'.format(self.type_name)
+            ctx.add_exception(IndexError, msg)
+            return self
+        ctx.exceptions.add(ExceptionInfo(
+            name='IndexError',
+            names={'IndexError', 'LookupError', 'Exception', 'BaseException'},
+            cond=registry.bool(expr=index.expr >= z3.Length(self.expr)),
+            message='{} index out of range'.format(self.type_name),
+        ))
         return wrap(self.expr[index.expr])
 
     def get_slice(self, start: 'ProxySort', stop: 'ProxySort', ctx: 'Context') -> 'ProxySort':
@@ -80,6 +95,8 @@ class VarTupleSort(ProxySort):
 
     @methods.add(name='__contains__')
     def m_contains(self, item: 'ProxySort', ctx: 'Context') -> 'BoolSort':
+        if self.expr is None:
+            return registry.bool.val(False)
         if not self.expr.sort().basis().eq(item.expr.sort()):
             return registry.bool.val(False)
         self._ensure(item)
@@ -121,7 +138,7 @@ class VarTupleSort(ProxySort):
 
     @methods.add(name='__add__')
     def m_add(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
-        if not isinstance(other, registry.tuple) or isinstance(other, registry.list):
+        if type(other) is not type(self):
             msg = 'can only concatenate {s} (not "{o}") to {s}'
             msg = msg.format(s=self.type_name, o=other.type_name)
             ctx.add_exception(TypeError, msg)

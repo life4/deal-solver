@@ -97,7 +97,7 @@ class IntSort(ProxySort):
     def m_mul(self, other: ProxySort, ctx: 'Context') -> 'ProxySort':
         if isinstance(other, registry.bool):
             other = other.m_int(ctx=ctx)
-        if isinstance(other, (registry.str, registry.list)):
+        if isinstance(other, (registry.str, registry.tuple)):
             return other.m_mul(self, ctx=ctx)
         if isinstance(other, (registry.int, registry.float)):
             return self._math_op(other=other, handler=operator.__mul__, ctx=ctx)

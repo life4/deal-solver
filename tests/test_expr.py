@@ -102,6 +102,7 @@ from .helpers import prove_f
     '2 + True == 3',
     '2 - True == 1',
     '2 * True == 2',
+    '2 ** True == 2',
     '2 / True == 2.0',
     '+True == 1',
     '-True == -1',
@@ -436,29 +437,6 @@ def test_lambda_untyped():
             a = lambda x: x + x
             assert a(3) == 6
             assert a("ab") == "abab"
-    """)
-    assert theorem.conclusion is Conclusion.OK
-
-
-def test_list_append():
-    theorem = prove_f("""
-        def f():
-            a = []
-            a.append(1)
-            a.append(2)
-            a.append(2)
-            assert a == [1, 2, 2]
-    """)
-    assert theorem.conclusion is Conclusion.OK
-
-
-def test_list_extend():
-    theorem = prove_f("""
-        def f():
-            a = []
-            a.extend([1, 2])
-            a.extend([2])
-            assert a == [1, 2, 2]
     """)
     assert theorem.conclusion is Conclusion.OK
 

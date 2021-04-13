@@ -26,12 +26,15 @@ T = typing.TypeVar('T', bound='ProxySort')
 class ProxySort:
     module_name: str = 'builtins'
     type_name: str
-    expr: z3.Z3PPObject
+    expr: z3.ExprRef
     methods: 'Methods' = Methods()
 
     @staticmethod
     def make_empty_expr(sort):
         raise NotImplementedError
+
+    def sort(self) -> z3.SortRef:
+        return self.expr.sort()
 
     def _ensure(self, item, seq=False) -> None:
         """

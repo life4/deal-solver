@@ -7,7 +7,7 @@ import z3
 
 # app
 from ._ast import get_full_name, get_name, infer
-from ._proxies import FloatSort, ProxySort
+from ._proxies import FloatSort
 from ._types import AstNode
 
 
@@ -21,7 +21,7 @@ GENERIC_SORTS = {
     'list': z3.SeqSort,
     'set': z3.SetSort,
 }
-MaybeSort = typing.Optional[ProxySort]
+MaybeSort = typing.Optional[z3.SortRef]
 
 
 def ann2sort(node: AstNode, ctx: z3.Context) -> MaybeSort:
@@ -60,6 +60,17 @@ def _sort_from_getattr(node: astroid.Subscript, ctx: z3.Context) -> MaybeSort:
         return None
 
     type_name = (get_name(node.value) or '').lower()
+    if type_name == 'tuple':
+        if isinstance(node.slice, astroid.Tuple):
+            nodes = node.slice.elts
+            # variable size tuple
+            if isinstance(nodes[-1], astroid.Ellipsis):
+                subsort = ann2sort(node=nodes[0], ctx=ctx)
+                if subsort is None:
+                    return None
+                return z3.SeqSort(subsort)
+        return None
+
     sort = GENERIC_SORTS.get(type_name)
     if sort is None:
         return None
