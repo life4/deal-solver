@@ -1,5 +1,6 @@
 # stdlib
 import typing
+from types import MappingProxyType
 
 # external
 import astroid
@@ -7,20 +8,26 @@ import z3
 
 # app
 from ._ast import get_full_name, get_name, infer
-from ._proxies import FloatSort, ProxySort, wrap
+from ._proxies import FloatSort, ProxySort, VarTupleSort, wrap, ListSort, SetSort
 from ._types import AstNode
 
 
-SIMPLE_SORTS = {
+SIMPLE_SORTS = MappingProxyType({
     'bool': z3.BoolSort,
     'int': z3.IntSort,
     'float': FloatSort.sort,
     'str': z3.StringSort,
-}
-GENERIC_SORTS = {
+})
+GENERIC_TYPES: typing.Mapping[str, typing.Type[ProxySort]]
+GENERIC_TYPES = MappingProxyType({
+    'list': ListSort,
+    'set': SetSort,
+})
+GENERIC_SORTS: typing.Mapping[str, typing.Callable]
+GENERIC_SORTS = MappingProxyType({
     'list': z3.SeqSort,
     'set': z3.SetSort,
-}
+})
 MaybeSort = typing.Optional[ProxySort]
 
 
@@ -51,6 +58,8 @@ def _sort_from_str(*, name: str, node: astroid.Const, ctx: z3.Context) -> MaybeS
 
 
 def _sort_from_getattr(*, name: str, node: astroid.Subscript, ctx: z3.Context) -> MaybeSort:
+    if not isinstance(node.slice, astroid.Index):
+        return None
     definitions = infer(node.value)
     if len(definitions) != 1:
         return None
@@ -61,21 +70,23 @@ def _sort_from_getattr(*, name: str, node: astroid.Subscript, ctx: z3.Context) -
 
     type_name = (get_name(node.value) or '').lower()
     if type_name == 'tuple':
-        if isinstance(node.slice, astroid.Tuple):
-            nodes = node.slice.elts
+        if isinstance(node.slice.value, astroid.Tuple):
+            nodes = node.slice.value.elts
             # variable size tuple
             if isinstance(nodes[-1], astroid.Ellipsis):
                 subtype = ann2type(name=name, node=nodes[0], ctx=ctx)
                 if subtype is None:
                     return None
-                return wrap(z3.Const(name=name, sort=z3.SeqSort(subtype.sort())))
+                sort = z3.SeqSort(subtype.sort())
+                return VarTupleSort(expr=z3.Const(name=name, sort=sort))
         return None
 
-    sort = GENERIC_SORTS.get(type_name)
-    if sort is None:
+    gtype = GENERIC_TYPES.get(type_name)
+    if gtype is None:
         return None
 
     subtype = ann2type(name=name, node=node.slice, ctx=ctx)
     if subtype is None:
         return None
-    return wrap(z3.Const(name=name, sort=sort(subtype.sort())))
+    sort = GENERIC_SORTS[type_name](subtype.sort())
+    return gtype(expr=z3.Const(name=name, sort=sort))

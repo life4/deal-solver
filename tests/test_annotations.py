@@ -2,7 +2,7 @@
 import pytest
 
 # project
-from deal_solver import Conclusion
+from deal_solver import Conclusion, UnsupportedError
 
 # app
 from .helpers import prove_f
@@ -55,6 +55,11 @@ from .helpers import prove_f
         '(a != set()) or (a == set())',
     ),
     (
+        'from typing import Tuple',
+        'Tuple[int, ...]',
+        'len(a) >= 0',
+    ),
+    (
         '',
         'set[int]',
         '(a != set()) or (a == set())',
@@ -69,3 +74,38 @@ def test_asserts_ok(setup: str, ann: str, check: str) -> None:
     text = text.format(s=setup, a=ann, c=check)
     theorem = prove_f(text)
     assert theorem.conclusion is Conclusion.OK
+
+
+@pytest.mark.parametrize('setup, ann', [
+    # too generic
+    ('', 'set'),
+    ('', '"set"'),
+    ('', 'tuple'),
+
+    # unsupported yet
+    ('', 'tuple[int]'),
+    ('', 'tuple[int, str]'),
+    ('from typing import Iterator', 'Iterator[int]'),
+
+    # invalid
+    ('', 'int[int]'),
+    ('', 'unknown'),
+    ('', '"unknown"'),
+    ('', 'int[unknown]'),
+    ('', 'unknown[int]'),
+    ('', 'list[int:str]'),
+    ('', 'list[int, str]'),
+    ('', 'max'),
+    ('from itertools import chain', 'chain'),
+    ('from glob import glob',       'glob'),
+    ('from inspect import getfile', 'getfile'),
+    ('import inspect',              'inspect.getfile'),
+])
+def test_unsupported(setup: str, ann: str) -> None:
+    proof = prove_f(f"""
+        {setup}
+        def f(a: {ann}):
+            pass
+    """)
+    assert proof.conclusion == Conclusion.SKIP
+    assert type(proof.error) is UnsupportedError
