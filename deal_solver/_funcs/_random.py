@@ -4,13 +4,13 @@ import z3
 # app
 from .._context import Context
 from .._exceptions import UnsupportedError
-from .._proxies import FloatSort, IntSort, ProxySort, random_name, wrap
+from .._proxies import FloatSort, IntSort, ProxySort, random_name
 from ._registry import register
 
 
 @register('random.Random.randint')
 def random_randint(a, b, ctx: Context, **kwargs):
-    result = wrap(z3.Int(random_name('randint')))
+    result = IntSort(z3.Int(random_name('randint')))
     ctx.given.add(result.m_ge(a, ctx=ctx))
     ctx.given.add(result.m_le(b, ctx=ctx))
     return result
@@ -18,7 +18,7 @@ def random_randint(a, b, ctx: Context, **kwargs):
 
 @register('random.Random.randrange')
 def random_randrange(start, stop, ctx: Context, **kwargs):
-    result = wrap(z3.Int(random_name('randrange')))
+    result = IntSort(z3.Int(random_name('randrange')))
     ctx.given.add(result.m_ge(start, ctx=ctx))
     ctx.given.add(result.m_lt(stop, ctx=ctx))
     return result
@@ -42,7 +42,7 @@ def random_choice(seq, ctx: Context, **kwargs):
 def random_random(ctx: Context, **kwargs):
     zero = FloatSort.val(0)
     one = FloatSort.val(1)
-    result = wrap(z3.Const(
+    result = FloatSort(z3.Const(
         name=random_name('random'),
         sort=FloatSort.sort(),
     ))

@@ -6,7 +6,7 @@ import typing
 import z3
 
 # app
-from ._funcs import if_expr, unwrap, wrap
+from ._funcs import if_expr, unwrap
 from ._proxy import ProxySort
 from ._registry import registry
 from .._exceptions import UnsupportedError
@@ -49,11 +49,13 @@ class IntSort(ProxySort):
         return self.m_real(ctx=ctx)
 
     def m_real(self, ctx: 'Context') -> 'RealSort':
-        return wrap(z3.ToReal(self.expr)).m_real(ctx=ctx)
+        from ._float import RealSort
+        return RealSort(z3.ToReal(self.expr)).m_real(ctx=ctx)
 
     def m_fp(self, ctx: 'Context'):
+        from ._float import RealSort
         expr = z3.ToReal(self.expr)
-        return wrap(expr).m_fp(ctx=ctx)
+        return RealSort(expr).m_fp(ctx=ctx)
 
     @methods.add(name='__str__')
     def m_str(self, ctx: 'Context') -> 'StrSort':

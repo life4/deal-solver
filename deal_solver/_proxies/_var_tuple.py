@@ -87,7 +87,8 @@ class VarTupleSort(ProxySort):
             return self
         start_expr = unwrap(start)
         stop_expr = unwrap(stop)
-        return wrap(z3.SubSeq(
+        proxy = type(self)
+        return proxy(z3.SubSeq(
             s=self.expr,
             offset=start_expr,
             length=stop_expr - start_expr,

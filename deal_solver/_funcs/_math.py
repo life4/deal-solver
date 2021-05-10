@@ -6,7 +6,7 @@ import z3
 
 # app
 from .._context import Context
-from .._proxies import BoolSort, FloatSort, IntSort, ProxySort, and_expr, if_expr, wrap
+from .._proxies import BoolSort, FloatSort, IntSort, ProxySort, and_expr, if_expr
 from ._registry import FUNCTIONS, register
 
 
@@ -85,7 +85,7 @@ def math_sin(x: ProxySort, ctx: Context, **kwargs) -> ProxySort:
     nominator: FloatSort = x
     for positive, pow in series:
         nominator = nominator.m_mul(x, ctx=ctx).m_mul(x, ctx=ctx)
-        denominator = wrap(z3.IntVal(math.factorial(pow), ctx=ctx.z3_ctx))
+        denominator = IntSort.val(math.factorial(pow))
         diff = nominator.m_truediv(denominator, ctx=ctx)
         if positive:
             result = result.m_add(diff, ctx=ctx)

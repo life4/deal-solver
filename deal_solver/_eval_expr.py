@@ -81,18 +81,18 @@ def eval_bin_op(node: astroid.BinOp, ctx: Context) -> ProxySort:
     right = eval_expr(node=node.right, ctx=ctx)
     method = left.m_getattr(op_name, ctx=ctx)
     result = method.m_call(right, ctx=ctx)
-    return wrap(result)
+    return result
 
 
 @eval_expr.register(astroid.Compare)
 def eval_compare(node: astroid.Compare, ctx: Context) -> ProxySort:
-    left = wrap(eval_expr(node=node.left, ctx=ctx))
+    left = eval_expr(node=node.left, ctx=ctx)
     for op, right_node in node.ops:
         assert op, 'missed comparison operator'
         op_name = COMAPARISON.get(op)
         assert op_name, 'unsupported comparison operator'
 
-        right = wrap(eval_expr(node=right_node, ctx=ctx))
+        right = eval_expr(node=right_node, ctx=ctx)
         # TODO: proper chain
         method = left.m_getattr(op_name, ctx=ctx)
         return method.m_call(right, ctx=ctx)
@@ -153,7 +153,7 @@ def eval_list_comp(node: astroid.ListComp, ctx: Context) -> ProxySort:
         items = _compr_apply_ifs(ctx=ctx, comp=comp, items=items)
     items = _compr_apply_body(node=node, ctx=ctx, comp=comp, items=items)
 
-    return wrap(items)
+    return ListSort(items)
 
 
 def _compr_apply_ifs(

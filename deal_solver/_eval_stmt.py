@@ -33,8 +33,9 @@ def eval_func(node: astroid.FunctionDef, ctx: Context) -> None:
         sorts.append(sort.sort())
 
         func = z3.Function(node.name, *sorts)
+        proxy = type(sort)
         ctx.returns.add(ReturnInfo(
-            value=func(*args),
+            value=proxy(func(*args)),
             cond=BoolSort.val(True)
         ))
         return
@@ -48,7 +49,7 @@ def eval_func(node: astroid.FunctionDef, ctx: Context) -> None:
             ctx.skips.append(exc)
 
 
-@eval_stmt.register(astroid.Assert)
+@ eval_stmt.register(astroid.Assert)
 def eval_assert(node: astroid.Assert, ctx: Context) -> None:
     assert node.test is not None, 'assert without condition'
     expr = eval_expr(node=node.test, ctx=ctx)
@@ -59,12 +60,12 @@ def eval_assert(node: astroid.Assert, ctx: Context) -> None:
     ctx.expected.add(expr)
 
 
-@eval_stmt.register(astroid.Expr)
+@ eval_stmt.register(astroid.Expr)
 def eval_expr_stmt(node: astroid.Expr, ctx: Context) -> None:
     eval_expr(node=node.value, ctx=ctx)
 
 
-@eval_stmt.register(astroid.Assign)
+@ eval_stmt.register(astroid.Assign)
 def eval_assign(node: astroid.Assign, ctx: Context) -> None:
     if not node.targets:
         raise UnsupportedError('assignment to an empty target')
@@ -78,7 +79,7 @@ def eval_assign(node: astroid.Assign, ctx: Context) -> None:
     ctx.scope.set(name=target.name, value=value_ref)
 
 
-@eval_stmt.register(astroid.Return)
+@ eval_stmt.register(astroid.Return)
 def eval_return(node: astroid.Return, ctx: Context) -> None:
     ctx.returns.add(ReturnInfo(
         value=eval_expr(node=node.value, ctx=ctx),
@@ -86,7 +87,7 @@ def eval_return(node: astroid.Return, ctx: Context) -> None:
     ))
 
 
-@eval_stmt.register(astroid.If)
+@ eval_stmt.register(astroid.If)
 def eval_if_else(node: astroid.If, ctx: Context) -> None:
     assert node.test
     assert node.body
@@ -149,7 +150,7 @@ def eval_if_else(node: astroid.If, ctx: Context) -> None:
         ))
 
 
-@eval_stmt.register(astroid.Raise)
+@ eval_stmt.register(astroid.Raise)
 def eval_raise(node: astroid.Raise, ctx: Context) -> None:
     names: typing.Set[str] = set()
     for exc in (node.exc, node.cause):
@@ -179,9 +180,9 @@ def _get_all_bases(node) -> typing.Iterator[str]:
                 yield from _get_all_bases(parent_node)
 
 
-@eval_stmt.register(astroid.Global)
-@eval_stmt.register(astroid.ImportFrom)
-@eval_stmt.register(astroid.Import)
-@eval_stmt.register(astroid.Pass)
+@ eval_stmt.register(astroid.Global)
+@ eval_stmt.register(astroid.ImportFrom)
+@ eval_stmt.register(astroid.Import)
+@ eval_stmt.register(astroid.Pass)
 def eval_skip(node, ctx: Context) -> None:
     pass
