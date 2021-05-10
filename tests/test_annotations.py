@@ -55,14 +55,19 @@ from .helpers import prove_f
         '(a != set()) or (a == set())',
     ),
     (
+        '',
+        'set[int]',
+        '(a != set()) or (a == set())',
+    ),
+    (
         'from typing import Tuple',
         'Tuple[int, ...]',
         'len(a) >= 0',
     ),
     (
         '',
-        'set[int]',
-        '(a != set()) or (a == set())',
+        'tuple[int, ...]',
+        'len(a) >= 0',
     ),
 ])
 def test_asserts_ok(setup: str, ann: str, check: str) -> None:
@@ -87,16 +92,22 @@ def test_asserts_ok(setup: str, ann: str, check: str) -> None:
     ('', 'tuple[int, str]'),
     ('from typing import Iterator', 'Iterator[int]'),
 
-    # invalid
-    ('', 'int[int]'),
+    # unresolved names
     ('', 'unknown'),
     ('', '"unknown"'),
     ('', 'int[unknown]'),
     ('', 'unknown[int]'),
+    ('', 'tuple[unknown, ...]'),
+
+    # invalid
+    ('', 'int[int]'),
     ('', 'list[int:str]'),
     ('', 'list[int, str]'),
+    ('', 'tuple[...]'),
     ('', 'max'),
+    ('', 'max[int]'),
     ('from itertools import chain', 'chain'),
+    ('from itertools import chain', 'chain[int]'),
     ('from glob import glob',       'glob'),
     ('from inspect import getfile', 'getfile'),
     ('import inspect',              'inspect.getfile'),
