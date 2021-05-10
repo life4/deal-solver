@@ -20,5 +20,8 @@ class cached_property(Generic[T]):  # noqa: N801
         pass
 
     def __get__(self, obj, cls):
-        value = obj.__dict__[self.func.__name__] = self.func(obj)
+        if obj is None:
+            return self
+        value = self.func(obj)
+        obj.__dict__[self.func.__name__] = value
         return value
