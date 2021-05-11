@@ -5,6 +5,7 @@ import typing
 if typing.TYPE_CHECKING:
     # app
     from ._bool import BoolSort
+    from ._dict import DictSort
     from ._float import FloatSort
     from ._func import FuncSort
     from ._int import IntSort
@@ -29,6 +30,7 @@ class Registry:
     set: typing.Type['SetSort']
     str: typing.Type['StrSort']
     tuple: typing.Type['VarTupleSort']
+    dict: typing.Type['DictSort']
 
     # internal
     func: typing.Type['FuncSort']

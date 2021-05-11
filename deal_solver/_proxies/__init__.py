@@ -1,5 +1,6 @@
 # app
 from ._bool import BoolSort
+from ._dict import DictSort
 from ._float import FloatSort
 from ._func import FuncSort
 from ._funcs import and_expr, if_expr, not_expr, or_expr, random_name, unwrap, wrap
@@ -26,6 +27,7 @@ __all__ = [
     'ProxySort',
 
     'BoolSort',
+    'DictSort',
     'FloatSort',
     'FuncSort',
     'IntSort',

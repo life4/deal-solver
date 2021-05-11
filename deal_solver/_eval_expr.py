@@ -11,6 +11,7 @@ from ._context import Context
 from ._exceptions import UnsupportedError
 from ._funcs import FUNCTIONS
 from ._proxies import (
+    DictSort,
     FloatSort, FuncSort, LambdaSort, ListSort, ProxySort, SetSort, VarTupleSort,
     and_expr, if_expr, not_expr, or_expr, random_name, unwrap, wrap,
 )
@@ -128,6 +129,16 @@ def eval_set(node: astroid.Set, ctx: Context) -> ProxySort:
     for subnode in node.elts:
         item = eval_expr(node=subnode, ctx=ctx)
         container = container.r_add(item, ctx=ctx)
+    return container
+
+
+@eval_expr.register(astroid.Dict)
+def eval_dict(node: astroid.Dict, ctx: Context) -> ProxySort:
+    container = DictSort()
+    for key_node, val_node in node.items:
+        key = eval_expr(node=key_node, ctx=ctx)
+        val = eval_expr(node=val_node, ctx=ctx)
+        container = container.m_setitem(key=key, value=val, ctx=ctx)
     return container
 
 
