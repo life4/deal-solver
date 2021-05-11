@@ -275,6 +275,7 @@ from .helpers import prove_f
     '1 in {1: 2}',
     '3 in {1: 2, 3: 4}',
     '2 not in {1: 2}',
+    '{1: 2}[1] == 2',
 
     # other expressions
     'True if True else False',
