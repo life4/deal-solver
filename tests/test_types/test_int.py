@@ -4,6 +4,17 @@ from ..helpers import prove_f
 
 
 @pytest.mark.parametrize('check', [
+    # comparison
+    '1 != 2',
+    '2 == 2',
+    '3 < 4',
+    '3 <= 4',
+    '4 <= 4',
+    '4 >= 4',
+    '5 >= 4',
+    '5 > 4',
+    '(5 > 4) and (7 > 3)',
+
     # math
     '13 == 13',
     '+12 == 12',

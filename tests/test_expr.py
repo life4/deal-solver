@@ -24,25 +24,6 @@ from .helpers import prove_f
     'False or True',
     'True or False',
 
-    # math for float
-    '1.4 + 2.7 == 4.1',
-    '2.9 - 1.4 == 1.5',
-    '7.0 % 3.0 == 1.0',
-    '7.0 % 3.5 == 0.0',
-    # 'math.isclose(4.5 ** 2, 20.25)',
-    '5.0 / 2.0 == 2.5',
-    '(1/2) / (4/3) == 0.375',
-    '7.3 // 2.0 == 3.0',
-    '7.3 // -2.0 == -4.0',
-    '-7.3 // 2.0 == -4.0',
-    '0.005 // 0.005 == 1.0',
-    '2.7 > 1.4',
-    '1.4 < 2.7',
-    '2.7 == 2.7',
-    'float("nan") != float("nan")',
-    'float("inf") == float("inf")',
-    '-0.0 == +0.0',
-
     # math for int and float
     '1 + 2.0 == 3.0',
     '1.0 + 2 == 3.0',
@@ -83,34 +64,6 @@ from .helpers import prove_f
     '2.3 * True == 2.3',
     # '2.3 ** True == 2.3',
     '2.3 / True == 2.3',
-
-    # comparison
-    '1 != 2',
-    '2 == 2',
-    '3 < 4',
-    '3 <= 4',
-    '4 <= 4',
-    '4 >= 4',
-    '5 >= 4',
-    '5 > 4',
-    '(5 > 4) and (7 > 3)',
-
-    # float functions
-    'bool(2.1) == True',
-    'bool(0.0) == False',
-    'int(4.2) == 4',
-    'float(4.2) == 4.2',
-    'float(10 / 2) == 5.0',
-    'float("Inf") > 10000',
-    'abs(-4.2) == 4.2',
-    # 'str(4.2) == "4.2"',
-
-    # float methods
-    '(12.1).conjugate() == 12.1',
-    '(12.1).real == 12.1',
-    '(12.1).imag == 0',
-    '(12.1).is_integer() == False',
-    '(12.0).is_integer() == True',
 
     # bool functions
     'int(True) == 1',
