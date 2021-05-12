@@ -119,7 +119,7 @@ class UntypedDictSort(DictSort):
 
     @cached_property
     def item_sort(self):
-        item_sort = z3.Datatype(random_name('dict_val'))
+        item_sort = z3.Datatype('dict_val__int')
         item_sort.declare(
             'new',
             ('exists', z3.BoolSort()),

@@ -1,5 +1,31 @@
+import pytest
 from deal_solver import Conclusion
 from ..helpers import prove_f
+
+
+@pytest.mark.parametrize('check', [
+    # contains
+    '1 not in {}',
+    '1 in {1: 2}',
+    '3 in {1: 2, 3: 4}',
+    '2 not in {1: 2}',
+
+    # getitem
+    '{1: 2}[1] == 2',
+
+    # compare
+    '{} == {}',
+])
+def test_asserts_ok(prefer_real: bool, check: str) -> None:
+    assert eval(check)
+    text = """
+        from typing import List
+        def f():
+            assert {}
+    """
+    text = text.format(check)
+    theorem = prove_f(text)
+    assert theorem.conclusion is Conclusion.OK
 
 
 def test_dict_clear():
@@ -18,10 +44,9 @@ def test_dict_clear_empty():
         def f():
             a = {}
             a.clear()
-            a[1]
+            assert a == {}
     """)
-    assert theorem.conclusion is Conclusion.FAIL
-    assert str(theorem.description) == 'KeyError'
+    assert theorem.conclusion is Conclusion.OK
 
 
 def test_dict_getattr_fails():

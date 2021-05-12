@@ -270,13 +270,6 @@ from .helpers import prove_f
     '2 in (1, 2, 3)',
     '4 not in (1, 2, 3)',
 
-    # dict
-    '1 not in {}',
-    '1 in {1: 2}',
-    '3 in {1: 2, 3: 4}',
-    '2 not in {1: 2}',
-    '{1: 2}[1] == 2',
-
     # other expressions
     'True if True else False',
     'False if False else True',
