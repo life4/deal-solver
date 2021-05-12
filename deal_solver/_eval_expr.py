@@ -11,7 +11,7 @@ from ._context import Context
 from ._exceptions import UnsupportedError
 from ._funcs import FUNCTIONS
 from ._proxies import (
-    DictSort,
+    DictSort, UntypedDictSort,
     FloatSort, FuncSort, LambdaSort, ListSort, ProxySort, SetSort, VarTupleSort,
     and_expr, if_expr, not_expr, or_expr, random_name, unwrap, wrap,
 )
@@ -133,8 +133,8 @@ def eval_set(node: astroid.Set, ctx: Context) -> ProxySort:
 
 
 @eval_expr.register(astroid.Dict)
-def eval_dict(node: astroid.Dict, ctx: Context) -> ProxySort:
-    container = DictSort()
+def eval_dict(node: astroid.Dict, ctx: Context) -> DictSort:
+    container: DictSort = UntypedDictSort()
     for key_node, val_node in node.items:
         key = eval_expr(node=key_node, ctx=ctx)
         val = eval_expr(node=val_node, ctx=ctx)

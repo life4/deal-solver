@@ -1,6 +1,6 @@
 # app
 from ._bool import BoolSort
-from ._dict import DictSort
+from ._dict import DictSort, UntypedDictSort
 from ._float import FloatSort
 from ._func import FuncSort
 from ._funcs import and_expr, if_expr, not_expr, or_expr, random_name, unwrap, wrap
@@ -15,6 +15,7 @@ from ._str import StrSort
 
 
 __all__ = [
+    # funcs
     'if_expr',
     'random_name',
     'unwrap',
@@ -23,9 +24,11 @@ __all__ = [
     'or_expr',
     'not_expr',
 
+    # special types
     'LambdaSort',
     'ProxySort',
 
+    # types
     'BoolSort',
     'DictSort',
     'FloatSort',
@@ -36,4 +39,7 @@ __all__ = [
     'SetSort',
     'StrSort',
     'VarTupleSort',
+
+    # untyped
+    'UntypedDictSort',
 ]

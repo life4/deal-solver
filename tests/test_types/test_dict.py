@@ -13,11 +13,32 @@ def test_dict_clear():
     assert str(theorem.description) == 'KeyError'
 
 
+def test_dict_clear_empty():
+    theorem = prove_f("""
+        def f():
+            a = {}
+            a.clear()
+            a[1]
+    """)
+    assert theorem.conclusion is Conclusion.FAIL
+    assert str(theorem.description) == 'KeyError'
+
+
 def test_dict_getattr_fails():
     theorem = prove_f("""
         def f():
             a = {1: 2}
             a[2]
+    """)
+    assert theorem.conclusion is Conclusion.FAIL
+    assert str(theorem.description) == 'KeyError'
+
+
+def test_dict_getattr_fails_empty():
+    theorem = prove_f("""
+        def f():
+            a = {}
+            a[0]
     """)
     assert theorem.conclusion is Conclusion.FAIL
     assert str(theorem.description) == 'KeyError'
