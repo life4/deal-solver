@@ -16,13 +16,14 @@ from ..helpers import prove_f
     '7.3 // -2.0 == -4.0',
     '-7.3 // 2.0 == -4.0',
     '0.005 // 0.005 == 1.0',
+
+    # compare
     '2.7 > 1.4',
     '1.4 < 2.7',
     '2.7 == 2.7',
     'float("nan") != float("nan")',
     'float("inf") == float("inf")',
     '-0.0 == +0.0',
-
 
     # functions
     'bool(2.1) == True',
