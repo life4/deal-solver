@@ -15,6 +15,10 @@ from ..helpers import prove_f
 
     # compare
     '{} == {}',
+    '{1: 2} == {1: 2}',
+    '{1: 2} != {2: 1}',
+    '{1: 2} != {}',
+    '{} != {1: 2}',
 ])
 def test_asserts_ok(prefer_real: bool, check: str) -> None:
     assert eval(check)

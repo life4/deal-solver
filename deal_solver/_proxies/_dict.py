@@ -5,7 +5,6 @@ import typing
 import z3
 
 # app
-from ._funcs import random_name
 from ._proxy import ProxySort
 from ._registry import registry
 from .._exceptions import UnsupportedError
@@ -36,8 +35,8 @@ class DictSort(ProxySort):
         self.value_sort = value_sort
 
     @classmethod
-    def make_empty(cls, key_sort: z3.SortRef, value: ProxySort) -> 'DictSort':
-        item_sort = z3.Datatype(random_name('dict_val'))
+    def make_empty(cls, key: ProxySort, value: ProxySort) -> 'DictSort':
+        item_sort = z3.Datatype(f'dict_val__{value.type_name}')
         item_sort.declare(
             'new',
             ('exists', z3.BoolSort()),
@@ -46,7 +45,7 @@ class DictSort(ProxySort):
         item_sort = item_sort.create()
         item = item_sort.new(z3.BoolVal(False), value.expr)
         return cls(
-            expr=z3.K(dom=key_sort, v=item),
+            expr=z3.K(dom=key.sort(), v=item),
             item_sort=item_sort,
             value_sort=type(value),
         )
@@ -135,7 +134,7 @@ class UntypedDictSort(DictSort):
     @methods.add(name='__setitem__', pure=False)
     def m_setitem(self, key: ProxySort, value: ProxySort, ctx: 'Context') -> 'DictSort':
         dict_val = DictSort.make_empty(
-            key_sort=key.sort(),
+            key=key,
             value=value,
         )
         return dict_val.m_setitem(key=key, value=value, ctx=ctx)
