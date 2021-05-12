@@ -1,4 +1,7 @@
+# stdlib
 import re
+
+# external
 import pytest
 
 # project

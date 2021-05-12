@@ -69,6 +69,7 @@ class VarTupleSort(ProxySort):
 
     @methods.add(name='__getitem__')
     def m_getitem(self, index: 'ProxySort', ctx: 'Context') -> 'ProxySort':
+        # app
         from .._context import ExceptionInfo
         if self.expr is None:
             msg = '{} index out of range'.format(self.type_name)

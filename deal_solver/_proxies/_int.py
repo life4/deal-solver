@@ -6,10 +6,10 @@ import typing
 import z3
 
 # app
+from .._exceptions import UnsupportedError
 from ._funcs import if_expr, unwrap
 from ._proxy import ProxySort
 from ._registry import registry
-from .._exceptions import UnsupportedError
 
 
 if typing.TYPE_CHECKING:
@@ -49,10 +49,12 @@ class IntSort(ProxySort):
         return self.m_real(ctx=ctx)
 
     def m_real(self, ctx: 'Context') -> 'RealSort':
+        # app
         from ._float import RealSort
         return RealSort(z3.ToReal(self.expr)).m_real(ctx=ctx)
 
     def m_fp(self, ctx: 'Context'):
+        # app
         from ._float import RealSort
         expr = z3.ToReal(self.expr)
         return RealSort(expr).m_fp(ctx=ctx)

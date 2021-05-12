@@ -5,10 +5,10 @@ import typing
 import z3
 
 # app
-from ._funcs import unwrap, not_expr
+from .._exceptions import UnsupportedError
+from ._funcs import not_expr, unwrap
 from ._proxy import ProxySort
 from ._registry import registry
-from .._exceptions import UnsupportedError
 
 
 if typing.TYPE_CHECKING:
@@ -152,7 +152,9 @@ class SetSort(ProxySort):
 
     @methods.add(name='remove', pure=False)
     def r_remove(self, item: 'ProxySort', ctx: 'Context') -> 'SetSort':
+        # app
         from .._context import ExceptionInfo
+
         # TODO: check sort
         ctx.exceptions.add(ExceptionInfo(
             name='KeyError',

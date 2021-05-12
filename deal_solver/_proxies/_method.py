@@ -1,9 +1,13 @@
+# stdlib
 import typing
 
-from ._proxy import ProxySort
+# app
 from .._exceptions import UnsupportedError
+from ._proxy import ProxySort
+
 
 if typing.TYPE_CHECKING:
+    # app
     from .._context import Context
 
 

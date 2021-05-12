@@ -5,10 +5,10 @@ import typing
 import z3
 
 # app
+from .._cached_property import cached_property
+from .._exceptions import UnsupportedError
 from ._proxy import ProxySort
 from ._registry import registry
-from .._exceptions import UnsupportedError
-from .._cached_property import cached_property
 
 
 if typing.TYPE_CHECKING:
@@ -63,6 +63,7 @@ class DictSort(ProxySort):
 
     @methods.add(name='__getitem__', pure=False)
     def m_getitem(self, key: ProxySort, ctx: 'Context') -> ProxySort:
+        # app
         from .._context import ExceptionInfo
 
         item = z3.Select(self.expr, key.expr)

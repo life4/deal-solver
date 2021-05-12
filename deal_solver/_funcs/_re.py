@@ -1,6 +1,6 @@
 # app
 from .._context import Context
-from .._proxies import BoolSort, ProxySort, PatternSort
+from .._proxies import BoolSort, PatternSort, ProxySort
 from ._registry import register
 
 

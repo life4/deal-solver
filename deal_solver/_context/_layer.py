@@ -7,8 +7,8 @@ import z3
 
 if typing.TYPE_CHECKING:
     # app
-    from .._proxies import BoolSort
     from .._context import Context
+    from .._proxies import BoolSort
 
 
 T = typing.TypeVar('T')
