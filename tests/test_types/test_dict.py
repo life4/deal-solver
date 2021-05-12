@@ -19,8 +19,13 @@ from ..helpers import prove_f
     '{1: 2} != {2: 1}',
     '{1: 2} != {}',
     '{} != {1: 2}',
+
+    # methods
+    '{1: 2}.get(1, 3) == 2',
+    '{1: 2}.get(3, 4) == 4',
+    '{}.get(1, 2) == 2',
 ])
-def test_asserts_ok(prefer_real: bool, check: str) -> None:
+def test_asserts_ok(check: str) -> None:
     assert eval(check)
     text = """
         from typing import List

@@ -48,7 +48,7 @@ from ..helpers import prove_f
     '[1]',
     '[1, 2]',
 ])
-def test_expr_asserts_ok(prefer_real: bool, check: str) -> None:
+def test_expr_asserts_ok(check: str) -> None:
     assert eval(check)
     text = """
         from typing import List

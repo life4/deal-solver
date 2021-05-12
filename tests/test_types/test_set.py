@@ -36,7 +36,7 @@ from ..helpers import prove_f
     '{1, 2}.isdisjoint({3, 4})',
     'not {1, 2}.isdisjoint({2, 3})',
 ])
-def test_expr_asserts_ok(prefer_real: bool, check: str) -> None:
+def test_expr_asserts_ok(check: str) -> None:
     assert eval(check)
     text = """
         from typing import List

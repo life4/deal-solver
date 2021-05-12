@@ -76,12 +76,22 @@ class DictSort(ProxySort):
         expr = self.item_sort.value(item)
         return self.value_sort(expr)
 
+    @methods.add(name='get')
+    def r_get(self, key: ProxySort, default: ProxySort, *, ctx: 'Context') -> ProxySort:
+        item = z3.Select(self.expr, key.expr)
+        expr = z3.If(
+            self.item_sort.exists(item),
+            self.item_sort.value(item),
+            default.expr,
+        )
+        return self.value_sort(expr)
+
     @methods.add(name='copy')
-    def m_copy(self, ctx: 'Context') -> 'DictSort':
+    def r_copy(self, ctx: 'Context') -> 'DictSort':
         return self
 
     @methods.add(name='clear', pure=False)
-    def m_clear(self, ctx: 'Context') -> 'DictSort':
+    def r_clear(self, ctx: 'Context') -> 'DictSort':
         cls = type(self)
         item = self.expr.default()
         return cls(
@@ -97,7 +107,6 @@ class DictSort(ProxySort):
         return registry.bool(expr=expr)
 
     @methods.add(name='fromkeys')
-    @methods.add(name='get')
     @methods.add(name='items')
     @methods.add(name='keys')
     @methods.add(name='pop')
@@ -145,8 +154,12 @@ class UntypedDictSort(DictSort):
         return registry.int.val(0)
 
     @methods.add(name='clear', pure=False)
-    def m_clear(self, ctx: 'Context') -> 'DictSort':
+    def r_clear(self, ctx: 'Context') -> 'DictSort':
         return self
+
+    @methods.add(name='get')
+    def r_get(self, key: ProxySort, default: ProxySort, *, ctx: 'Context') -> ProxySort:
+        return default
 
     @methods.add(name='__contains__')
     def m_contains(self, key: 'ProxySort', ctx: 'Context') -> 'BoolSort':
