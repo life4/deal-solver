@@ -42,6 +42,8 @@ from ..helpers import prove_f
     'max([3, 7, 5]) == 7',
     'sum([3, 7, 5]) == 15',
     'sum([sum([3, 7]), 5]) == 15',
+    'bool([]) == False',
+    'bool([0]) == True',
 
     # implicit bool
     'not []',

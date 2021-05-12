@@ -125,16 +125,6 @@ from .helpers import prove_f
     '5 > 4',
     '(5 > 4) and (7 > 3)',
 
-    # strings
-    '"ab" < "cd"',
-    '"ab" == "ab"',
-    '"ab" != "cd"',
-    '"ab" + "cd" == "abcd"',
-    '"ab" + "cd" != "cdab"',
-    '"bc" in "abcd"',
-    # '"ab" * 3 == "ababab"',
-    '"abc"[1] == "b"',
-
     # int functions
     'bool(0) == False',
     'bool(1) == True',
@@ -155,27 +145,6 @@ from .helpers import prove_f
     '(12).numerator == 12',
     '(12).denominator == 1',
     '(12).imag == 0',
-
-    # string functions
-    'min("ab", "cd") == "ab"',
-    'min("cd", "ab") == "ab"',
-    'max("ab", "cd") == "cd"',
-    'max("cd", "ab") == "cd"',
-    'len("abcd") == 4',
-    'str("abc") == "abc"',
-    # 'float("12.3") == 12.3',
-    'ord("a") == 97',
-    'ord(".") == 46',
-
-    # string methods
-    '"abcd".startswith("ab")',
-    '"abcd".endswith("cd")',
-    '"abcbcd".index("bc") == 1',
-    '"abcbcd".index("bc", 2) == 3',
-    '"abcbcd".find("bc") == 1',
-    '"abcbcd".find("bc", 2) == 3',
-    '"abcbcd".find("bc", 4) == -1',
-    '"abcbcd".find("bd") == -1',
 
     # float functions
     'bool(2.1) == True',
@@ -201,17 +170,6 @@ from .helpers import prove_f
     'float(False) == 0.0',
     'bool(True)',
     'not bool(False)',
-
-    # tuple
-    '(1, 2) == (1, 2)',
-    '(1, 2) != (2, 1)',
-    '(1, 2) != (2, 1)',
-    '(1, 2) + (3,) == (1, 2, 3)',
-    '(1, 2) + () == (1, 2)',
-    '() + () == ()',
-    '()[:3] == ()',
-    '2 in (1, 2, 3)',
-    '4 not in (1, 2, 3)',
 
     # other expressions
     'True if True else False',
