@@ -18,6 +18,13 @@ from ..helpers import prove_f
     '{1} != set()',
     'set() == set()',
 
+    # compare mismatching types
+    '{1} != [1]',
+    '{1} != {1: 2}',
+    '{1} != "hi"',
+    '{1} != 1',
+    '{1} != True',
+
     # 'len({7, 9, 9, 9, 11}) == 3',
 
     # operations

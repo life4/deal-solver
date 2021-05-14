@@ -135,10 +135,6 @@ from .helpers import prove_f
     '1.5 != 2',
     '0.0 == 0',
 
-    # compare mismatching types
-    '{1} != [1]',
-    'not ({1} == [1])',
-
     # compare mismatching empty types
     'set() != []',
     'not (set() == [])',

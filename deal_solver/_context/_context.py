@@ -13,7 +13,7 @@ from ._trace import Trace
 
 if typing.TYPE_CHECKING:
     # app
-    from .._proxies import BoolSort
+    from .._proxies import BoolSort, ProxySort
 
 
 class Context(typing.NamedTuple):
@@ -85,7 +85,7 @@ class Context(typing.NamedTuple):
         ))
 
     @property
-    def return_value(self):
+    def return_value(self) -> typing.Optional['ProxySort']:
         returns = list(self.returns)
         if not returns:
             return None

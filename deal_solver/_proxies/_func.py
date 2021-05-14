@@ -28,7 +28,7 @@ class FuncSort(ProxySort):
         self.impl = impl  # type: ignore
 
     @methods.add(name='__call__')
-    def m_call(self, *args, ctx: 'Context', **kwargs) -> 'ProxySort':
+    def m_call(self, *args, ctx: 'Context', **kwargs) -> ProxySort:
         """self(*args, **kwargs)
         """
         if isinstance(self.impl, astroid.FunctionDef):
@@ -36,7 +36,7 @@ class FuncSort(ProxySort):
         return self.impl(*args, ctx=ctx, **kwargs)
 
     @staticmethod
-    def _call_function(node: astroid.FunctionDef, ctx: 'Context', call_args=list):
+    def _call_function(node: astroid.FunctionDef, ctx: 'Context', call_args=list) -> ProxySort:
         # app
         from .._eval_contracts import eval_contracts
         from .._eval_stmt import eval_stmt

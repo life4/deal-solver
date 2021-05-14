@@ -135,6 +135,18 @@ class VarTupleSort(ProxySort):
             return self
         raise UnsupportedError('cannot multiply list')
 
+    @methods.add(name='__eq__')
+    def m_eq(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
+        # type mismatch
+        if not isinstance(other, registry.tuple):
+            return registry.bool.val(False)
+        # other is untyped
+        if isinstance(other, UntypedVarTupleSort):
+            empty = self.make_empty_expr(sort=self.sort().basis())
+            expr = self.expr == empty
+            return registry.bool(expr=expr)
+        return super().m_eq(other, ctx=ctx)
+
     @methods.add(name='__pos__')
     def m_pos(self, ctx: 'Context') -> 'VarTupleSort':
         return self._bad_un_op(op='+', ctx=ctx)

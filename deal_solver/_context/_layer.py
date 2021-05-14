@@ -5,7 +5,7 @@ import typing
 if typing.TYPE_CHECKING:
     # app
     from .._context import Context
-    from .._proxies import BoolSort
+    from .._proxies import BoolSort, ProxySort
 
 
 T = typing.TypeVar('T')
@@ -19,7 +19,7 @@ class ExceptionInfo(typing.NamedTuple):
 
 
 class ReturnInfo(typing.NamedTuple):
-    value: typing.Any
+    value: 'ProxySort'
     cond: 'BoolSort'
 
     def merge(self, other: 'ReturnInfo', ctx: 'Context') -> 'ReturnInfo':
