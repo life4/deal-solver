@@ -7,7 +7,7 @@ import z3
 
 # app
 from .._exceptions import UnsupportedError
-from ._funcs import not_expr, unwrap, wrap
+from ._funcs import not_expr, wrap
 from ._methods import Methods
 
 
@@ -144,7 +144,7 @@ class ProxySort:
         return registry.bool.val(False)
 
     def _binary_op(self, other: 'ProxySort', handler: typing.Callable, ctx: 'Context'):
-        return handler(self.expr, unwrap(other))
+        return handler(self.expr, other.expr)
 
     # comparison
 

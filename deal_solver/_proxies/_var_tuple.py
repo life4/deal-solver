@@ -7,7 +7,7 @@ import z3
 
 # app
 from .._exceptions import UnsupportedError
-from ._funcs import random_name, unwrap, wrap
+from ._funcs import random_name, wrap
 from ._proxy import ProxySort
 from ._registry import registry
 
@@ -39,9 +39,9 @@ class VarTupleSort(ProxySort):
     @classmethod
     def from_items(cls: typing.Type[T], values: typing.List[ProxySort], ctx: 'Context') -> T:
         assert values
-        items = cls.make_empty_expr(sort=unwrap(values[0]).sort())
+        items = cls.make_empty_expr(sort=values[0].expr.sort())
         for value in values:
-            item = z3.Unit(unwrap(value))
+            item = z3.Unit(value.expr)
             items = z3.Concat(items, item)
         return cls(expr=items)
 
@@ -72,8 +72,8 @@ class VarTupleSort(ProxySort):
         return wrap(self.expr[index.expr])
 
     def get_slice(self, start: 'ProxySort', stop: 'ProxySort', ctx: 'Context') -> 'ProxySort':
-        start_expr = unwrap(start)
-        stop_expr = unwrap(stop)
+        start_expr = start.expr
+        stop_expr = stop.expr
         proxy = type(self)
         return proxy(z3.SubSeq(
             s=self.expr,
@@ -85,15 +85,15 @@ class VarTupleSort(ProxySort):
     def m_contains(self, item: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         if not self.expr.sort().basis().eq(item.expr.sort()):
             return registry.bool.val(False)
-        unit = z3.Unit(unwrap(item))
+        unit = z3.Unit(item.expr)
         return registry.bool(expr=z3.Contains(self.expr, unit))
 
     @methods.add(name='index')
     def r_index(self, other: 'ProxySort', start: 'ProxySort' = None, *, ctx: 'Context') -> 'IntSort':
         if start is None:
-            start = z3.IntVal(0)
-        unit = z3.Unit(unwrap(other))
-        return registry.int(expr=z3.IndexOf(self.expr, unit, unwrap(start)))
+            start = registry.int(z3.IntVal(0))
+        unit = z3.Unit(other.expr)
+        return registry.int(expr=z3.IndexOf(self.expr, unit, start.expr))
 
     @methods.add(name='__len__')
     def m_len(self, ctx: 'Context') -> 'IntSort':
@@ -101,7 +101,7 @@ class VarTupleSort(ProxySort):
 
     @methods.add(name='count')
     def r_count(self, item: 'ProxySort', ctx: 'Context') -> 'IntSort':
-        item_expr = unwrap(item)
+        item_expr = item.expr
         f = z3.RecFunction(
             random_name('list_count'),
             z3.IntSort(), z3.IntSort(),

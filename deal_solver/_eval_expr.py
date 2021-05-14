@@ -12,8 +12,8 @@ from ._exceptions import UnsupportedError
 from ._funcs import FUNCTIONS
 from ._proxies import (
     DictSort, FloatSort, FuncSort, LambdaSort, ListSort, UntypedVarTupleSort, UntypedListSort,
-    ProxySort, SetSort, UntypedDictSort, VarTupleSort, and_expr, UntypedSetSort,
-    if_expr, not_expr, or_expr, random_name, unwrap, wrap,
+    ProxySort, SetSort, UntypedDictSort, VarTupleSort, and_expr, UntypedSetSort, IntSort,
+    if_expr, not_expr, or_expr, random_name, wrap,
 )
 from ._registry import HandlersRegistry
 
@@ -162,7 +162,7 @@ def eval_list_comp(node: astroid.ListComp, ctx: Context) -> ProxySort:
     comp: astroid.Comprehension
     comp = node.generators[0]
 
-    items = unwrap(eval_expr(node=comp.iter, ctx=ctx))
+    items = eval_expr(node=comp.iter, ctx=ctx).expr
     if comp.ifs:
         items = _compr_apply_ifs(ctx=ctx, comp=comp, items=items)
     items = _compr_apply_body(node=node, ctx=ctx, comp=comp, items=items)
@@ -173,7 +173,7 @@ def eval_list_comp(node: astroid.ListComp, ctx: Context) -> ProxySort:
 def _compr_apply_ifs(
     ctx: Context,
     comp: astroid.Comprehension,
-    items: z3.Z3PPObject,
+    items: z3.ExprRef,
 ) -> z3.Z3PPObject:
     one = z3.IntVal(1, ctx=ctx.z3_ctx)
     zero = z3.IntVal(0, ctx=ctx.z3_ctx)
@@ -221,7 +221,7 @@ def _compr_apply_body(
         name=comp.target.name,
         value=wrap(items[index]),
     )
-    body_ref = unwrap(eval_expr(node=node.elt, ctx=body_ctx))
+    body_ref = eval_expr(node=node.elt, ctx=body_ctx).expr
 
     f = z3.RecFunction(
         random_name('compr_body'),
@@ -248,7 +248,7 @@ def eval_getitem(node: astroid.Subscript, ctx: Context) -> ProxySort:
     if node.slice.lower:
         lower_ref = eval_expr(node=node.slice.lower, ctx=ctx)
     else:
-        lower_ref = z3.IntVal(0, ctx=ctx.z3_ctx)
+        lower_ref = IntSort(z3.IntVal(0, ctx=ctx.z3_ctx))
     if node.slice.upper:
         upper_ref = eval_expr(node=node.slice.upper, ctx=ctx)
     else:

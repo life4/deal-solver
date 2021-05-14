@@ -180,7 +180,7 @@ class IntSort(ProxySort):
     def _bitwise_op(self, other: 'ProxySort', handler: typing.Callable, ctx: 'Context') -> 'IntSort':
         expr = z3.BV2Int(handler(
             z3.Int2BV(self.expr, INT_BITS),
-            z3.Int2BV(unwrap(other), INT_BITS),
+            z3.Int2BV(other.expr, INT_BITS),
         ))
         return type(self)(expr=expr)
 

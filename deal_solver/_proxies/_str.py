@@ -7,7 +7,6 @@ import z3
 
 # app
 from .._exceptions import UnsupportedError
-from ._funcs import unwrap
 from ._proxy import ProxySort
 from ._registry import registry
 
@@ -77,13 +76,13 @@ class StrSort(ProxySort):
     @methods.add(name='startswith')
     def r_startswith(self, prefix: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         assert self.expr is not None
-        expr = z3.PrefixOf(unwrap(prefix), self.expr)
+        expr = z3.PrefixOf(prefix.expr, self.expr)
         return registry.bool(expr=expr)
 
     @methods.add(name='endswith')
     def r_endswith(self, suffix: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         assert self.expr is not None
-        expr = z3.SuffixOf(unwrap(suffix), self.expr)
+        expr = z3.SuffixOf(suffix.expr, self.expr)
         return registry.bool(expr=expr)
 
     @methods.add(name='index')

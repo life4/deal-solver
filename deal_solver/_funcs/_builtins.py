@@ -4,7 +4,7 @@ import z3
 # app
 from .._context import Context, ExceptionInfo
 from .._proxies import (
-    BoolSort, IntSort, ProxySort, SetSort, UntypedSetSort, StrSort, if_expr, random_name, unwrap, wrap,
+    BoolSort, IntSort, ProxySort, SetSort, UntypedSetSort, StrSort, if_expr, random_name, wrap,
 )
 from ._registry import register
 
@@ -16,7 +16,7 @@ def builtins_ignore(*args, **kwargs) -> None:
 
 @register('builtins.sum')
 def builtins_sum(items, ctx: Context, **kwargs) -> ProxySort:
-    items = unwrap(items)
+    items = items.expr
     f = z3.RecFunction(
         random_name('sum'),
         z3.IntSort(ctx=ctx.z3_ctx),
@@ -40,7 +40,7 @@ def builtins_min(a: ProxySort, b: ProxySort = None, *, ctx: Context, **kwargs) -
     if b is not None:
         return if_expr(a.m_lt(b, ctx=ctx), a, b, ctx=ctx)
 
-    items = unwrap(a)
+    items = a.expr
     f = z3.RecFunction(
         random_name('min'),
         z3.IntSort(ctx=ctx.z3_ctx),
@@ -68,7 +68,7 @@ def builtins_max(a: ProxySort, b: ProxySort = None, *, ctx: Context, **kwargs) -
     if b is not None:
         return if_expr(a.m_gt(b, ctx=ctx), a, b, ctx=ctx)
 
-    items = unwrap(a)
+    items = a.expr
     f = z3.RecFunction(
         random_name('max'),
         z3.IntSort(ctx=ctx.z3_ctx),
@@ -106,7 +106,7 @@ def builtins_ord(val: ProxySort, ctx: Context, **kwargs) -> IntSort:
         message='ord() expected a character, but string of length N found',
     ))
     bv = z3.BitVec(random_name('ord_bv'), 8)
-    ctx.given.add(BoolSort(z3.Unit(bv) == unwrap(val)))
+    ctx.given.add(BoolSort(z3.Unit(bv) == val.expr))
     return IntSort(z3.BV2Int(bv))
 
 

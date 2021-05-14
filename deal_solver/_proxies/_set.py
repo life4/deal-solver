@@ -6,7 +6,7 @@ import z3
 
 # app
 from .._exceptions import UnsupportedError
-from ._funcs import not_expr, unwrap
+from ._funcs import not_expr
 from ._proxy import ProxySort
 from ._registry import registry
 
@@ -39,7 +39,7 @@ class SetSort(ProxySort):
     @classmethod
     def from_items(cls, values: typing.List[ProxySort], ctx: 'Context') -> 'SetSort':
         assert values
-        items = cls.make_empty_expr(sort=unwrap(values[0]).sort())
+        items = cls.make_empty_expr(sort=values[0].expr.sort())
         for value in values:
             items = z3.SetAdd(items, value.expr)
         return cls(expr=items)
@@ -47,7 +47,7 @@ class SetSort(ProxySort):
     @methods.add(name='add', pure=False)
     def r_add(self, item: 'ProxySort', ctx: 'Context') -> 'SetSort':
         return registry.set(
-            expr=z3.SetAdd(s=self.expr, e=unwrap(item)),
+            expr=z3.SetAdd(s=self.expr, e=item.expr),
         )
 
     @methods.add(name='copy')
@@ -61,7 +61,7 @@ class SetSort(ProxySort):
 
     @methods.add(name='__contains__')
     def m_contains(self, item: 'ProxySort', ctx: 'Context') -> 'BoolSort':
-        return registry.bool(expr=z3.IsMember(e=unwrap(item), s=self.expr))
+        return registry.bool(expr=z3.IsMember(e=item.expr, s=self.expr))
 
     @methods.add(name='__pos__')
     def m_pos(self, ctx: 'Context') -> 'SetSort':
