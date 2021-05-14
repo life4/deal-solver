@@ -21,13 +21,12 @@ from ..helpers import prove_f
     '(1, 2) + (3,) == (1, 2, 3)',
     '(1, 2) + () == (1, 2)',
     '() + () == ()',
+    '1 not in ()',
+    '2 in (1, 2, 3)',
+    '4 not in (1, 2, 3)',
 
     # getitem
     '()[:3] == ()',
-
-    # contains
-    '2 in (1, 2, 3)',
-    '4 not in (1, 2, 3)',
 
     # functions
     'len(()) == 0',
@@ -36,6 +35,11 @@ from ..helpers import prove_f
     # implicit bool
     'not ()',
     '(1, 2)',
+
+    # methods
+    '(1, 2, 1, 1).count(1) == 3',
+    '(1, 2, 1, 1).count(4) == 0',
+    '().count(4) == 0',
 ])
 def test_expr_asserts_ok(check: str) -> None:
     assert eval(check)

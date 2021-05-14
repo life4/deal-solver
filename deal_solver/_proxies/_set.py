@@ -24,8 +24,7 @@ class SetSort(ProxySort):
     expr: z3.ArrayRef
 
     def __init__(self, expr) -> None:
-        if expr is not None:
-            assert z3.is_array(expr)
+        assert z3.is_array(expr)
         self.expr = expr
 
     @staticmethod
@@ -33,15 +32,20 @@ class SetSort(ProxySort):
         return z3.EmptySet(sort)
 
     @classmethod
-    def make_empty(cls, sort: z3.SortRef = None) -> 'SetSort':
-        expr = None
-        if sort is not None:
-            expr = cls.make_empty_expr(sort)
+    def make_empty(cls, sort: z3.SortRef) -> 'SetSort':
+        expr = cls.make_empty_expr(sort)
         return cls(expr=expr)
+
+    @classmethod
+    def from_items(cls, values: typing.List[ProxySort], ctx: 'Context') -> 'SetSort':
+        assert values
+        items = cls.make_empty_expr(sort=unwrap(values[0]).sort())
+        for value in values:
+            items = z3.SetAdd(items, value.expr)
+        return cls(expr=items)
 
     @methods.add(name='add', pure=False)
     def r_add(self, item: 'ProxySort', ctx: 'Context') -> 'SetSort':
-        self._ensure(item)
         return registry.set(
             expr=z3.SetAdd(s=self.expr, e=unwrap(item)),
         )
@@ -142,7 +146,8 @@ class SetSort(ProxySort):
             msg = "'{}' object is not iterable".format(other.type_name)
             ctx.add_exception(TypeError, msg)
             return registry.bool.val(False)
-        return self.m_and(other, ctx=ctx).m_eq(self.make_empty(), ctx=ctx)
+        empty = self.make_empty(sort=other.expr.domain())
+        return self.m_and(other, ctx=ctx).m_eq(empty, ctx=ctx)
 
     @methods.add(name='discard', pure=False)
     def r_discard(self, item: 'ProxySort', ctx: 'Context') -> 'SetSort':
@@ -164,7 +169,51 @@ class SetSort(ProxySort):
         expr = z3.SetDel(self.expr, item.expr)
         return registry.set(expr=expr)
 
+    @methods.add(name='__eq__')
+    def m_eq(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
+        # type mismatch
+        if not isinstance(other, registry.set):
+            return registry.bool.val(False)
+        # other is untyped
+        if isinstance(other, UntypedSetSort):
+            empty = self.make_empty_expr(sort=self.expr.domain())
+            expr = self.expr == empty
+            return registry.bool(expr=expr)
+        return super().m_eq(other, ctx=ctx)
+
     @methods.add(name='pop')
     def unsupported(self, *args, **kwargs):
         msg = 'unsupported attribute for type {}'.format(self.type_name)
         raise UnsupportedError(msg)
+
+
+class UntypedSetSort(SetSort):
+    methods = SetSort.methods.copy()
+
+    def __init__(self) -> None:
+        pass
+
+    @staticmethod
+    def sort() -> z3.SeqSortRef:
+        return z3.SeqSort(z3.IntSort())
+
+    @property
+    def expr(self):
+        return z3.Empty(self.sort())
+
+    @methods.add(name='add', pure=False)
+    def r_add(self, item: 'ProxySort', ctx: 'Context') -> 'SetSort':
+        result = SetSort.make_empty(item.sort())
+        return result.r_add(item, ctx=ctx)
+
+    @methods.add(name='__eq__')
+    def m_eq(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
+        # type mismatch
+        if not isinstance(other, registry.set):
+            return registry.bool.val(False)
+        # both are empty
+        if isinstance(other, type(self)):
+            return registry.bool.val(True)
+        # other is a typed set
+        empty = SetSort.make_empty(sort=other.expr.domain())
+        return other.m_eq(empty, ctx=ctx)

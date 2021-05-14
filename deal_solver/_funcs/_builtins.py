@@ -4,7 +4,7 @@ import z3
 # app
 from .._context import Context, ExceptionInfo
 from .._proxies import (
-    BoolSort, IntSort, ProxySort, SetSort, StrSort, if_expr, random_name, unwrap, wrap,
+    BoolSort, IntSort, ProxySort, SetSort, UntypedSetSort, StrSort, if_expr, random_name, unwrap, wrap,
 )
 from ._registry import register
 
@@ -142,4 +142,4 @@ def builtins_bool(obj: ProxySort, ctx: Context, **kwargs) -> BoolSort:
 
 @register('builtins.set')
 def builtins_set(**kwargs) -> SetSort:
-    return SetSort.make_empty()
+    return UntypedSetSort()

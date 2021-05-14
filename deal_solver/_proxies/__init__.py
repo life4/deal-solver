@@ -9,7 +9,7 @@ from ._lambda import LambdaSort
 from ._list import UntypedListSort, ListSort
 from ._pattern import PatternSort
 from ._proxy import ProxySort
-from ._set import SetSort
+from ._set import SetSort, UntypedSetSort
 from ._str import StrSort
 from ._var_tuple import VarTupleSort, UntypedVarTupleSort
 
@@ -44,4 +44,5 @@ __all__ = [
     'UntypedDictSort',
     'UntypedVarTupleSort',
     'UntypedListSort',
+    'UntypedSetSort',
 ]

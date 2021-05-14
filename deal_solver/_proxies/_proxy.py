@@ -191,7 +191,9 @@ class ProxySort:
     def m_ne(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         """self != other
         """
-        return self._comp_op(other=other, handler=operator.__ne__, ctx=ctx)
+        from ._bool import BoolSort
+        expr = self.m_eq(other, ctx=ctx).expr
+        return BoolSort(expr=z3.Not(expr))
 
     @methods.add(name='__lt__')
     def m_lt(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':

@@ -12,7 +12,7 @@ from ._exceptions import UnsupportedError
 from ._funcs import FUNCTIONS
 from ._proxies import (
     DictSort, FloatSort, FuncSort, LambdaSort, ListSort, UntypedVarTupleSort, UntypedListSort,
-    ProxySort, SetSort, UntypedDictSort, VarTupleSort, and_expr,
+    ProxySort, SetSort, UntypedDictSort, VarTupleSort, and_expr, UntypedSetSort,
     if_expr, not_expr, or_expr, random_name, unwrap, wrap,
 )
 from ._registry import HandlersRegistry
@@ -126,11 +126,12 @@ def eval_list(node: astroid.List, ctx: Context) -> ListSort:
 
 @eval_expr.register(astroid.Set)
 def eval_set(node: astroid.Set, ctx: Context) -> ProxySort:
-    container = SetSort.make_empty()
+    if not node.elts:
+        return UntypedSetSort()
+    items = []
     for subnode in node.elts:
-        item = eval_expr(node=subnode, ctx=ctx)
-        container = container.r_add(item, ctx=ctx)
-    return container
+        items.append(eval_expr(node=subnode, ctx=ctx))
+    return SetSort.from_items(items, ctx=ctx)
 
 
 @eval_expr.register(astroid.Dict)

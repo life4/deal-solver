@@ -81,9 +81,6 @@ from .helpers import prove_f
     # 'len(set()) == 0',
     'len([]) == 0',
     'len("") == 0',
-    'set() == set()',
-    '[] == []',
-    '[] + [] == [] + [] + []',
     '"" == ""',
 
     # sequences in sequences
@@ -137,6 +134,14 @@ from .helpers import prove_f
     '1.5 <= 2',
     '1.5 != 2',
     '0.0 == 0',
+
+    # compare mismatching types
+    '{1} != [1]',
+    'not ({1} == [1])',
+
+    # compare mismatching empty types
+    'set() != []',
+    'not (set() == [])',
 ])
 def test_asserts_ok(prefer_real: bool, check: str) -> None:
     assert eval(check)

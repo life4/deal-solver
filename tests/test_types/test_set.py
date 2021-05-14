@@ -14,14 +14,15 @@ from ..helpers import prove_f
     '{1, 2, 3} != {1, 2, 3, 4}',
     '{1, 2, 3} == {3, 1, 2}',
     '{1, 2, 3} == {3, 2, 1, 1, 2}',
+    'set() != {1}',
+    '{1} != set()',
+    'set() == set()',
 
     # 'len({7, 9, 9, 9, 11}) == 3',
 
-    # compare
+    # operations
     '10 in {3, 6, 10, 17}',
     '2 not in {3, 6, 10, 17}',
-
-    # operations
     '{1, 2} | {2, 3} == {1, 2, 3}',
     '{1, 2} ^ {2, 3} == {1, 3}',
     '{1, 2} & {2, 3} == {2}',
@@ -61,6 +62,20 @@ def test_set_clear():
             assert a == set()
             a.add(1)
             assert a == {1}
+    """)
+    assert theorem.conclusion is Conclusion.OK
+
+
+def test_set_add():
+    theorem = prove_f("""
+        def f():
+            a = set()
+            a.add(1)
+            assert a == {1}
+            a.add(2)
+            assert a == {1, 2}
+            a.add(2)
+            assert a == {1, 2}
     """)
     assert theorem.conclusion is Conclusion.OK
 
