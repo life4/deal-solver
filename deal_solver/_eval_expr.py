@@ -274,7 +274,7 @@ def eval_name(node: astroid.Name, ctx: Context) -> ProxySort:
     if inferred:
         func = inferred[0]
         if isinstance(func, astroid.FunctionDef) and func.body:
-            return func
+            return FuncSort(func)
 
     # resolve built-in functions
     value = FUNCTIONS.get('builtins.' + node.name)
@@ -348,40 +348,11 @@ def eval_call(node: astroid.Call, ctx: Context) -> ProxySort:
         call_args.append(arg_node)
 
     value = eval_expr(node=node.func, ctx=ctx)
-    if isinstance(value, astroid.FunctionDef):
-        return _call_function(node=value, ctx=ctx, call_args=call_args)
-
     if isinstance(node.func, astroid.Attribute):
         var_name = node.func.expr.as_string()
     else:
         var_name = node.func.as_string()
-
     return value.m_call(*call_args, ctx=ctx, var_name=var_name)
-
-
-def _call_function(node: astroid.FunctionDef, ctx: Context, call_args=typing.List[z3.Z3PPObject]):
-    # app
-    from ._eval_contracts import eval_contracts
-    from ._eval_stmt import eval_stmt
-
-    # put arguments into the scope
-    func_ctx = Context.make_empty(get_contracts=ctx.get_contracts, trace=ctx.trace)
-    for arg, value in zip(node.args.args or [], call_args):
-        func_ctx.scope.set(name=arg.name, value=value)
-
-    # call the function
-    eval_stmt(node=node, ctx=func_ctx)
-    result = func_ctx.return_value
-    if result is None:
-        raise UnsupportedError('cannot find return value for', node.name)
-
-    # we ask pre-conditions to be true
-    # and promise post-condition to be true
-    contracts = eval_contracts(func=node, ctx=func_ctx)
-    ctx.expected.add(and_expr(*contracts.pre, ctx=ctx))
-    ctx.given.add(and_expr(*contracts.post, ctx=ctx))
-
-    return result
 
 
 @eval_expr.register(astroid.Lambda)

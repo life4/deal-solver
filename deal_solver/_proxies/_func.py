@@ -1,9 +1,13 @@
 # stdlib
 import typing
 
+import astroid
+
 # app
+from ._funcs import and_expr
 from ._proxy import ProxySort
 from ._registry import registry
+from .._exceptions import UnsupportedError
 
 
 if typing.TYPE_CHECKING:
@@ -27,4 +31,31 @@ class FuncSort(ProxySort):
     def m_call(self, *args, ctx: 'Context', **kwargs) -> 'ProxySort':
         """self(*args, **kwargs)
         """
+        if isinstance(self.impl, astroid.FunctionDef):
+            return self._call_function(node=self.impl, ctx=ctx, call_args=args)
         return self.impl(*args, ctx=ctx, **kwargs)
+
+    @staticmethod
+    def _call_function(node: astroid.FunctionDef, ctx: 'Context', call_args=list):
+        # app
+        from .._eval_contracts import eval_contracts
+        from .._eval_stmt import eval_stmt
+
+        # put arguments into the scope
+        func_ctx = ctx.make_empty(get_contracts=ctx.get_contracts, trace=ctx.trace)
+        for arg, value in zip(node.args.args or [], call_args):
+            func_ctx.scope.set(name=arg.name, value=value)
+
+        # call the function
+        eval_stmt(node=node, ctx=func_ctx)
+        result = func_ctx.return_value
+        if result is None:
+            raise UnsupportedError('cannot find return value for', node.name)
+
+        # we ask pre-conditions to be true
+        # and promise post-condition to be true
+        contracts = eval_contracts(func=node, ctx=func_ctx)
+        ctx.expected.add(and_expr(*contracts.pre, ctx=ctx))
+        ctx.given.add(and_expr(*contracts.post, ctx=ctx))
+
+        return result
