@@ -11,7 +11,7 @@ from ._ast import infer
 from ._context import Context, ExceptionInfo, ReturnInfo
 from ._eval_expr import eval_expr
 from ._exceptions import UnsupportedError
-from ._proxies import BoolSort, ProxySort, if_expr, not_expr, or_expr
+from ._proxies import BoolSort, if_expr, not_expr, or_expr
 from ._registry import HandlersRegistry
 
 
@@ -53,8 +53,7 @@ def eval_func(node: astroid.FunctionDef, ctx: Context) -> None:
 def eval_assert(node: astroid.Assert, ctx: Context) -> None:
     assert node.test is not None, 'assert without condition'
     expr = eval_expr(node=node.test, ctx=ctx)
-    if isinstance(expr, ProxySort):
-        expr = expr.m_bool(ctx=ctx)
+    expr = expr.m_bool(ctx=ctx)
     expr = or_expr(ctx.interrupted, expr, ctx=ctx)
     ctx.expected.add(expr)
 
@@ -66,16 +65,12 @@ def eval_expr_stmt(node: astroid.Expr, ctx: Context) -> None:
 
 @ eval_stmt.register(astroid.Assign)
 def eval_assign(node: astroid.Assign, ctx: Context) -> None:
-    if not node.targets:
-        raise UnsupportedError('assignment to an empty target')
-    if len(node.targets) > 1:
-        raise UnsupportedError('multiple assignment')
-    target = node.targets[0]
-    if not isinstance(target, astroid.AssignName):
-        raise UnsupportedError('cannot assign to', type(target).__name__)
-
-    value_ref = eval_expr(node=node.value, ctx=ctx)
-    ctx.scope.set(name=target.name, value=value_ref)
+    assert node.targets
+    for target in node.targets:
+        if not isinstance(target, astroid.AssignName):
+            raise UnsupportedError('cannot assign to', type(target).__name__)
+        value_ref = eval_expr(node=node.value, ctx=ctx)
+        ctx.scope.set(name=target.name, value=value_ref)
 
 
 @ eval_stmt.register(astroid.Return)
@@ -106,8 +101,7 @@ def eval_if_else(node: astroid.If, ctx: Context) -> None:
         val_then = ctx_then.scope.get(name=var_name)
         val_else = ctx_else.scope.get(name=var_name)
         if val_then is None or val_else is None:
-            raise UnsupportedError('unbound variable', var_name)
-
+            continue
         value = if_expr(test_ref, val_then, val_else, ctx=ctx)
         ctx.scope.set(name=var_name, value=value)
 

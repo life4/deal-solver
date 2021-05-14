@@ -97,3 +97,14 @@ def test_no_effect_statements():
             pass
     """)
     assert theorem.conclusion is Conclusion.OK
+
+
+def test_multiple_assignment_targets():
+    theorem = prove_f("""
+        def f():
+            a = b = 13
+            assert a == 13
+            assert b == 13
+            assert a == b
+    """)
+    assert theorem.conclusion is Conclusion.OK

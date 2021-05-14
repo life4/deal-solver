@@ -99,3 +99,10 @@ def test_partial_proof():
     """)
     assert proof.conclusion == Conclusion.PARTIAL
     assert type(proof.error) is UnsupportedError
+
+
+def test_unsupported_annotation():
+    proof = prove_f("def f(x: Unknown): pass")
+    assert proof.conclusion == Conclusion.SKIP
+    assert type(proof.error) is UnsupportedError
+    assert str(proof.error) == 'unsupported annotation type Unknown'

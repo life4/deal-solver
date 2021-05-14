@@ -123,3 +123,14 @@ def test_if_dont_interrupt():
             assert False
     """)
     assert theorem.conclusion is Conclusion.FAIL
+
+
+def test_if_unbound_var_skip():
+    theorem = prove_f("""
+        def f(a: int):
+            if a > 0:
+                x = 13
+                assert x
+            assert True
+    """)
+    assert theorem.conclusion is Conclusion.OK
