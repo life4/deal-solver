@@ -11,7 +11,7 @@ from ._ast import infer
 from ._context import Context, ExceptionInfo, ReturnInfo
 from ._eval_expr import eval_expr
 from ._exceptions import UnsupportedError
-from ._proxies import BoolSort, ProxySort, if_expr, not_expr
+from ._proxies import BoolSort, ProxySort, if_expr, not_expr, or_expr
 from ._registry import HandlersRegistry
 
 
@@ -55,8 +55,7 @@ def eval_assert(node: astroid.Assert, ctx: Context) -> None:
     expr = eval_expr(node=node.test, ctx=ctx)
     if isinstance(expr, ProxySort):
         expr = expr.m_bool(ctx=ctx)
-    true = BoolSort.val(True)
-    expr = if_expr(ctx.interrupted, true, expr, ctx=ctx)
+    expr = or_expr(ctx.interrupted, expr, ctx=ctx)
     ctx.expected.add(expr)
 
 

@@ -7,7 +7,6 @@ import z3
 
 # app
 from .._exceptions import UnsupportedError
-from ._funcs import if_expr, unwrap
 from ._proxy import ProxySort
 from ._registry import registry
 
@@ -139,12 +138,12 @@ class IntSort(ProxySort):
         if as_float:
             other = other.m_int(ctx=ctx)
         zero = self.val(0).expr
-        result = if_expr(
-            test=other.expr >= zero,
-            val_then=self.expr / other.expr,
-            val_else=-self.expr / -other.expr,
-            ctx=ctx,
-        )
+        result = registry.int(z3.If(
+            other.expr >= zero,
+            self.expr / other.expr,
+            -self.expr / -other.expr,
+            ctx=ctx.z3_ctx,
+        ))
         if as_float:
             return result.m_float(ctx=ctx)
         return result
@@ -159,12 +158,12 @@ class IntSort(ProxySort):
         if as_float:
             other = other.m_int(ctx=ctx)
         zero = self.val(0).expr
-        result = if_expr(
-            test=other.expr >= zero,
-            val_then=self.expr % other.expr,
-            val_else=-(-self.expr % -other.expr),
-            ctx=ctx,
-        )
+        result = registry.int(z3.If(
+            other.expr >= zero,
+            self.expr % other.expr,
+            -(-self.expr % -other.expr),
+            ctx=ctx.z3_ctx,
+        ))
         if as_float:
             return result.m_float(ctx=ctx)
         return result
@@ -175,14 +174,14 @@ class IntSort(ProxySort):
         zero = z3.IntVal(0)
         modulo = z3.IntVal(2 ** INT_BITS)
         expr = z3.If(self.expr >= zero, expr - modulo, expr)
-        return type(self)(expr=expr)
+        return registry.int(expr=expr)
 
     def _bitwise_op(self, other: 'ProxySort', handler: typing.Callable, ctx: 'Context') -> 'IntSort':
         expr = z3.BV2Int(handler(
             z3.Int2BV(self.expr, INT_BITS),
             z3.Int2BV(other.expr, INT_BITS),
         ))
-        return type(self)(expr=expr)
+        return registry.int(expr=expr)
 
     @methods.add(name='__and__')
     def m_and(self, other: 'ProxySort', ctx: 'Context'):

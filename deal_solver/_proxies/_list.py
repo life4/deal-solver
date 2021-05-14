@@ -6,7 +6,6 @@ import z3
 
 # app
 from .._exceptions import UnsupportedError
-from ._funcs import unwrap
 from ._proxy import ProxySort
 from ._registry import registry
 from ._var_tuple import VarTupleSort

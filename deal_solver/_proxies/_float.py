@@ -9,7 +9,7 @@ import z3
 
 # app
 from .._exceptions import UnsupportedError
-from ._funcs import and_expr, if_expr, switch
+from ._funcs import and_expr, switch
 from ._proxy import ProxySort
 from ._registry import registry
 
@@ -112,7 +112,7 @@ class FloatSort(ProxySort):
         result = self.m_truediv(other, ctx=ctx).m_int(ctx=ctx).m_fp(ctx=ctx)
         if other.is_fp:
             result = switch(
-                (z3.Not(z3.fpIsInf(other.expr)), result),
+                (registry.bool(z3.Not(z3.fpIsInf(other.expr))), result),
                 (and_expr(self.m_lt(zero, ctx=ctx), other.m_lt(zero, ctx=ctx), ctx=ctx), zero),
                 (and_expr(self.m_gt(zero, ctx=ctx), other.m_gt(zero, ctx=ctx), ctx=ctx), zero),
                 default=minus_one,
@@ -120,8 +120,9 @@ class FloatSort(ProxySort):
             )
         if self.is_fp:
             nan = z3.fpNaN(FPSort.sort())
-            result = if_expr(z3.fpIsInf(self.expr), nan, result, ctx=ctx)
-            result = if_expr(z3.fpIsZero(self.expr), zero, result, ctx=ctx)
+            result_expr = z3.If(z3.fpIsInf(self.expr), nan, result.expr, ctx=ctx)
+            result_expr = z3.If(z3.fpIsZero(self.expr), zero.expr, result_expr, ctx=ctx)
+            result = FPSort(result_expr)
 
         return result
 

@@ -1,9 +1,6 @@
 # stdlib
 import typing
 
-# external
-import z3
-
 
 if typing.TYPE_CHECKING:
     # app
@@ -27,12 +24,11 @@ class ReturnInfo(typing.NamedTuple):
 
     def merge(self, other: 'ReturnInfo', ctx: 'Context') -> 'ReturnInfo':
         # app
-        from .._proxies import if_expr
+        from .._proxies import if_expr, or_expr
 
-        true = z3.BoolVal(True)
         cls = type(self)
         return cls(
-            cond=if_expr(self.cond, true, other.cond, ctx=ctx),
+            cond=or_expr(self.cond, other.cond, ctx=ctx),
             value=if_expr(self.cond, self.value, other.value, ctx=ctx),
         )
 

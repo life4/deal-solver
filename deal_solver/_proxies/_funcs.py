@@ -20,15 +20,6 @@ if typing.TYPE_CHECKING:
 T = typing.TypeVar('T', bound='ProxySort')
 
 
-def unwrap(obj: 'ProxySort') -> z3.ExprRef:
-    # app
-    from ._proxy import ProxySort
-
-    if not isinstance(obj, ProxySort):
-        return obj
-    return obj.expr
-
-
 def wrap(expr) -> 'ProxySort':
     # app
     from ._float import FPSort, RealSort
@@ -59,10 +50,14 @@ def if_expr(
     val_else: T,
     ctx: Context,
 ) -> T:
+    from ._proxy import ProxySort
+    if not isinstance(test, ProxySort):
+        test = registry.bool(expr=test)
+
     expr = z3.If(
-        wrap(test).m_bool(ctx=ctx).expr,
-        unwrap(val_then),
-        unwrap(val_else),
+        test.m_bool(ctx=ctx).expr,
+        val_then.expr,
+        val_else.expr,
         ctx=ctx.z3_ctx,
     )
     return wrap(expr)  # type: ignore
@@ -73,7 +68,7 @@ def random_name(prefix: str = 'v') -> str:
     return prefix + '__' + suffix
 
 
-def switch(*cases: typing.Tuple[typing.Any, T], default, ctx: Context) -> T:
+def switch(*cases: typing.Tuple['ProxySort', T], default, ctx: Context) -> T:
     result = default
     for cond, then in reversed(cases):
         result = if_expr(cond, then, result, ctx=ctx)
