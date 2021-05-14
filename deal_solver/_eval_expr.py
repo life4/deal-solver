@@ -11,9 +11,10 @@ from ._context import Context
 from ._exceptions import UnsupportedError
 from ._funcs import FUNCTIONS
 from ._proxies import (
+    BoolSort,
     DictSort, FloatSort, FuncSort, LambdaSort, ListSort, UntypedVarTupleSort, UntypedListSort,
     ProxySort, SetSort, UntypedDictSort, VarTupleSort, and_expr, UntypedSetSort, IntSort,
-    if_expr, not_expr, or_expr, random_name, wrap,
+    if_expr, or_expr, random_name, wrap,
 )
 from ._registry import HandlersRegistry
 
@@ -317,7 +318,8 @@ def eval_unary_op(node: astroid.UnaryOp, ctx: Context) -> ProxySort:
     if node.op == '~':
         return value_ref.m_inv(ctx=ctx)
     if node.op == 'not':
-        return not_expr(value_ref, ctx=ctx)
+        expr = value_ref.m_bool(ctx=ctx).expr
+        return BoolSort(expr=z3.Not(expr, ctx=ctx.z3_ctx))
     raise RuntimeError('unsupported unary operation')
 
 

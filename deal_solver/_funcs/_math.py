@@ -55,7 +55,7 @@ def math_isinf(x, ctx: Context, **kwargs) -> BoolSort:
         return BoolSort.val(False)
     if not x.is_fp:
         return BoolSort.val(False)
-    return z3.fpIsInf(x.expr)
+    return BoolSort(z3.fpIsInf(x.expr))
 
 
 @register('math.isnan')

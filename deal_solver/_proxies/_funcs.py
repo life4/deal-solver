@@ -45,22 +45,18 @@ def wrap(expr) -> 'ProxySort':
 
 
 def if_expr(
-    test: typing.Any,
+    test: 'ProxySort',
     val_then: T,
     val_else: T,
     ctx: Context,
 ) -> T:
-    from ._proxy import ProxySort
-    if not isinstance(test, ProxySort):
-        test = registry.bool(expr=test)
-
     expr = z3.If(
         test.m_bool(ctx=ctx).expr,
         val_then.expr,
         val_else.expr,
         ctx=ctx.z3_ctx,
     )
-    return wrap(expr)  # type: ignore
+    return type(val_then)(expr)
 
 
 def random_name(prefix: str = 'v') -> str:
@@ -80,8 +76,8 @@ def and_expr(*args: 'ProxySort', ctx: Context) -> 'BoolSort':
 
 
 def or_expr(*args: 'ProxySort', ctx: Context) -> 'BoolSort':
-    return registry.bool(z3.Or(*[wrap(arg).m_bool(ctx=ctx).expr for arg in args]))
+    return registry.bool(z3.Or(*[arg.m_bool(ctx=ctx).expr for arg in args]))
 
 
 def not_expr(cond: 'ProxySort', *, ctx: Context) -> 'BoolSort':
-    return registry.bool(z3.Not(wrap(cond).m_bool(ctx=ctx).expr))
+    return registry.bool(z3.Not(cond.m_bool(ctx=ctx).expr))
