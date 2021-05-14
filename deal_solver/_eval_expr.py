@@ -11,7 +11,7 @@ from ._context import Context
 from ._exceptions import UnsupportedError
 from ._funcs import FUNCTIONS
 from ._proxies import (
-    DictSort, FloatSort, FuncSort, LambdaSort, ListSort,
+    DictSort, FloatSort, FuncSort, LambdaSort, ListSort, UntypedVarTupleSort, UntypedListSort,
     ProxySort, SetSort, UntypedDictSort, VarTupleSort, and_expr,
     if_expr, not_expr, or_expr, random_name, unwrap, wrap,
 )
@@ -115,12 +115,13 @@ def eval_bool_op(node: astroid.BoolOp, ctx: Context) -> ProxySort:
 
 
 @eval_expr.register(astroid.List)
-def eval_list(node: astroid.List, ctx: Context) -> ProxySort:
-    container = ListSort.make_empty()
+def eval_list(node: astroid.List, ctx: Context) -> ListSort:
+    if not node.elts:
+        return UntypedListSort()
     items = []
     for subnode in node.elts:
         items.append(eval_expr(node=subnode, ctx=ctx))
-    return container.from_items(items, ctx=ctx)
+    return ListSort.from_items(items, ctx=ctx)
 
 
 @eval_expr.register(astroid.Set)
@@ -144,11 +145,12 @@ def eval_dict(node: astroid.Dict, ctx: Context) -> DictSort:
 
 @eval_expr.register(astroid.Tuple)
 def eval_tuple(node: astroid.Tuple, ctx: Context) -> ProxySort:
-    container = VarTupleSort.make_empty()
+    if not node.elts:
+        return UntypedVarTupleSort()
     items = []
     for subnode in node.elts:
         items.append(eval_expr(node=subnode, ctx=ctx))
-    return container.from_items(items, ctx=ctx)
+    return VarTupleSort.from_items(items, ctx=ctx)
 
 
 @eval_expr.register(astroid.ListComp)

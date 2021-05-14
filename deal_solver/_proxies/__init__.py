@@ -6,12 +6,12 @@ from ._func import FuncSort
 from ._funcs import and_expr, if_expr, not_expr, or_expr, random_name, unwrap, wrap
 from ._int import IntSort
 from ._lambda import LambdaSort
-from ._list import ListSort
+from ._list import UntypedListSort, ListSort
 from ._pattern import PatternSort
 from ._proxy import ProxySort
 from ._set import SetSort
 from ._str import StrSort
-from ._var_tuple import VarTupleSort
+from ._var_tuple import VarTupleSort, UntypedVarTupleSort
 
 
 __all__ = [
@@ -42,4 +42,6 @@ __all__ = [
 
     # untyped
     'UntypedDictSort',
+    'UntypedVarTupleSort',
+    'UntypedListSort',
 ]
