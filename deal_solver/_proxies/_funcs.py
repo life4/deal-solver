@@ -26,10 +26,7 @@ def unwrap(obj: 'ProxySort') -> z3.ExprRef:
 
     if not isinstance(obj, ProxySort):
         return obj
-    expr = obj.expr
-    if expr is None:
-        return obj.make_empty_expr(z3.IntSort())
-    return expr
+    return obj.expr
 
 
 def wrap(expr) -> 'ProxySort':

@@ -36,32 +36,6 @@ class ProxySort:
     def sort(self) -> z3.SortRef:
         return self.expr.sort()
 
-    def _ensure(self, item, seq=False) -> None:
-        """
-        Sometimes, the subtype for sequences is not known in advance.
-        In that case, we set `expr=None`.
-
-        What `_ensure` does is it takes another item or sequence,
-        extracts type from it, and sets the type for the current sequence
-        to match the another one. For example, if `a` is an empty list,
-        operation `a.append(1)` will set the subtype of `a` to `int`.
-        """
-        if self.expr is not None:
-            return
-        item = unwrap(item)
-        if item is None:
-            sort = z3.IntSort()
-        else:
-            sort = item.sort()
-
-        if seq:
-            if isinstance(sort, z3.ArraySortRef):
-                sort = sort.domain()
-            elif isinstance(sort, z3.SeqSortRef):
-                sort = sort.basis()
-
-        self.expr = self.make_empty_expr(sort)
-
     def __init__(self, expr) -> None:
         raise NotImplementedError
 
@@ -170,7 +144,6 @@ class ProxySort:
         return registry.bool.val(False)
 
     def _binary_op(self, other: 'ProxySort', handler: typing.Callable, ctx: 'Context'):
-        self._ensure(other, seq=True)
         return handler(self.expr, unwrap(other))
 
     # comparison

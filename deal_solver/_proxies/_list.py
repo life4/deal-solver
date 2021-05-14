@@ -39,7 +39,6 @@ class ListSort(VarTupleSort):
     def r_append(self, item: ProxySort, ctx: 'Context') -> 'ListSort':
         cls = type(self)
         unit = z3.Unit(unwrap(item))
-        self._ensure(item)
         return cls(expr=self.expr + unit)
 
     @methods.add(name='extend', pure=False)

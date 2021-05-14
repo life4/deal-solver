@@ -30,9 +30,6 @@ class StrSort(ProxySort):
         assert z3.is_string(expr)
         self.expr = expr
 
-    def _ensure(self, item, seq=False):
-        pass
-
     @methods.add(name='__int__')
     def m_int(self, ctx: 'Context') -> 'IntSort':
         assert self.expr is not None
@@ -74,7 +71,6 @@ class StrSort(ProxySort):
             ctx.add_exception(TypeError, msg)
             return registry.bool.val(True)
         assert self.expr is not None
-        self._ensure(item)
         expr = z3.Contains(self.expr, item.expr)
         return registry.bool(expr=expr)
 

@@ -85,7 +85,6 @@ class VarTupleSort(ProxySort):
     def m_contains(self, item: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         if not self.expr.sort().basis().eq(item.expr.sort()):
             return registry.bool.val(False)
-        self._ensure(item)
         unit = z3.Unit(unwrap(item))
         return registry.bool(expr=z3.Contains(self.expr, unit))
 
