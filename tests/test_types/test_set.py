@@ -48,6 +48,9 @@ from ..helpers import prove_f
     'not {1, 2}.issuperset({1, 2, 3})',
     '{1, 2}.isdisjoint({3, 4})',
     'not {1, 2}.isdisjoint({2, 3})',
+
+    # functions
+    'len({4}) >= 1',
 ])
 def test_expr_asserts_ok(check: str) -> None:
     assert eval(check)

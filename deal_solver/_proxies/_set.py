@@ -15,6 +15,8 @@ if typing.TYPE_CHECKING:
     # app
     from .._context import Context
     from ._bool import BoolSort
+    from ._int import IntSort
+    from ._list import ListSort
 
 
 @registry.add
@@ -179,6 +181,23 @@ class SetSort(ProxySort):
             expr = self.expr == empty
             return registry.bool(expr=expr)
         return super().m_eq(other, ctx=ctx)
+
+    def m_list(self, ctx: 'Context') -> 'ListSort':
+        sort = self.expr.domain()
+        expr = z3.Const(random_name('set2list'), z3.SeqSort(sort))
+        x = z3.Const(random_name('set_item'), sort)
+        ctx.given.add(registry.bool(
+            z3.ForAll([x], z3.Implies(
+                z3.IsMember(e=x, s=self.expr),
+                z3.Contains(expr, z3.Unit(x)),
+            )),
+        ))
+        # TODO: remove duplicate values
+        return registry.list(expr=expr)
+
+    @methods.add(name='__len__')
+    def m_len(self, ctx: 'Context') -> 'IntSort':
+        return self.m_list(ctx=ctx).m_len(ctx=ctx)
 
     @methods.add(name='pop', pure=False)
     def r_pop(self, ctx: 'Context') -> Mutation:
