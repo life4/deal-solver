@@ -94,3 +94,14 @@ def test_dict_getattr_fails_empty():
     """)
     assert theorem.conclusion is Conclusion.FAIL
     assert str(theorem.description) == 'KeyError'
+
+
+def test_pop():
+    theorem = prove_f("""
+        def f():
+            a = {1: 2, 3: 4}
+            r = a.pop(3)
+            assert r == 4
+            assert a == {1: 2}
+    """)
+    assert theorem.conclusion is Conclusion.OK

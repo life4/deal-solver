@@ -9,6 +9,7 @@ from .._cached_property import cached_property
 from .._exceptions import UnsupportedError
 from ._proxy import ProxySort
 from ._registry import registry
+from ._method import Mutation
 
 
 if typing.TYPE_CHECKING:
@@ -101,6 +102,24 @@ class DictSort(ProxySort):
             value_sort=self.value_sort,
         )
 
+    @methods.add(name='pop', pure=False)
+    def r_pop(self, key: 'ProxySort', ctx: 'Context') -> Mutation:
+        # get the value
+        item = z3.Select(self.expr, key.expr)
+        expr = self.item_sort.value(item)
+        result = self.value_sort(expr)
+
+        # remove the item
+        expr = z3.Update(self.expr, key.expr, self.expr.default())
+        cls = type(self)
+        new_value = cls(
+            expr=expr,
+            item_sort=self.item_sort,
+            value_sort=self.value_sort,
+        )
+
+        return Mutation(new_value=new_value, result=result)
+
     @methods.add(name='__contains__')
     def m_contains(self, key: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         item = z3.Select(self.expr, key.expr)
@@ -122,7 +141,6 @@ class DictSort(ProxySort):
     @methods.add(name='fromkeys')
     @methods.add(name='items')
     @methods.add(name='keys')
-    @methods.add(name='pop')
     @methods.add(name='popitem')
     @methods.add(name='setdefault')
     @methods.add(name='update')
