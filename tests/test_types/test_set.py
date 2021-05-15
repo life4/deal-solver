@@ -51,6 +51,8 @@ from ..helpers import prove_f
 
     # functions
     'len({4}) >= 1',
+    'len({4, 5, 5, 6}) >= 3',
+    'len(set()) == 0',
 ])
 def test_expr_asserts_ok(check: str) -> None:
     assert eval(check)
