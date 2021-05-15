@@ -187,12 +187,15 @@ class SetSort(ProxySort):
         expr = z3.Const(random_name('set2list'), z3.SeqSort(sort))
         x = z3.Const(random_name('set_item'), sort)
         ctx.given.add(registry.bool(
-            z3.ForAll([x], z3.Implies(
-                z3.IsMember(e=x, s=self.expr),
-                z3.Contains(expr, z3.Unit(x)),
+            z3.ForAll([x], z3.And(
+                z3.Implies(
+                    z3.IsMember(e=x, s=self.expr),
+                    z3.Contains(expr, z3.Unit(x)),
+                ),
+                # TODO: correct but slow as hell
+                # z3.IndexOf(expr, z3.Unit(x), 0) == z3.LastIndexOf(expr, z3.Unit(x)),
             )),
         ))
-        # TODO: remove duplicate values
         return registry.list(expr=expr)
 
     @methods.add(name='__len__')
