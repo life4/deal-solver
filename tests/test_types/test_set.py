@@ -128,3 +128,34 @@ def test_set_remove_fails():
     """)
     assert theorem.conclusion is Conclusion.FAIL
     assert str(theorem.description) == 'KeyError'
+
+
+def test_set_pop():
+    theorem = prove_f("""
+        def f():
+            a = {1}
+            v = a.pop()
+            assert v == 1
+            assert a == set()
+    """)
+    assert theorem.conclusion is Conclusion.OK
+
+
+def test_set_pop_two():
+    theorem = prove_f("""
+        def f():
+            a = {1, 2}
+            v = a.pop()
+            assert (v == 1 and a == {2}) or (v == 2 and a == {1})
+    """)
+    assert theorem.conclusion is Conclusion.OK
+
+
+def test_set_pop_empty():
+    theorem = prove_f("""
+        def f():
+            a = set()
+            a.pop()
+    """)
+    assert theorem.conclusion is Conclusion.FAIL
+    assert str(theorem.description) == 'KeyError: pop from an empty set'

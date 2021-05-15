@@ -5,10 +5,10 @@ import typing
 import z3
 
 # app
-from .._exceptions import UnsupportedError
-from ._funcs import not_expr
+from ._funcs import not_expr, random_name, wrap
 from ._proxy import ProxySort
 from ._registry import registry
+from ._method import Mutation
 
 
 if typing.TYPE_CHECKING:
@@ -180,10 +180,16 @@ class SetSort(ProxySort):
             return registry.bool(expr=expr)
         return super().m_eq(other, ctx=ctx)
 
-    @methods.add(name='pop')
-    def unsupported(self, *args, **kwargs):
-        msg = 'unsupported attribute for type {}'.format(self.type_name)
-        raise UnsupportedError(msg)
+    @methods.add(name='pop', pure=False)
+    def r_pop(self, ctx: 'Context') -> Mutation:
+        # TODO: KeyError for empty set
+        expr = z3.Const(random_name('set_item'), self.expr.domain())
+        item = wrap(expr)
+        ctx.given.add(self.m_contains(item, ctx=ctx))
+        return Mutation(
+            new_value=registry.set(expr=z3.SetDel(self.expr, item.expr)),
+            result=item,
+        )
 
 
 class UntypedSetSort(SetSort):
@@ -216,3 +222,8 @@ class UntypedSetSort(SetSort):
         # other is a typed set
         empty = SetSort.make_empty(sort=other.expr.domain())
         return other.m_eq(empty, ctx=ctx)
+
+    @methods.add(name='pop', pure=False)
+    def r_pop(self, ctx: 'Context') -> Mutation:
+        ctx.add_exception(KeyError, "pop from an empty set")
+        return Mutation(new_value=self, result=self)
