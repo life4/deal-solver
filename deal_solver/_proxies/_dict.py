@@ -126,6 +126,12 @@ class DictSort(ProxySort):
         expr = self.item_sort.exists(item)
         return registry.bool(expr=expr)
 
+    @methods.add(name='__bool__')
+    def m_bool(self, ctx: 'Context') -> 'BoolSort':
+        empty = z3.K(dom=self.expr.domain(), v=self.expr.default())
+        expr = self.expr != empty
+        return registry.bool(expr=expr)
+
     @methods.add(name='__eq__')
     def m_eq(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         # type mismatch

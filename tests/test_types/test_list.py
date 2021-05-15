@@ -63,6 +63,8 @@ from ..helpers import prove_f
     '[1, 2, 3].copy() == [1, 2, 3]',
 
     # functions
+    'list() == []',
+    'list([1, 2]) == [1, 2]',
     'len([7, 9, 9, 9, 11]) == 5',
     'min([7, 3, 5]) == 3',
     'max([3, 7, 5]) == 7',

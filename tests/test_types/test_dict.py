@@ -42,6 +42,12 @@ from ..helpers import prove_f
     '{1: 2}.get(1, 3) == 2',
     '{1: 2}.get(3, 4) == 4',
     '{}.get(1, 2) == 2',
+
+    # functions
+    'dict() == {}',
+    'dict({1: 2}) == {1: 2}',
+    'bool({}) == False',
+    'bool({1: 2}) == True',
 ])
 def test_asserts_ok(check: str) -> None:
     assert eval(check)

@@ -50,9 +50,11 @@ from ..helpers import prove_f
     'not {1, 2}.isdisjoint({2, 3})',
 
     # functions
+    'len({True}) >= 1',
     'len({4}) >= 1',
     'len({4, 5, 5, 6}) >= 3',
     'len(set()) == 0',
+    'set({1, 2}) == {1, 2}',
 ])
 def test_expr_asserts_ok(check: str) -> None:
     assert eval(check)

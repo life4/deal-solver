@@ -46,7 +46,6 @@ def test_timeout():
     # temporary unsupported
     ('None',                'unsupported constant None'),
     ('2+3j',                'unsupported constant 3j'),
-    ('dict()',              'cannot resolve name dict'),
     ('"ab" * 3',            'cannot multiply str'),
     ('[1] * 3',             'cannot multiply list'),
     ('[1,2,3,4][::2]',      'slice step is not supported'),
@@ -54,6 +53,11 @@ def test_timeout():
     ('min([], default=13)', 'keyword function arguments are unsupported'),
     ('[1 for i in "12" for j in "34"]', 'to many loops inside list compr'),
     ('a, b = 3, 4',         'cannot assign to Tuple'),
+
+    # unsupported arguments
+    ('dict([(1,2)])',       'unsupported argument for dict()'),
+    ('list({1, 2})',       'unsupported argument for list()'),
+    ('set([1, 2])',       'unsupported argument for set()'),
 
     # unsupported attributes
     ('"Ab".swapcase()',     'unsupported attribute for type str'),

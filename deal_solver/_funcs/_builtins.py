@@ -4,8 +4,11 @@ import z3
 # app
 from .._context import Context, ExceptionInfo
 from .._proxies import (
-    BoolSort, IntSort, ProxySort, SetSort, UntypedSetSort, StrSort, if_expr, random_name, wrap,
+    BoolSort, IntSort, ProxySort, SetSort, UntypedSetSort,
+    UntypedListSort, UntypedDictSort, StrSort, if_expr, random_name, wrap,
+    ListSort, DictSort,
 )
+from .._exceptions import UnsupportedError
 from ._registry import register
 
 
@@ -141,5 +144,27 @@ def builtins_bool(obj: ProxySort, ctx: Context, **kwargs) -> BoolSort:
 
 
 @register('builtins.set')
-def builtins_set(**kwargs) -> SetSort:
+def builtins_set(iterable=None, **kwargs) -> SetSort:
+    if iterable is not None:
+        if isinstance(iterable, SetSort):
+            return iterable
+        raise UnsupportedError('unsupported argument for set()')
     return UntypedSetSort()
+
+
+@register('builtins.list')
+def builtins_list(iterable=None, **kwargs) -> ListSort:
+    if iterable is not None:
+        if isinstance(iterable, ListSort):
+            return iterable
+        raise UnsupportedError('unsupported argument for list()')
+    return UntypedListSort()
+
+
+@register('builtins.dict')
+def builtins_dict(iterable=None, **kwargs) -> DictSort:
+    if iterable is not None:
+        if isinstance(iterable, DictSort):
+            return iterable
+        raise UnsupportedError('unsupported argument for dict()')
+    return UntypedDictSort()
