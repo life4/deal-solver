@@ -1,7 +1,5 @@
-# stdlib
 import typing
 
-# external
 import z3
 
 

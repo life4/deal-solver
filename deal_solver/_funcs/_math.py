@@ -1,10 +1,7 @@
-# stdlib
 import math
 
-# external
 import z3
 
-# app
 from .._context import Context
 from .._proxies import BoolSort, FloatSort, IntSort, ProxySort, and_expr, if_expr
 from ._registry import FUNCTIONS, register

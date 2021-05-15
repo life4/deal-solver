@@ -1,6 +1,5 @@
 """Solver core for deal, powered by z3-solver.
 """
-# app
 from ._eval_contracts import Contract
 from ._exceptions import ProveError, UnsupportedError
 from ._theorem import Conclusion, Proof, Theorem

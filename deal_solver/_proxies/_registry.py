@@ -1,9 +1,7 @@
-# stdlib
 import typing
 
 
 if typing.TYPE_CHECKING:
-    # app
     from ._bool import BoolSort
     from ._dict import DictSort
     from ._float import FloatSort

@@ -1,7 +1,5 @@
-# external
 import z3
 
-# app
 from .._context import Context
 from .._exceptions import UnsupportedError
 from .._proxies import FloatSort, IntSort, ProxySort, random_name

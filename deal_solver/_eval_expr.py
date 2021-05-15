@@ -1,20 +1,16 @@
-# stdlib
 import typing
 
-# external
 import astroid
 import z3
 
-# app
 from ._ast import get_full_name, infer
 from ._context import Context
 from ._exceptions import UnsupportedError
 from ._funcs import FUNCTIONS
 from ._proxies import (
-    BoolSort,
-    DictSort, FloatSort, FuncSort, LambdaSort, ListSort, UntypedVarTupleSort, UntypedListSort,
-    ProxySort, SetSort, UntypedDictSort, VarTupleSort, and_expr, UntypedSetSort, IntSort,
-    if_expr, or_expr, random_name, wrap,
+    BoolSort, DictSort, FloatSort, FuncSort, IntSort, LambdaSort, ListSort,
+    ProxySort, SetSort, UntypedDictSort, UntypedListSort, UntypedSetSort,
+    UntypedVarTupleSort, VarTupleSort, and_expr, if_expr, or_expr, random_name, wrap,
 )
 from ._registry import HandlersRegistry
 

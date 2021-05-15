@@ -1,10 +1,7 @@
-# external
 import pytest
 
-# project
 from deal_solver import Conclusion, UnsupportedError
 
-# app
 from .helpers import prove_f
 
 

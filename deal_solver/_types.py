@@ -1,4 +1,3 @@
-# stdlib
 import typing
 
 

@@ -1,9 +1,7 @@
-# stdlib
 import typing
 
 
 if typing.TYPE_CHECKING:
-    # app
     from ._method import Method
 
 
@@ -38,10 +36,9 @@ class Methods:
         return wrapper
 
     def _finalize(self) -> None:
+        from ._method import Method
         if self._final:
             return
-        # app
-        from ._method import Method
         for raw in self._raw:
             self._registry[raw['name']] = Method(**raw)
         self._final = True

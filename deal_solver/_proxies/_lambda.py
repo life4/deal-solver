@@ -1,15 +1,11 @@
-# stdlib
 import typing
 
-# external
 import astroid
 
-# app
 from ._proxy import ProxySort
 
 
 if typing.TYPE_CHECKING:
-    # app
     from .._context import Context
 
 
@@ -26,7 +22,6 @@ class LambdaSort(ProxySort):
 
     @methods.add(name='__call__')
     def m_call(self, *values, **kwargs) -> ProxySort:
-        # app
         from .._eval_expr import eval_expr
 
         body_ctx = self.ctx.make_child()

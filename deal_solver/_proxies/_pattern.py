@@ -1,20 +1,16 @@
-# stdlib
 import sre_constants
 import sre_parse
 import string
 import typing
 
-# external
 import z3
 
-# app
 from .._exceptions import UnsupportedError
 from ._proxy import ProxySort
 from ._registry import registry
 
 
 if typing.TYPE_CHECKING:
-    # app
     from .._context import Context
     from ._bool import BoolSort
 

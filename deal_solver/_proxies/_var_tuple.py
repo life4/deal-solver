@@ -1,11 +1,8 @@
-# stdlib
 import operator
 import typing
 
-# external
 import z3
 
-# app
 from .._exceptions import UnsupportedError
 from ._funcs import random_name, wrap
 from ._proxy import ProxySort
@@ -13,7 +10,6 @@ from ._registry import registry
 
 
 if typing.TYPE_CHECKING:
-    # app
     from .._context import Context
     from ._bool import BoolSort
     from ._int import IntSort
@@ -61,7 +57,6 @@ class VarTupleSort(ProxySort):
 
     @methods.add(name='__getitem__')
     def m_getitem(self, index: 'ProxySort', ctx: 'Context') -> 'ProxySort':
-        # app
         from .._context import ExceptionInfo
         ctx.exceptions.add(ExceptionInfo(
             name='IndexError',

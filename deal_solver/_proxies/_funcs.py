@@ -1,18 +1,14 @@
-# stdlib
 import typing
 from random import choices
 from string import ascii_letters
 
-# external
 import z3
 
-# app
 from .._context import Context
 from ._registry import registry
 
 
 if typing.TYPE_CHECKING:
-    # app
     from ._bool import BoolSort
     from ._proxy import ProxySort
 
@@ -21,7 +17,6 @@ T = typing.TypeVar('T', bound='ProxySort')
 
 
 def wrap(expr) -> 'ProxySort':
-    # app
     from ._float import FPSort, RealSort
     from ._proxy import ProxySort
 

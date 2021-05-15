@@ -1,18 +1,14 @@
-# stdlib
 import typing
 
-# external
 import z3
 
-# app
 from ._funcs import not_expr, random_name, wrap
+from ._method import Mutation
 from ._proxy import ProxySort
 from ._registry import registry
-from ._method import Mutation
 
 
 if typing.TYPE_CHECKING:
-    # app
     from .._context import Context
     from ._bool import BoolSort
     from ._int import IntSort
@@ -158,7 +154,6 @@ class SetSort(ProxySort):
 
     @methods.add(name='remove', pure=False)
     def r_remove(self, item: 'ProxySort', ctx: 'Context') -> 'SetSort':
-        # app
         from .._context import ExceptionInfo
 
         # TODO: check sort

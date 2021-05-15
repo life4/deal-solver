@@ -1,10 +1,7 @@
-# external
 import pytest
 
-# project
 from deal_solver import Theorem
 
-# app
 from .helpers import prove_f
 
 

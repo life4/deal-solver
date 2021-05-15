@@ -1,11 +1,9 @@
-# stdlib
 import typing
 
-# app
 from ._context import Context
 from ._exceptions import UnsupportedError
-from ._types import AstNode
 from ._proxies import ProxySort
+from ._types import AstNode
 
 
 T = typing.TypeVar('T')

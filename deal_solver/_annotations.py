@@ -1,12 +1,9 @@
-# stdlib
 import typing
 from types import MappingProxyType
 
-# external
 import astroid
 import z3
 
-# app
 from ._ast import get_full_name, get_name, infer
 from ._proxies import FloatSort, ListSort, ProxySort, SetSort, VarTupleSort, wrap
 from ._types import AstNode

@@ -1,9 +1,7 @@
-# stdlib
 import typing
 
 
 if typing.TYPE_CHECKING:
-    # app
     from .._proxies import ProxySort
 
 

@@ -1,10 +1,7 @@
-# stdlib
 import typing
 
-# external
 import z3
 
-# app
 from .._exceptions import UnsupportedError
 from ._proxy import ProxySort
 from ._registry import registry
@@ -12,10 +9,9 @@ from ._var_tuple import VarTupleSort
 
 
 if typing.TYPE_CHECKING:
-    # app
     from ._bool import BoolSort
-    from ._int import IntSort
     from .._context import Context
+    from ._int import IntSort
 
 
 @registry.add

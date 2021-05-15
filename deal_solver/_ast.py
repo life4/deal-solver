@@ -1,8 +1,6 @@
-# stdlib
 from contextlib import suppress
 from typing import Optional, Tuple
 
-# external
 import astroid
 
 

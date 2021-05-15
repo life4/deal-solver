@@ -1,13 +1,9 @@
-# stdlib
 from time import monotonic
 
-# external
 import pytest
 
-# project
 from deal_solver import Conclusion, ProveError, UnsupportedError
 
-# app
 from .helpers import prove_f
 
 

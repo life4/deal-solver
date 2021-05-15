@@ -1,7 +1,5 @@
-# stdlib
 from typing import Iterator, List
 
-# app
 from ._proxies import BoolSort
 
 

@@ -1,17 +1,14 @@
-# stdlib
 import typing
 
 import astroid
 
-# app
+from .._exceptions import UnsupportedError
 from ._funcs import and_expr
 from ._proxy import ProxySort
 from ._registry import registry
-from .._exceptions import UnsupportedError
 
 
 if typing.TYPE_CHECKING:
-    # app
     from .._context import Context
 
 
@@ -37,7 +34,6 @@ class FuncSort(ProxySort):
 
     @staticmethod
     def _call_function(node: astroid.FunctionDef, ctx: 'Context', call_args=list) -> ProxySort:
-        # app
         from .._eval_contracts import eval_contracts
         from .._eval_stmt import eval_stmt
 

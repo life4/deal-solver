@@ -1,4 +1,3 @@
-# app
 from ._registry import FUNCTIONS, init_all
 
 

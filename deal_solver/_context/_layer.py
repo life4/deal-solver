@@ -1,9 +1,7 @@
-# stdlib
 import typing
 
 
 if typing.TYPE_CHECKING:
-    # app
     from .._context import Context
     from .._proxies import BoolSort, ProxySort
 
@@ -23,7 +21,6 @@ class ReturnInfo(typing.NamedTuple):
     cond: 'BoolSort'
 
     def merge(self, other: 'ReturnInfo', ctx: 'Context') -> 'ReturnInfo':
-        # app
         from .._proxies import if_expr, or_expr
 
         cls = type(self)

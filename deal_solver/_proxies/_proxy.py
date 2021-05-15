@@ -1,18 +1,14 @@
-# stdlib
 import operator
 import typing
 
-# external
 import z3
 
-# app
 from .._exceptions import UnsupportedError
 from ._funcs import not_expr, wrap
 from ._methods import Methods
 
 
 if typing.TYPE_CHECKING:
-    # app
     from .._context import Context
     from ._bool import BoolSort
     from ._float import FloatSort, FPSort, RealSort
@@ -110,7 +106,6 @@ class ProxySort:
     def m_len(self, ctx: 'Context') -> 'IntSort':
         """len(self)
         """
-        # app
         from ._registry import registry
         msg = "object of type '{}' has no len()".format(self.type_name)
         ctx.add_exception(TypeError, msg)
@@ -137,7 +132,6 @@ class ProxySort:
     def m_contains(self, item, ctx: 'Context') -> 'BoolSort':
         """item in self
         """
-        # app
         from ._registry import registry
         msg = "argument of type '{}' is not iterable".format(self.type_name)
         ctx.add_exception(TypeError, msg)
@@ -149,7 +143,6 @@ class ProxySort:
     # comparison
 
     def _comp_op(self, other: 'ProxySort', handler: typing.Callable, ctx: 'Context') -> 'BoolSort':
-        # app
         from ._bool import BoolSort
         expr = self._binary_op(other=other, handler=handler, ctx=ctx)
         return BoolSort(expr=expr)

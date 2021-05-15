@@ -1,17 +1,13 @@
-# stdlib
 import typing
 
-# external
 import z3
 
-# app
 from ._funcs import if_expr
 from ._proxy import ProxySort
 from ._registry import registry
 
 
 if typing.TYPE_CHECKING:
-    # app
     from .._context import Context
     from ._float import FloatSort, FPSort, RealSort
     from ._int import IntSort

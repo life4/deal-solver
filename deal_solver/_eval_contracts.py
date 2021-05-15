@@ -1,10 +1,7 @@
-# stdlib
 import typing
 
-# external
 import astroid
 
-# app
 from ._context import Context, Scope
 from ._eval_expr import eval_expr
 from ._goal import Goal

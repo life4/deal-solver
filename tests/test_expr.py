@@ -1,17 +1,13 @@
-# stdlib
 import math
 
-# external
 import hypothesis
 import hypothesis.strategies
 import pytest
 from z3 import Z3Exception
 
-# project
 from deal_solver import Conclusion
 from deal_solver._proxies import FloatSort
 
-# app
 from .helpers import prove_f
 
 

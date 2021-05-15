@@ -1,18 +1,14 @@
-# stdlib
 import operator
 import typing
 
-# external
 import z3
 
-# app
 from .._exceptions import UnsupportedError
 from ._proxy import ProxySort
 from ._registry import registry
 
 
 if typing.TYPE_CHECKING:
-    # app
     from .._context import Context
     from ._bool import BoolSort
     from ._float import FloatSort, RealSort
@@ -48,12 +44,10 @@ class IntSort(ProxySort):
         return self.m_real(ctx=ctx)
 
     def m_real(self, ctx: 'Context') -> 'RealSort':
-        # app
         from ._float import RealSort
         return RealSort(z3.ToReal(self.expr)).m_real(ctx=ctx)
 
     def m_fp(self, ctx: 'Context'):
-        # app
         from ._float import RealSort
         expr = z3.ToReal(self.expr)
         return RealSort(expr).m_fp(ctx=ctx)

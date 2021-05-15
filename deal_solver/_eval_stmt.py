@@ -1,11 +1,8 @@
-# stdlib
 import typing
 
-# external
 import astroid
 import z3
 
-# app
 from ._annotations import ann2type
 from ._ast import infer
 from ._context import Context, ExceptionInfo, ReturnInfo

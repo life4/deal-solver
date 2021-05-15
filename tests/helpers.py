@@ -1,10 +1,7 @@
-# stdlib
 import typing
 
-# external
 import astroid
 
-# project
 from deal_solver import Contract, Proof, Theorem
 from deal_solver._ast import get_name
 

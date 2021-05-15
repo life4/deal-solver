@@ -1,13 +1,9 @@
-# stdlib
 import re
 
-# external
 import pytest
 
-# project
 from deal_solver import Conclusion
 
-# app
 from .helpers import prove_f
 
 

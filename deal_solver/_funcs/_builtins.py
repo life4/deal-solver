@@ -1,14 +1,11 @@
-# external
 import z3
 
-# app
 from .._context import Context, ExceptionInfo
-from .._proxies import (
-    BoolSort, IntSort, ProxySort, SetSort, UntypedSetSort,
-    UntypedListSort, UntypedDictSort, StrSort, if_expr, random_name, wrap,
-    ListSort, DictSort,
-)
 from .._exceptions import UnsupportedError
+from .._proxies import (
+    BoolSort, DictSort, IntSort, ListSort, ProxySort, SetSort, StrSort,
+    UntypedDictSort, UntypedListSort, UntypedSetSort, if_expr, random_name, wrap,
+)
 from ._registry import register
 
 

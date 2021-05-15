@@ -1,13 +1,10 @@
-# stdlib
 import math
 import operator
 import typing
 from sys import float_info
 
-# external
 import z3
 
-# app
 from .._exceptions import UnsupportedError
 from ._funcs import and_expr, switch
 from ._proxy import ProxySort
@@ -15,7 +12,6 @@ from ._registry import registry
 
 
 if typing.TYPE_CHECKING:
-    # app
     from .._context import Context
     from ._bool import BoolSort
     from ._int import IntSort

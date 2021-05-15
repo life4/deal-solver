@@ -1,7 +1,5 @@
-# external
 import z3
 
-# app
 from .._context import Context
 from .._proxies import ProxySort, StrSort
 from ._registry import register

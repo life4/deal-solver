@@ -1,13 +1,10 @@
-# stdlib
 import enum
 import typing
 from textwrap import dedent
 
-# external
 import astroid
 import z3
 
-# app
 from ._annotations import ann2type
 from ._cached_property import cached_property
 from ._context import Context
