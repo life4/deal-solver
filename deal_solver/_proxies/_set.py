@@ -36,7 +36,8 @@ class SetSort(ProxySort):
 
     @classmethod
     def from_items(cls, values: typing.List[ProxySort], ctx: 'Context') -> 'SetSort':
-        assert values
+        if not values:
+            return UntypedSetSort()
         items = cls.make_empty_expr(sort=values[0].expr.sort())
         for value in values:
             items = z3.SetAdd(items, value.expr)

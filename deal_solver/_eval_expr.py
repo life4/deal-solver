@@ -8,9 +8,8 @@ from ._context import Context
 from ._exceptions import UnsupportedError
 from ._funcs import FUNCTIONS
 from ._proxies import (
-    BoolSort, DictSort, FloatSort, FuncSort, IntSort, LambdaSort, ListSort,
-    ProxySort, SetSort, UntypedDictSort, UntypedListSort, UntypedSetSort,
-    UntypedVarTupleSort, VarTupleSort, and_expr, if_expr, or_expr, random_name, wrap,
+    DictSort, FloatSort, FuncSort, LambdaSort, ProxySort, UntypedDictSort, UntypedListSort,
+    UntypedVarTupleSort, and_expr, if_expr, or_expr, random_name, wrap, types,
 )
 from ._registry import HandlersRegistry
 
@@ -112,27 +111,25 @@ def eval_bool_op(node: astroid.BoolOp, ctx: Context) -> ProxySort:
 
 
 @eval_expr.register(astroid.List)
-def eval_list(node: astroid.List, ctx: Context) -> ListSort:
+def eval_list(node: astroid.List, ctx: Context) -> ProxySort:
     if not node.elts:
         return UntypedListSort()
     items = []
     for subnode in node.elts:
         items.append(eval_expr(node=subnode, ctx=ctx))
-    return ListSort.from_items(items, ctx=ctx)
+    return types.list.from_items(items, ctx=ctx)
 
 
 @eval_expr.register(astroid.Set)
 def eval_set(node: astroid.Set, ctx: Context) -> ProxySort:
-    if not node.elts:
-        return UntypedSetSort()
     items = []
     for subnode in node.elts:
         items.append(eval_expr(node=subnode, ctx=ctx))
-    return SetSort.from_items(items, ctx=ctx)
+    return types.set.from_items(items, ctx=ctx)
 
 
 @eval_expr.register(astroid.Dict)
-def eval_dict(node: astroid.Dict, ctx: Context) -> DictSort:
+def eval_dict(node: astroid.Dict, ctx: Context) -> ProxySort:
     container: DictSort = UntypedDictSort()
     for key_node, val_node in node.items:
         key = eval_expr(node=key_node, ctx=ctx)
@@ -148,7 +145,7 @@ def eval_tuple(node: astroid.Tuple, ctx: Context) -> ProxySort:
     items = []
     for subnode in node.elts:
         items.append(eval_expr(node=subnode, ctx=ctx))
-    return VarTupleSort.from_items(items, ctx=ctx)
+    return types.tuple.from_items(items, ctx=ctx)
 
 
 @eval_expr.register(astroid.ListComp)
@@ -164,7 +161,7 @@ def eval_list_comp(node: astroid.ListComp, ctx: Context) -> ProxySort:
         items = _compr_apply_ifs(ctx=ctx, comp=comp, items=items)
     items = _compr_apply_body(node=node, ctx=ctx, comp=comp, items=items)
 
-    return ListSort(items)
+    return types.list(items)
 
 
 def _compr_apply_ifs(
@@ -245,7 +242,7 @@ def eval_getitem(node: astroid.Subscript, ctx: Context) -> ProxySort:
     if node.slice.lower:
         lower_ref = eval_expr(node=node.slice.lower, ctx=ctx)
     else:
-        lower_ref = IntSort(z3.IntVal(0, ctx=ctx.z3_ctx))
+        lower_ref = types.int(z3.IntVal(0, ctx=ctx.z3_ctx))
     if node.slice.upper:
         upper_ref = eval_expr(node=node.slice.upper, ctx=ctx)
     else:
@@ -315,7 +312,7 @@ def eval_unary_op(node: astroid.UnaryOp, ctx: Context) -> ProxySort:
         return value_ref.m_inv(ctx=ctx)
     if node.op == 'not':
         expr = value_ref.m_bool(ctx=ctx).expr
-        return BoolSort(expr=z3.Not(expr, ctx=ctx.z3_ctx))
+        return types.bool(expr=z3.Not(expr, ctx=ctx.z3_ctx))
     raise RuntimeError('unsupported unary operation')
 
 
