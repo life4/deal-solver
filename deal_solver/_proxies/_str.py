@@ -25,6 +25,14 @@ class StrSort(ProxySort):
         assert z3.is_string(expr)
         self.expr = expr
 
+    @classmethod
+    def var(cls, *, name: str, ctx: z3.Context) -> 'StrSort':
+        expr = z3.Const(
+            name=name,
+            sort=z3.StringSort(ctx=ctx),
+        )
+        return cls(expr=expr)
+
     @staticmethod
     def val(val: str, ctx: 'Context') -> 'StrSort':
         return types.str(expr=z3.StringVal(val, ctx=ctx.z3_ctx))

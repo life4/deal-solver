@@ -108,6 +108,7 @@ from .helpers import prove_f
     '0 or 3',
     '2 if 3 else 0',
     '0 if 0 else 4',
+    'int',
 
     # comprehensions
     '[i for i in [4, 5, 6]] == [4, 5, 6]',

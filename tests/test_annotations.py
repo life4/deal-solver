@@ -40,6 +40,11 @@ from .helpers import prove_f
         'Tuple[int, ...]',
         'len(a) >= 0',
     ),
+    (
+        'from typing import Pattern',
+        'Pattern',
+        'a.fullmatch',
+    ),
 ])
 def test_asserts_ok(setup: str, ann: str, check: str) -> None:
     text = """

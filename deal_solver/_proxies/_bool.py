@@ -26,6 +26,14 @@ class BoolSort(ProxySort):
         self.expr = expr
 
     @classmethod
+    def var(cls, *, name: str, ctx: z3.Context) -> 'BoolSort':
+        expr = z3.Const(
+            name=name,
+            sort=z3.BoolSort(ctx=ctx),
+        )
+        return cls(expr=expr)
+
+    @classmethod
     def val(cls, x, ctx: 'Context' = None) -> 'BoolSort':
         if ctx is not None:
             ctx = ctx.z3_ctx

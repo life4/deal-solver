@@ -27,6 +27,14 @@ class IntSort(ProxySort):
         assert z3.is_int(expr), f'expected int, given {type(expr)}'
         self.expr = expr
 
+    @classmethod
+    def var(cls, *, name: str, ctx: z3.Context) -> 'IntSort':
+        expr = z3.Const(
+            name=name,
+            sort=z3.IntSort(ctx=ctx),
+        )
+        return cls(expr=expr)
+
     @staticmethod
     def val(x: int, ctx: 'Context') -> 'IntSort':
         return types.int(expr=z3.IntVal(x, ctx=ctx.z3_ctx))

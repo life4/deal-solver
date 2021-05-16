@@ -35,6 +35,10 @@ class ProxySort:
     def __init__(self, expr) -> None:
         raise NotImplementedError
 
+    @classmethod
+    def var(cls, *, name: str, ctx: z3.Context) -> 'ProxySort':
+        raise NotImplementedError
+
     @property
     def is_real(self) -> bool:
         return False
@@ -62,7 +66,8 @@ class ProxySort:
     def m_bool(self, ctx: 'Context') -> 'BoolSort':
         """bool(self)
         """
-        raise NotImplementedError
+        from ._bool import BoolSort
+        return BoolSort.val(True, ctx=ctx)
 
     @methods.add(name='__abs__')
     def m_abs(self, ctx: 'Context') -> 'ProxySort':

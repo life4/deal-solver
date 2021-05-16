@@ -22,15 +22,23 @@ class PatternSort(ProxySort):
     methods = ProxySort.methods.copy()
 
     expr: z3.ReRef
-    pattern: str
+    pattern: typing.Optional[str]
 
-    def __init__(self, expr, pattern: str) -> None:
+    def __init__(self, expr, pattern: str = None) -> None:
         assert z3.is_re(expr)
         self.expr = expr
         self.pattern = pattern
 
     @classmethod
-    def from_str(cls, pattern: str, flags: int) -> 'PatternSort':
+    def var(cls, *, name: str, ctx: z3.Context) -> 'PatternSort':
+        expr = z3.Const(
+            name=name,
+            sort=z3.ReSort(z3.StringSort(ctx=ctx)),
+        )
+        return cls(expr=expr)
+
+    @classmethod
+    def val(cls, pattern: str, flags: int = 0) -> 'PatternSort':
         parsed = sre_parse.parse(pattern, flags=flags)
         expr = cls._parse_pattern(parsed)
         return cls(expr=expr, pattern=pattern)

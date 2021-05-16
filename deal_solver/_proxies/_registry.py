@@ -45,7 +45,7 @@ class Registry:
         return self._proxies[name]
 
     def add(self, cls: P) -> P:
-        self._proxies[cls.type_name] = cls
+        self._proxies[cls.type_name.lower()] = cls
         return cls
 
 

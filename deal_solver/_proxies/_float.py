@@ -41,7 +41,15 @@ class FloatSort(ProxySort):
         return FPSort.__new__(FPSort)
 
     @classmethod
-    def sort(cls, ctx: z3.Context = None):
+    def var(cls, *, name: str, ctx: z3.Context) -> 'FloatSort':
+        expr = z3.Const(
+            name=name,
+            sort=cls.sort(ctx=ctx),
+        )
+        return cls(expr=expr)
+
+    @classmethod
+    def sort(cls, ctx: z3.Context = None) -> z3.SortRef:
         if cls.prefer_real:
             return RealSort.sort(ctx=ctx)
         return FPSort.sort(ctx=ctx)

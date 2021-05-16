@@ -11,7 +11,7 @@ def re_fullmatch(
     **kwargs,
 ) -> BoolSort:
     pat_str = pattern.expr.as_string()
-    pat = PatternSort.from_str(pat_str, flags=0)
+    pat = PatternSort.val(pat_str)
     return pat.fullmatch(string, ctx=ctx)
 
 
@@ -23,7 +23,7 @@ def re_match(
     **kwargs,
 ) -> BoolSort:
     pat_str = pattern.expr.as_string()
-    pat = PatternSort.from_str(pat_str, flags=0)
+    pat = PatternSort.val(pat_str)
     return pat.match(string, ctx=ctx)
 
 
@@ -33,4 +33,4 @@ def re_compile(
     **kwargs,
 ) -> PatternSort:
     pat_str = pattern.expr.as_string()
-    return PatternSort.from_str(pat_str, flags=0)
+    return PatternSort.val(pat_str)
