@@ -68,7 +68,7 @@ class StrSort(ProxySort):
             msg = "'in <string>' requires string as left operand, not {}"
             msg = msg.format(item.type_name)
             ctx.add_exception(TypeError, msg)
-            return types.bool.val(True)
+            return types.bool.val(True, ctx=ctx)
         assert self.expr is not None
         expr = z3.Contains(self.expr, item.expr)
         return types.bool(expr=expr)

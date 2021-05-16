@@ -114,14 +114,14 @@ class PatternSort(ProxySort):
     def fullmatch(self, string: ProxySort, ctx: 'Context') -> 'BoolSort':
         if not isinstance(string, types.str):
             ctx.add_exception(TypeError, "expected string or bytes-like object")
-            return types.bool.val(False)
+            return types.bool.val(False, ctx=ctx)
         return types.bool(expr=z3.InRe(string.expr, self.expr))
 
     @methods.add(name='match')
     def match(self, string: ProxySort, ctx: 'Context') -> 'BoolSort':
         if not isinstance(string, types.str):
             ctx.add_exception(TypeError, "expected string or bytes-like object")
-            return types.bool.val(False)
+            return types.bool.val(False, ctx=ctx)
         rex = z3.Concat(
             self.expr,
             z3.Star(

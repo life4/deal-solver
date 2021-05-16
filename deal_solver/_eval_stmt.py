@@ -33,7 +33,7 @@ def eval_func(node: astroid.FunctionDef, ctx: Context) -> None:
         proxy = type(sort)
         ctx.returns.add(ReturnInfo(
             value=proxy(func(*args)),
-            cond=types.bool.val(True)
+            cond=types.bool.val(True, ctx=ctx)
         ))
         return
 
@@ -103,14 +103,14 @@ def eval_if_else(node: astroid.If, ctx: Context) -> None:
         ctx.scope.set(name=var_name, value=value)
 
     # update new assertions
-    true = types.bool.val(True)
+    true = types.bool.val(True, ctx=ctx)
     for constr in ctx_then.expected.layer:
         ctx.expected.add(if_expr(test_ref, constr, true, ctx=ctx))
     for constr in ctx_else.expected.layer:
         ctx.expected.add(if_expr(test_ref, true, constr, ctx=ctx))
 
     # update new exceptions
-    false = types.bool.val(False)
+    false = types.bool.val(False, ctx=ctx)
     for exc in ctx_then.exceptions.layer:
         ctx.exceptions.add(ExceptionInfo(
             name=exc.name,
@@ -127,7 +127,7 @@ def eval_if_else(node: astroid.If, ctx: Context) -> None:
         ))
 
     # update new return statements
-    false = types.bool.val(False)
+    false = types.bool.val(False, ctx=ctx)
     for ret in ctx_then.returns.layer:
         ctx.returns.add(ReturnInfo(
             value=ret.value,

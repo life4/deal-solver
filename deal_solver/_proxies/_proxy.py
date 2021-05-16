@@ -135,7 +135,7 @@ class ProxySort:
         from ._registry import types
         msg = "argument of type '{}' is not iterable".format(self.type_name)
         ctx.add_exception(TypeError, msg)
-        return types.bool.val(False)
+        return types.bool.val(False, ctx=ctx)
 
     def _binary_op(self, other: 'ProxySort', handler: typing.Callable, ctx: 'Context'):
         return handler(self.expr, other.expr)

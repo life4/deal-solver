@@ -131,7 +131,7 @@ class DictSort(ProxySort):
     def m_eq(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         # type mismatch
         if not isinstance(other, types.dict):
-            return types.bool.val(False)
+            return types.bool.val(False, ctx=ctx)
         # other is untyped
         if isinstance(other, UntypedDictSort):
             empty = z3.K(dom=self.expr.domain(), v=self.expr.default())
@@ -195,4 +195,4 @@ class UntypedDictSort(DictSort):
 
     @methods.add(name='__contains__')
     def m_contains(self, key: 'ProxySort', ctx: 'Context') -> 'BoolSort':
-        return types.bool.val(False)
+        return types.bool.val(False, ctx=ctx)

@@ -66,7 +66,7 @@ class UntypedListSort(ListSort):
 
     @methods.add(name='__bool__')
     def m_bool(self, ctx: 'Context') -> 'BoolSort':
-        return types.bool.val(False)
+        return types.bool.val(False, ctx=ctx)
 
     @methods.add(name='__getitem__')
     def m_getitem(self, index: 'ProxySort', ctx: 'Context') -> 'ProxySort':
@@ -79,7 +79,7 @@ class UntypedListSort(ListSort):
 
     @methods.add(name='__contains__')
     def m_contains(self, item: 'ProxySort', ctx: 'Context') -> 'BoolSort':
-        return types.bool.val(False)
+        return types.bool.val(False, ctx=ctx)
 
     @methods.add(name='__len__')
     def m_len(self, ctx: 'Context') -> 'IntSort':

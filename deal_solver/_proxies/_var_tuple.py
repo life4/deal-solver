@@ -78,7 +78,7 @@ class VarTupleSort(ProxySort):
     @methods.add(name='__contains__')
     def m_contains(self, item: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         if not self.expr.sort().basis().eq(item.expr.sort()):
-            return types.bool.val(False)
+            return types.bool.val(False, ctx=ctx)
         unit = z3.Unit(item.expr)
         return types.bool(expr=z3.Contains(self.expr, unit))
 
@@ -133,7 +133,7 @@ class VarTupleSort(ProxySort):
     def m_eq(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         # type mismatch
         if not isinstance(other, types.tuple):
-            return types.bool.val(False)
+            return types.bool.val(False, ctx=ctx)
         # other is untyped
         if isinstance(other, UntypedVarTupleSort):
             empty = self.make_empty_expr(sort=self.sort().basis())
@@ -170,7 +170,7 @@ class UntypedVarTupleSort(VarTupleSort):
 
     @methods.add(name='__bool__')
     def m_bool(self, ctx: 'Context') -> 'BoolSort':
-        return types.bool.val(False)
+        return types.bool.val(False, ctx=ctx)
 
     @methods.add(name='__getitem__')
     def m_getitem(self, index: 'ProxySort', ctx: 'Context') -> 'ProxySort':
@@ -183,7 +183,7 @@ class UntypedVarTupleSort(VarTupleSort):
 
     @methods.add(name='__contains__')
     def m_contains(self, item: 'ProxySort', ctx: 'Context') -> 'BoolSort':
-        return types.bool.val(False)
+        return types.bool.val(False, ctx=ctx)
 
     @methods.add(name='__len__')
     def m_len(self, ctx: 'Context') -> 'IntSort':

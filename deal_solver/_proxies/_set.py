@@ -124,7 +124,7 @@ class SetSort(ProxySort):
         if not isinstance(other, types.set):
             msg = "'{}' object is not iterable".format(other.type_name)
             ctx.add_exception(TypeError, msg)
-            return types.bool.val(False)
+            return types.bool.val(False, ctx=ctx)
         return other.r_issubset(self, ctx=ctx)
 
     @methods.add(name='issubset')
@@ -133,7 +133,7 @@ class SetSort(ProxySort):
         if not isinstance(other, types.set):
             msg = "'{}' object is not iterable".format(other.type_name)
             ctx.add_exception(TypeError, msg)
-            return types.bool.val(False)
+            return types.bool.val(False, ctx=ctx)
         expr = z3.IsSubset(self.expr, other.expr)
         return types.bool(expr=expr)
 
@@ -143,7 +143,7 @@ class SetSort(ProxySort):
         if not isinstance(other, types.set):
             msg = "'{}' object is not iterable".format(other.type_name)
             ctx.add_exception(TypeError, msg)
-            return types.bool.val(False)
+            return types.bool.val(False, ctx=ctx)
         empty = self.make_empty(sort=other.expr.domain())
         return self.m_and(other, ctx=ctx).m_eq(empty, ctx=ctx)
 
@@ -170,7 +170,7 @@ class SetSort(ProxySort):
     def m_eq(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         # type mismatch
         if not isinstance(other, types.set):
-            return types.bool.val(False)
+            return types.bool.val(False, ctx=ctx)
         # other is untyped
         if isinstance(other, UntypedSetSort):
             empty = self.make_empty_expr(sort=self.expr.domain())
@@ -233,10 +233,10 @@ class UntypedSetSort(SetSort):
     def m_eq(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         # type mismatch
         if not isinstance(other, types.set):
-            return types.bool.val(False)
+            return types.bool.val(False, ctx=ctx)
         # both are empty
         if isinstance(other, type(self)):
-            return types.bool.val(True)
+            return types.bool.val(True, ctx=ctx)
         # other is a typed set
         empty = SetSort.make_empty(sort=other.expr.domain())
         return other.m_eq(empty, ctx=ctx)
