@@ -9,7 +9,7 @@ from ._exceptions import UnsupportedError
 from ._funcs import FUNCTIONS
 from ._proxies import (
     DictSort, FuncSort, LambdaSort, ProxySort, UntypedDictSort, UntypedListSort,
-    UntypedVarTupleSort, and_expr, if_expr, or_expr, random_name, wrap, types,
+    UntypedVarTupleSort, and_expr, if_expr, or_expr, random_name, types,
 )
 from ._registry import HandlersRegistry
 
@@ -156,19 +156,20 @@ def eval_list_comp(node: astroid.ListComp, ctx: Context) -> ProxySort:
     comp: astroid.Comprehension
     comp = node.generators[0]
 
-    items = eval_expr(node=comp.iter, ctx=ctx).expr
+    items = eval_expr(node=comp.iter, ctx=ctx)
     if comp.ifs:
         items = _compr_apply_ifs(ctx=ctx, comp=comp, items=items)
     items = _compr_apply_body(node=node, ctx=ctx, comp=comp, items=items)
-
-    return types.list(items)
+    return items
 
 
 def _compr_apply_ifs(
     ctx: Context,
     comp: astroid.Comprehension,
-    items: z3.ExprRef,
-) -> z3.Z3PPObject:
+    items: ProxySort,
+) -> ProxySort:
+    if not isinstance(items, types.list):
+        raise UnsupportedError(f'cannot iterate over {items.type_name}')
     one = z3.IntVal(1, ctx=ctx.z3_ctx)
     zero = z3.IntVal(0, ctx=ctx.z3_ctx)
 
@@ -176,7 +177,7 @@ def _compr_apply_ifs(
     body_ctx = ctx.make_child()
     body_ctx.scope.set(
         name=comp.target.name,
-        value=wrap(items[index]),
+        value=items.m_getitem(types.int(index), ctx=ctx.make_child()),
     )
 
     conds = []
@@ -190,7 +191,7 @@ def _compr_apply_ifs(
     )
     if_body = z3.If(
         z3.And(*conds),
-        z3.Unit(items[index]),
+        z3.Unit(items.m_getitem(types.int(index), ctx=ctx.make_child()).expr),
         z3.Empty(items.sort()),
     )
     z3.RecAddDefinition(f, index, z3.If(
@@ -198,22 +199,22 @@ def _compr_apply_ifs(
         if_body,
         f(index - one) + if_body,
     ))
-    return f(z3.Length(items) - one)
+    return types.list(f(z3.Length(items.expr) - one))
 
 
 def _compr_apply_body(
     node: astroid.ListComp,
     ctx: Context,
     comp: astroid.Comprehension,
-    items: z3.Z3PPObject,
-) -> z3.Z3PPObject:
+    items: ProxySort,
+) -> ProxySort:
     one = z3.IntVal(1, ctx=ctx.z3_ctx)
     zero = z3.IntVal(0, ctx=ctx.z3_ctx)
     index = z3.Int(random_name('index'))
     body_ctx = ctx.make_child()
     body_ctx.scope.set(
         name=comp.target.name,
-        value=wrap(items[index]),
+        value=items.m_getitem(types.int(index), ctx=ctx.make_child()),
     )
     body_ref = eval_expr(node=node.elt, ctx=body_ctx).expr
 
@@ -221,12 +222,12 @@ def _compr_apply_body(
         random_name('compr_body'),
         z3.IntSort(ctx=ctx.z3_ctx), z3.SeqSort(body_ref.sort()),
     )
-    z3.RecAddDefinition(f, index, z3.If(
+    z3.RecAddDefinition(f, [index], z3.If(
         index == zero,
         z3.Unit(body_ref),
         f(index - one) + z3.Unit(body_ref),
     ))
-    return f(z3.Length(items) - one)
+    return types.list(f(z3.Length(items.expr) - one))
 
 
 @eval_expr.register(astroid.Subscript)
