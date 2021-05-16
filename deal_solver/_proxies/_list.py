@@ -20,6 +20,12 @@ class ListSort(VarTupleSort):
     type_name = 'list'
     methods = VarTupleSort.methods.copy()
 
+    @classmethod
+    def var(cls, subtype: ProxySort = None, *, name: str, ctx: z3.Context) -> 'ListSort':
+        assert subtype
+        expr = z3.Const(name=name, sort=z3.SeqSort(subtype.sort()))
+        return cls(expr=expr)
+
     @methods.add(name='copy')
     def m_copy(self, ctx: 'Context') -> 'ListSort':
         return self

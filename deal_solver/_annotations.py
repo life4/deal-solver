@@ -37,15 +37,14 @@ MaybeSort = typing.Optional[ProxySort]
 
 class Generic(typing.NamedTuple):
     type: typing.Type[ProxySort]
-    sort: typing.Callable
     arity: int
 
 
 GENERICS: typing.Mapping[str, Generic]
 GENERICS = MappingProxyType({
-    'list': Generic(type=types.list, sort=z3.SeqSort, arity=1),
-    'set':  Generic(type=types.set, sort=z3.SetSort, arity=1),
-    # 'dict': Generic(type=types.dict, sort=z3.ArraySort, arity=2),
+    'list': Generic(type=types.list, arity=1),
+    'set':  Generic(type=types.set, arity=1),
+    'dict': Generic(type=types.dict, arity=2),
 })
 
 
@@ -117,6 +116,4 @@ def _sort_from_getattr(*, name: str, node: astroid.Subscript, ctx: z3.Context) -
         if subtype is None:
             return None
         subtypes.append(subtype)
-    subsorts = [subtype.sort() for subtype in subtypes]
-    sort = generic.sort(*subsorts)
-    return generic.type(expr=z3.Const(name=name, sort=sort))
+    return generic.type.var(*subtypes, name=name, ctx=ctx)

@@ -32,6 +32,18 @@ class DictSort(ProxySort):
         self.value_sort = value_sort
 
     @classmethod
+    def var(
+        cls, ktype: ProxySort = None, vtype: ProxySort = None,
+        *, name: str, ctx: z3.Context,
+    ) -> 'DictSort':
+        assert ktype
+        assert vtype
+        empty = cls.make_empty(ktype, vtype)
+        expr = z3.Array(name, ktype.sort(), vtype.sort())
+        empty.expr = expr
+        return empty
+
+    @classmethod
     def make_empty(cls, key: ProxySort, value: ProxySort) -> 'DictSort':
         item_sort = z3.Datatype(f'dict_val__{value.type_name}')
         item_sort.declare(

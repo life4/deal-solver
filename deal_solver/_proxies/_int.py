@@ -29,10 +29,7 @@ class IntSort(ProxySort):
 
     @classmethod
     def var(cls, *, name: str, ctx: z3.Context) -> 'IntSort':
-        expr = z3.Const(
-            name=name,
-            sort=z3.IntSort(ctx=ctx),
-        )
+        expr = z3.Const(name=name, sort=z3.IntSort(ctx=ctx))
         return cls(expr=expr)
 
     @staticmethod

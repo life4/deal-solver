@@ -66,8 +66,8 @@ class ProxySort:
     def m_bool(self, ctx: 'Context') -> 'BoolSort':
         """bool(self)
         """
-        from ._bool import BoolSort
-        return BoolSort.val(True, ctx=ctx)
+        from ._registry import types
+        return types.bool.val(True, ctx=ctx)
 
     @methods.add(name='__abs__')
     def m_abs(self, ctx: 'Context') -> 'ProxySort':

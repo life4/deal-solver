@@ -17,7 +17,7 @@ from .helpers import prove_f
     ('', 'list[int]',       '(a != []) or (a == [])'),
     ('', 'set[int]',        '(a != set()) or (a == set())'),
     ('', 'tuple[int, ...]', '(a != ()) or (a == ())'),
-    # ('', 'dict[str, int]',  '(a != {}) or (a == {})'),
+    ('', 'dict[str, int]',  '(a != {}) or (a == {})'),
 
     # typing module
     (
@@ -39,6 +39,11 @@ from .helpers import prove_f
         'from typing import Tuple',
         'Tuple[int, ...]',
         'len(a) >= 0',
+    ),
+    (
+        'from typing import Dict',
+        'Dict[str, int]',
+        '(a != {}) or (a == {})',
     ),
     (
         'from typing import Pattern',

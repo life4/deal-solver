@@ -25,6 +25,12 @@ class SetSort(ProxySort):
         assert z3.is_array(expr)
         self.expr = expr
 
+    @classmethod
+    def var(cls, subtype: ProxySort = None, *, name: str, ctx: z3.Context) -> 'SetSort':
+        assert subtype
+        expr = z3.Const(name=name, sort=z3.SetSort(subtype.sort()))
+        return cls(expr=expr)
+
     @staticmethod
     def make_empty_expr(sort):
         return z3.EmptySet(sort)
