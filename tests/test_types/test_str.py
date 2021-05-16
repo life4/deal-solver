@@ -8,6 +8,12 @@ from ..helpers import prove_f
 @pytest.mark.parametrize('check', [
     # compare
     '"ab" < "cd"',
+    '"ab" <= "cd"',
+    '"ab" <= "ab"',
+    '"cd" > "ab"',
+    '"cd" >= "ab"',
+    '"ab" >= "ab"',
+    '"a" > ""',
     '"ab" == "ab"',
     '"ab" != "cd"',
 

@@ -2,6 +2,7 @@ from contextlib import suppress
 from typing import Optional, Tuple
 
 import astroid
+from ._types import AstNode
 
 
 def get_name(expr) -> Optional[str]:
@@ -34,7 +35,7 @@ def get_full_name(expr) -> Tuple[str, str]:
     return path, func_name
 
 
-def infer(expr) -> Tuple[astroid.node_classes.NodeNG, ...]:
+def infer(expr) -> Tuple[AstNode, ...]:
     if not isinstance(expr, astroid.node_classes.NodeNG):
         return tuple()
     with suppress(astroid.exceptions.InferenceError, RecursionError):
