@@ -8,7 +8,7 @@ from ._ast import infer
 from ._context import Context, ExceptionInfo, ReturnInfo
 from ._eval_expr import eval_expr
 from ._exceptions import UnsupportedError
-from ._proxies import BoolSort, if_expr, not_expr, or_expr
+from ._proxies import types, if_expr, not_expr, or_expr
 from ._registry import HandlersRegistry
 
 
@@ -33,7 +33,7 @@ def eval_func(node: astroid.FunctionDef, ctx: Context) -> None:
         proxy = type(sort)
         ctx.returns.add(ReturnInfo(
             value=proxy(func(*args)),
-            cond=BoolSort.val(True)
+            cond=types.bool.val(True)
         ))
         return
 
@@ -103,14 +103,14 @@ def eval_if_else(node: astroid.If, ctx: Context) -> None:
         ctx.scope.set(name=var_name, value=value)
 
     # update new assertions
-    true = BoolSort.val(True)
+    true = types.bool.val(True)
     for constr in ctx_then.expected.layer:
         ctx.expected.add(if_expr(test_ref, constr, true, ctx=ctx))
     for constr in ctx_else.expected.layer:
         ctx.expected.add(if_expr(test_ref, true, constr, ctx=ctx))
 
     # update new exceptions
-    false = BoolSort.val(False)
+    false = types.bool.val(False)
     for exc in ctx_then.exceptions.layer:
         ctx.exceptions.add(ExceptionInfo(
             name=exc.name,
@@ -127,7 +127,7 @@ def eval_if_else(node: astroid.If, ctx: Context) -> None:
         ))
 
     # update new return statements
-    false = BoolSort.val(False)
+    false = types.bool.val(False)
     for ret in ctx_then.returns.layer:
         ctx.returns.add(ReturnInfo(
             value=ret.value,
