@@ -8,7 +8,7 @@ from ._ast import infer
 from ._context import Context, ExceptionInfo, ReturnInfo
 from ._eval_expr import eval_expr
 from ._exceptions import UnsupportedError
-from ._proxies import types, if_expr, not_expr, or_expr
+from ._proxies import if_expr, not_expr, or_expr, types
 from ._registry import HandlersRegistry
 
 

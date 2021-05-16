@@ -3,8 +3,8 @@ import z3
 from .._context import Context, ExceptionInfo
 from .._exceptions import UnsupportedError
 from .._proxies import (
-    IntSort, ProxySort, StrSort, types,
-    UntypedDictSort, UntypedListSort, UntypedSetSort, if_expr, random_name, wrap,
+    IntSort, ProxySort, StrSort, UntypedDictSort, UntypedListSort,
+    UntypedSetSort, if_expr, random_name, types, wrap,
 )
 from ._registry import register
 

@@ -9,8 +9,8 @@ from ._var_tuple import VarTupleSort
 
 
 if typing.TYPE_CHECKING:
-    from ._bool import BoolSort
     from .._context import Context
+    from ._bool import BoolSort
     from ._int import IntSort
 
 

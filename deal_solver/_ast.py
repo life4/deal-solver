@@ -2,6 +2,7 @@ from contextlib import suppress
 from typing import Optional, Tuple
 
 import astroid
+
 from ._types import AstNode
 
 
