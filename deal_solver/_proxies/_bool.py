@@ -26,8 +26,10 @@ class BoolSort(ProxySort):
         self.expr = expr
 
     @classmethod
-    def val(cls, x) -> 'BoolSort':
-        return cls(expr=z3.BoolVal(x))
+    def val(cls, x, ctx: 'Context' = None) -> 'BoolSort':
+        if ctx is not None:
+            ctx = ctx.z3_ctx
+        return cls(expr=z3.BoolVal(x, ctx=ctx))
 
     @methods.add(name='__bool__')
     def m_bool(self, ctx: 'Context') -> 'BoolSort':

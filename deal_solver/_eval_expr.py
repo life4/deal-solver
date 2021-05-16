@@ -8,7 +8,7 @@ from ._context import Context
 from ._exceptions import UnsupportedError
 from ._funcs import FUNCTIONS
 from ._proxies import (
-    DictSort, FloatSort, FuncSort, LambdaSort, ProxySort, UntypedDictSort, UntypedListSort,
+    DictSort, FuncSort, LambdaSort, ProxySort, UntypedDictSort, UntypedListSort,
     UntypedVarTupleSort, and_expr, if_expr, or_expr, random_name, wrap, types,
 )
 from ._registry import HandlersRegistry
@@ -18,10 +18,10 @@ eval_expr: HandlersRegistry[ProxySort] = HandlersRegistry()
 
 CONSTS: typing.Mapping[type, typing.Callable[..., ProxySort]]
 CONSTS = {
-    bool: z3.BoolVal,
-    int: z3.IntVal,
-    float: FloatSort.val,
-    str: z3.StringVal,
+    bool: types.bool.val,
+    int: types.int.val,
+    float: types.float.val,
+    str: types.str.val,
 }
 COMAPARISON: typing.Mapping[str, str]
 COMAPARISON = {
@@ -66,7 +66,7 @@ def eval_const(node: astroid.Const, ctx: Context) -> ProxySort:
     converter = CONSTS.get(t)
     if not converter:
         raise UnsupportedError('unsupported constant', repr(node.value))
-    return wrap(converter(node.value, ctx=ctx.z3_ctx))
+    return converter(node.value, ctx=ctx)
 
 
 @eval_expr.register(astroid.BinOp)

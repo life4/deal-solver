@@ -25,6 +25,10 @@ class StrSort(ProxySort):
         assert z3.is_string(expr)
         self.expr = expr
 
+    @staticmethod
+    def val(val: str, ctx: 'Context') -> 'StrSort':
+        return types.str(expr=z3.StringVal(val, ctx=ctx.z3_ctx))
+
     @methods.add(name='__int__')
     def m_int(self, ctx: 'Context') -> 'IntSort':
         assert self.expr is not None

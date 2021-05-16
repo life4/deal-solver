@@ -99,7 +99,7 @@ def math_trunc(x: ProxySort, ctx: Context, **kwargs) -> ProxySort:
         x.m_int(ctx=ctx).m_float(ctx=ctx).m_eq(x, ctx=ctx),
         x.m_int(ctx=ctx),
         if_expr(
-            x.m_gt(FloatSort.val(0, ctx=ctx.z3_ctx), ctx=ctx),
+            x.m_gt(FloatSort.val(0, ctx=ctx), ctx=ctx),
             x.m_int(ctx=ctx),
             x.m_int(ctx=ctx).m_add(IntSort.val(1), ctx=ctx),
             ctx=ctx,

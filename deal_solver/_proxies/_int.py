@@ -27,9 +27,11 @@ class IntSort(ProxySort):
         assert z3.is_int(expr), f'expected int, given {type(expr)}'
         self.expr = expr
 
-    @classmethod
-    def val(cls, x: int) -> 'IntSort':
-        return cls(expr=z3.IntVal(x))
+    @staticmethod
+    def val(x: int, ctx: 'Context' = None) -> 'IntSort':
+        if ctx is not None:
+            ctx = ctx.z3_ctx
+        return types.int(expr=z3.IntVal(x, ctx=ctx))
 
     @methods.add(name='__int__')
     @methods.add(name='conjugate')

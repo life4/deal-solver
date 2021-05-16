@@ -47,7 +47,9 @@ class FloatSort(ProxySort):
         return FPSort.sort(ctx=ctx)
 
     @classmethod
-    def val(cls, x: float, ctx: z3.Context = None) -> 'FloatSort':
+    def val(cls, x: float, ctx: 'Context' = None) -> 'FloatSort':
+        if ctx is not None:
+            ctx = ctx.z3_ctx
         if not math.isfinite(x):
             return FPSort.val(x, ctx=ctx)
         if cls.prefer_real:
