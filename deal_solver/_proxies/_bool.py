@@ -4,7 +4,7 @@ import z3
 
 from ._funcs import if_expr
 from ._proxy import ProxySort
-from ._registry import registry
+from ._registry import types
 
 
 if typing.TYPE_CHECKING:
@@ -16,7 +16,7 @@ if typing.TYPE_CHECKING:
 INT_BITS = 64
 
 
-@registry.add
+@types.add
 class BoolSort(ProxySort):
     type_name = 'bool'
     methods = ProxySort.methods.copy()
@@ -35,7 +35,7 @@ class BoolSort(ProxySort):
 
     @methods.add(name='__int__')
     def m_int(self, ctx: 'Context') -> 'IntSort':
-        return if_expr(self, registry.int.val(1), registry.int.val(0), ctx=ctx)
+        return if_expr(self, types.int.val(1), types.int.val(0), ctx=ctx)
 
     @methods.add(name='__float__')
     def m_float(self, ctx: 'Context') -> 'FloatSort':
@@ -49,37 +49,37 @@ class BoolSort(ProxySort):
 
     @methods.add(name='__add__')
     def m_add(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
-        if not isinstance(other, (registry.bool, registry.float, registry.int)):
+        if not isinstance(other, (types.bool, types.float, types.int)):
             return self._bad_bin_op(other, op='+', ctx=ctx)
         return self.m_int(ctx=ctx).m_add(other, ctx=ctx)
 
     @methods.add(name='__mod__')
     def m_mod(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
-        if not isinstance(other, (registry.bool, registry.float, registry.int)):
+        if not isinstance(other, (types.bool, types.float, types.int)):
             return self._bad_bin_op(other, op='%', ctx=ctx)
         return self.m_int(ctx=ctx).m_mod(other, ctx=ctx)
 
     @methods.add(name='__sub__')
     def m_sub(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
-        if not isinstance(other, (registry.bool, registry.float, registry.int)):
+        if not isinstance(other, (types.bool, types.float, types.int)):
             return self._bad_bin_op(other, op='-', ctx=ctx)
         return self.m_int(ctx=ctx).m_sub(other, ctx=ctx)
 
     @methods.add(name='__mul__')
     def m_mul(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
-        if not isinstance(other, (registry.bool, registry.float, registry.int)):
+        if not isinstance(other, (types.bool, types.float, types.int)):
             return self._bad_bin_op(other, op='*', ctx=ctx)
         return self.m_int(ctx=ctx).m_mul(other, ctx=ctx)
 
     @methods.add(name='__truediv__')
     def m_truediv(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
-        if not isinstance(other, (registry.bool, registry.float, registry.int)):
+        if not isinstance(other, (types.bool, types.float, types.int)):
             return self._bad_bin_op(other, op='/', ctx=ctx)
         return self.m_int(ctx=ctx).m_truediv(other, ctx=ctx)
 
     @methods.add(name='__floordiv__')
     def m_floordiv(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
-        if not isinstance(other, (registry.bool, registry.float, registry.int)):
+        if not isinstance(other, (types.bool, types.float, types.int)):
             return self._bad_bin_op(other, op='//', ctx=ctx)
         return self.m_int(ctx=ctx).m_floordiv(other, ctx=ctx)
 

@@ -6,7 +6,7 @@ from .._cached_property import cached_property
 from .._exceptions import UnsupportedError
 from ._method import Mutation
 from ._proxy import ProxySort
-from ._registry import registry
+from ._registry import types
 
 
 if typing.TYPE_CHECKING:
@@ -14,7 +14,7 @@ if typing.TYPE_CHECKING:
     from ._bool import BoolSort
 
 
-@registry.add
+@types.add
 class DictSort(ProxySort):
     type_name = 'dict'
     methods = ProxySort.methods.copy()
@@ -67,7 +67,7 @@ class DictSort(ProxySort):
         ctx.exceptions.add(ExceptionInfo(
             name='KeyError',
             names={'KeyError', 'LookupError', 'Exception', 'BaseException'},
-            cond=registry.bool(expr),
+            cond=types.bool(expr),
         ))
 
         expr = self.item_sort.value(item)
@@ -119,24 +119,24 @@ class DictSort(ProxySort):
     def m_contains(self, key: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         item = z3.Select(self.expr, key.expr)
         expr = self.item_sort.exists(item)
-        return registry.bool(expr=expr)
+        return types.bool(expr=expr)
 
     @methods.add(name='__bool__')
     def m_bool(self, ctx: 'Context') -> 'BoolSort':
         empty = z3.K(dom=self.expr.domain(), v=self.expr.default())
         expr = self.expr != empty
-        return registry.bool(expr=expr)
+        return types.bool(expr=expr)
 
     @methods.add(name='__eq__')
     def m_eq(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         # type mismatch
-        if not isinstance(other, registry.dict):
-            return registry.bool.val(False)
+        if not isinstance(other, types.dict):
+            return types.bool.val(False)
         # other is untyped
         if isinstance(other, UntypedDictSort):
             empty = z3.K(dom=self.expr.domain(), v=self.expr.default())
             expr = self.expr == empty
-            return registry.bool(expr=expr)
+            return types.bool(expr=expr)
         return super().m_eq(other, ctx=ctx)
 
     @methods.add(name='fromkeys')
@@ -183,7 +183,7 @@ class UntypedDictSort(DictSort):
     @methods.add(name='__getitem__', pure=False)
     def m_getitem(self, key: ProxySort, ctx: 'Context') -> ProxySort:
         ctx.add_exception(KeyError, '')
-        return registry.int.val(0)
+        return types.int.val(0)
 
     @methods.add(name='clear', pure=False)
     def r_clear(self, ctx: 'Context') -> 'DictSort':
@@ -195,4 +195,4 @@ class UntypedDictSort(DictSort):
 
     @methods.add(name='__contains__')
     def m_contains(self, key: 'ProxySort', ctx: 'Context') -> 'BoolSort':
-        return registry.bool.val(False)
+        return types.bool.val(False)

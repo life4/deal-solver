@@ -8,12 +8,15 @@ from ._lambda import LambdaSort
 from ._list import ListSort, UntypedListSort
 from ._pattern import PatternSort
 from ._proxy import ProxySort
+from ._registry import types
 from ._set import SetSort, UntypedSetSort
 from ._str import StrSort
 from ._var_tuple import UntypedVarTupleSort, VarTupleSort
 
 
 __all__ = [
+    'types',
+
     # funcs
     'if_expr',
     'random_name',

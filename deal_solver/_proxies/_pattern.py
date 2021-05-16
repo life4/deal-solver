@@ -7,7 +7,7 @@ import z3
 
 from .._exceptions import UnsupportedError
 from ._proxy import ProxySort
-from ._registry import registry
+from ._registry import types
 
 
 if typing.TYPE_CHECKING:
@@ -15,7 +15,7 @@ if typing.TYPE_CHECKING:
     from ._bool import BoolSort
 
 
-@registry.add
+@types.add
 class PatternSort(ProxySort):
     module_name = 're'
     type_name = 'Pattern'
@@ -112,16 +112,16 @@ class PatternSort(ProxySort):
 
     @methods.add(name='fullmatch')
     def fullmatch(self, string: ProxySort, ctx: 'Context') -> 'BoolSort':
-        if not isinstance(string, registry.str):
+        if not isinstance(string, types.str):
             ctx.add_exception(TypeError, "expected string or bytes-like object")
-            return registry.bool.val(False)
-        return registry.bool(expr=z3.InRe(string.expr, self.expr))
+            return types.bool.val(False)
+        return types.bool(expr=z3.InRe(string.expr, self.expr))
 
     @methods.add(name='match')
     def match(self, string: ProxySort, ctx: 'Context') -> 'BoolSort':
-        if not isinstance(string, registry.str):
+        if not isinstance(string, types.str):
             ctx.add_exception(TypeError, "expected string or bytes-like object")
-            return registry.bool.val(False)
+            return types.bool.val(False)
         rex = z3.Concat(
             self.expr,
             z3.Star(
@@ -131,4 +131,4 @@ class PatternSort(ProxySort):
                 )
             ),
         )
-        return registry.bool(expr=z3.InRe(string.expr, rex))
+        return types.bool(expr=z3.InRe(string.expr, rex))

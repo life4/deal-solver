@@ -6,7 +6,7 @@ import z3
 from .._exceptions import UnsupportedError
 from ._funcs import random_name, wrap
 from ._proxy import ProxySort
-from ._registry import registry
+from ._registry import types
 
 
 if typing.TYPE_CHECKING:
@@ -18,7 +18,7 @@ if typing.TYPE_CHECKING:
 T = typing.TypeVar('T', bound='VarTupleSort')
 
 
-@registry.add
+@types.add
 class VarTupleSort(ProxySort):
     expr: z3.SeqRef
     type_name = 'tuple'
@@ -53,7 +53,7 @@ class VarTupleSort(ProxySort):
     @methods.add(name='__bool__')
     def m_bool(self, ctx: 'Context') -> 'BoolSort':
         expr = z3.Length(self.expr) != z3.IntVal(0)
-        return registry.bool(expr=expr)
+        return types.bool(expr=expr)
 
     @methods.add(name='__getitem__')
     def m_getitem(self, index: 'ProxySort', ctx: 'Context') -> 'ProxySort':
@@ -61,7 +61,7 @@ class VarTupleSort(ProxySort):
         ctx.exceptions.add(ExceptionInfo(
             name='IndexError',
             names={'IndexError', 'LookupError', 'Exception', 'BaseException'},
-            cond=registry.bool(expr=index.expr >= z3.Length(self.expr)),
+            cond=types.bool(expr=index.expr >= z3.Length(self.expr)),
             message='{} index out of range'.format(self.type_name),
         ))
         return wrap(self.expr[index.expr])
@@ -79,20 +79,20 @@ class VarTupleSort(ProxySort):
     @methods.add(name='__contains__')
     def m_contains(self, item: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         if not self.expr.sort().basis().eq(item.expr.sort()):
-            return registry.bool.val(False)
+            return types.bool.val(False)
         unit = z3.Unit(item.expr)
-        return registry.bool(expr=z3.Contains(self.expr, unit))
+        return types.bool(expr=z3.Contains(self.expr, unit))
 
     @methods.add(name='index')
     def r_index(self, other: 'ProxySort', start: 'ProxySort' = None, *, ctx: 'Context') -> 'IntSort':
         if start is None:
-            start = registry.int(z3.IntVal(0))
+            start = types.int(z3.IntVal(0))
         unit = z3.Unit(other.expr)
-        return registry.int(expr=z3.IndexOf(self.expr, unit, start.expr))
+        return types.int(expr=z3.IndexOf(self.expr, unit, start.expr))
 
     @methods.add(name='__len__')
     def m_len(self, ctx: 'Context') -> 'IntSort':
-        return registry.int(expr=z3.Length(self.expr))
+        return types.int(expr=z3.Length(self.expr))
 
     @methods.add(name='count')
     def r_count(self, item: 'ProxySort', ctx: 'Context') -> 'IntSort':
@@ -110,7 +110,7 @@ class VarTupleSort(ProxySort):
             f(i - one) + z3.If(self.expr[i] == item_expr, one, zero),
         ))
         result = f(z3.Length(self.expr) - one)
-        return registry.int(result)
+        return types.int(result)
 
     @methods.add(name='__add__')
     def m_add(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
@@ -123,7 +123,7 @@ class VarTupleSort(ProxySort):
 
     @methods.add(name='__mul__')
     def m_mul(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
-        if not isinstance(other, registry.int):
+        if not isinstance(other, types.int):
             msg = "can't multiply sequence by non-int of type '{}'"
             msg = msg.format(other.type_name)
             ctx.add_exception(TypeError, msg)
@@ -133,13 +133,13 @@ class VarTupleSort(ProxySort):
     @methods.add(name='__eq__')
     def m_eq(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         # type mismatch
-        if not isinstance(other, registry.tuple):
-            return registry.bool.val(False)
+        if not isinstance(other, types.tuple):
+            return types.bool.val(False)
         # other is untyped
         if isinstance(other, UntypedVarTupleSort):
             empty = self.make_empty_expr(sort=self.sort().basis())
             expr = self.expr == empty
-            return registry.bool(expr=expr)
+            return types.bool(expr=expr)
         return super().m_eq(other, ctx=ctx)
 
     @methods.add(name='__pos__')
@@ -171,7 +171,7 @@ class UntypedVarTupleSort(VarTupleSort):
 
     @methods.add(name='__bool__')
     def m_bool(self, ctx: 'Context') -> 'BoolSort':
-        return registry.bool.val(False)
+        return types.bool.val(False)
 
     @methods.add(name='__getitem__')
     def m_getitem(self, index: 'ProxySort', ctx: 'Context') -> 'ProxySort':
@@ -184,12 +184,12 @@ class UntypedVarTupleSort(VarTupleSort):
 
     @methods.add(name='__contains__')
     def m_contains(self, item: 'ProxySort', ctx: 'Context') -> 'BoolSort':
-        return registry.bool.val(False)
+        return types.bool.val(False)
 
     @methods.add(name='__len__')
     def m_len(self, ctx: 'Context') -> 'IntSort':
-        return registry.int(expr=z3.IntVal(0))
+        return types.int(expr=z3.IntVal(0))
 
     @methods.add(name='count')
     def r_count(self, item: 'ProxySort', ctx: 'Context') -> 'IntSort':
-        return registry.int(expr=z3.IntVal(0))
+        return types.int(expr=z3.IntVal(0))

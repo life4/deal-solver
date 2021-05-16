@@ -5,7 +5,7 @@ from string import ascii_letters
 import z3
 
 from .._context import Context
-from ._registry import registry
+from ._registry import types
 
 
 if typing.TYPE_CHECKING:
@@ -23,19 +23,19 @@ def wrap(expr) -> 'ProxySort':
     if isinstance(expr, ProxySort):
         return expr
     if z3.is_bool(expr):
-        return registry.bool(expr=expr)
+        return types.bool(expr=expr)
     if z3.is_string(expr):
-        return registry.str(expr=expr)
+        return types.str(expr=expr)
     if z3.is_seq(expr):
-        return registry.list(expr=expr)
+        return types.list(expr=expr)
     if z3.is_array(expr):
-        return registry.set(expr=expr)
+        return types.set(expr=expr)
     if z3.is_fp(expr):
         return FPSort.wrap(expr)
     if z3.is_real(expr):
         return RealSort.wrap(expr=expr)
     if z3.is_int(expr):
-        return registry.int(expr=expr)
+        return types.int(expr=expr)
     return expr
 
 
@@ -67,12 +67,12 @@ def switch(*cases: typing.Tuple['ProxySort', T], default, ctx: Context) -> T:
 
 
 def and_expr(*args: 'ProxySort', ctx: Context) -> 'BoolSort':
-    return registry.bool(z3.And(*[arg.m_bool(ctx=ctx).expr for arg in args]))
+    return types.bool(z3.And(*[arg.m_bool(ctx=ctx).expr for arg in args]))
 
 
 def or_expr(*args: 'ProxySort', ctx: Context) -> 'BoolSort':
-    return registry.bool(z3.Or(*[arg.m_bool(ctx=ctx).expr for arg in args]))
+    return types.bool(z3.Or(*[arg.m_bool(ctx=ctx).expr for arg in args]))
 
 
 def not_expr(cond: 'ProxySort', *, ctx: Context) -> 'BoolSort':
-    return registry.bool(z3.Not(cond.m_bool(ctx=ctx).expr))
+    return types.bool(z3.Not(cond.m_bool(ctx=ctx).expr))

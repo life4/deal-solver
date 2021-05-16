@@ -49,4 +49,4 @@ class Registry:
         return cls
 
 
-registry = Registry()
+types = Registry()

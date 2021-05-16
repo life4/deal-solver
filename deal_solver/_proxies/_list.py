@@ -4,7 +4,7 @@ import z3
 
 from .._exceptions import UnsupportedError
 from ._proxy import ProxySort
-from ._registry import registry
+from ._registry import types
 from ._var_tuple import VarTupleSort
 
 
@@ -14,7 +14,7 @@ if typing.TYPE_CHECKING:
     from ._int import IntSort
 
 
-@registry.add
+@types.add
 class ListSort(VarTupleSort):
     expr: z3.SeqRef
     type_name = 'list'
@@ -66,7 +66,7 @@ class UntypedListSort(ListSort):
 
     @methods.add(name='__bool__')
     def m_bool(self, ctx: 'Context') -> 'BoolSort':
-        return registry.bool.val(False)
+        return types.bool.val(False)
 
     @methods.add(name='__getitem__')
     def m_getitem(self, index: 'ProxySort', ctx: 'Context') -> 'ProxySort':
@@ -79,15 +79,15 @@ class UntypedListSort(ListSort):
 
     @methods.add(name='__contains__')
     def m_contains(self, item: 'ProxySort', ctx: 'Context') -> 'BoolSort':
-        return registry.bool.val(False)
+        return types.bool.val(False)
 
     @methods.add(name='__len__')
     def m_len(self, ctx: 'Context') -> 'IntSort':
-        return registry.int(expr=z3.IntVal(0))
+        return types.int(expr=z3.IntVal(0))
 
     @methods.add(name='count')
     def r_count(self, item: 'ProxySort', ctx: 'Context') -> 'IntSort':
-        return registry.int(expr=z3.IntVal(0))
+        return types.int(expr=z3.IntVal(0))
 
     @methods.add(name='clear', pure=False)
     def m_clear(self, ctx: 'Context') -> 'ListSort':

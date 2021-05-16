@@ -5,7 +5,7 @@ import astroid
 from .._exceptions import UnsupportedError
 from ._funcs import and_expr
 from ._proxy import ProxySort
-from ._registry import registry
+from ._registry import types
 
 
 if typing.TYPE_CHECKING:
@@ -15,7 +15,7 @@ if typing.TYPE_CHECKING:
 F = typing.Callable[..., ProxySort]
 
 
-@registry.add
+@types.add
 class FuncSort(ProxySort):
     type_name = 'function'
     impl: F

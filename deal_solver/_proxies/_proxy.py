@@ -106,10 +106,10 @@ class ProxySort:
     def m_len(self, ctx: 'Context') -> 'IntSort':
         """len(self)
         """
-        from ._registry import registry
+        from ._registry import types
         msg = "object of type '{}' has no len()".format(self.type_name)
         ctx.add_exception(TypeError, msg)
-        return registry.int.val(0)
+        return types.int.val(0)
 
     @methods.add(name='__getitem__')
     def m_getitem(self, item: 'ProxySort', ctx: 'Context') -> 'ProxySort':
@@ -132,10 +132,10 @@ class ProxySort:
     def m_contains(self, item, ctx: 'Context') -> 'BoolSort':
         """item in self
         """
-        from ._registry import registry
+        from ._registry import types
         msg = "argument of type '{}' is not iterable".format(self.type_name)
         ctx.add_exception(TypeError, msg)
-        return registry.bool.val(False)
+        return types.bool.val(False)
 
     def _binary_op(self, other: 'ProxySort', handler: typing.Callable, ctx: 'Context'):
         return handler(self.expr, other.expr)

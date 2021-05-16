@@ -5,7 +5,7 @@ import z3
 
 from .._exceptions import UnsupportedError
 from ._proxy import ProxySort
-from ._registry import registry
+from ._registry import types
 
 
 if typing.TYPE_CHECKING:
@@ -15,7 +15,7 @@ if typing.TYPE_CHECKING:
     from ._int import IntSort
 
 
-@registry.add
+@types.add
 class StrSort(ProxySort):
     type_name = 'str'
     methods = ProxySort.methods.copy()
@@ -28,7 +28,7 @@ class StrSort(ProxySort):
     @methods.add(name='__int__')
     def m_int(self, ctx: 'Context') -> 'IntSort':
         assert self.expr is not None
-        return registry.int(expr=z3.StrToInt(self.expr))
+        return types.int(expr=z3.StrToInt(self.expr))
 
     @methods.add(name='__str__')
     def m_str(self, ctx: 'Context') -> 'StrSort':
@@ -39,14 +39,14 @@ class StrSort(ProxySort):
         assert self.expr is not None
         if z3.is_string_value(self.expr):
             val = float(self.expr.as_string())
-            return registry.float.val(val)
+            return types.float.val(val)
         raise UnsupportedError('cannot convert str to float')
 
     @methods.add(name='__bool__')
     def m_bool(self, ctx: 'Context') -> 'BoolSort':
         assert self.expr is not None
         expr = self.expr != z3.Empty(z3.StringSort())
-        return registry.bool(expr=expr)
+        return types.bool(expr=expr)
 
     @methods.add(name='__getitem__')
     def m_getitem(self, index: 'ProxySort', ctx: 'Context') -> 'ProxySort':
@@ -56,44 +56,44 @@ class StrSort(ProxySort):
             offset=index.expr,
             length=z3.IntVal(1, ctx=ctx.z3_ctx),
         )
-        return registry.str(expr=expr)
+        return types.str(expr=expr)
 
     @methods.add(name='__contains__')
     def m_contains(self, item: 'ProxySort', ctx: 'Context') -> 'BoolSort':
-        if not isinstance(item, registry.str):
+        if not isinstance(item, types.str):
             msg = "'in <string>' requires string as left operand, not {}"
             msg = msg.format(item.type_name)
             ctx.add_exception(TypeError, msg)
-            return registry.bool.val(True)
+            return types.bool.val(True)
         assert self.expr is not None
         expr = z3.Contains(self.expr, item.expr)
-        return registry.bool(expr=expr)
+        return types.bool(expr=expr)
 
     @methods.add(name='startswith')
     def r_startswith(self, prefix: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         assert self.expr is not None
         expr = z3.PrefixOf(prefix.expr, self.expr)
-        return registry.bool(expr=expr)
+        return types.bool(expr=expr)
 
     @methods.add(name='endswith')
     def r_endswith(self, suffix: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         assert self.expr is not None
         expr = z3.SuffixOf(suffix.expr, self.expr)
-        return registry.bool(expr=expr)
+        return types.bool(expr=expr)
 
     @methods.add(name='index')
     def r_index(self, other: 'ProxySort', start: 'ProxySort' = None, *, ctx: 'Context') -> 'IntSort':
         assert self.expr is not None
         if start is None:
-            start = registry.int.val(0)
+            start = types.int.val(0)
         # TODO: emit IndexError
-        return registry.int(expr=z3.IndexOf(self.expr, other.expr, start.expr))
+        return types.int(expr=z3.IndexOf(self.expr, other.expr, start.expr))
 
     @methods.add(name='find')
     def r_find(self, other: 'ProxySort', start: 'ProxySort' = None, *, ctx: 'Context') -> 'IntSort':
         assert self.expr is not None
         if start is None:
-            start = registry.int.val(0)
+            start = types.int.val(0)
         expr = z3.If(
             z3.Contains(
                 z3.SubString(self.expr, offset=start.expr, length=z3.Length(self.expr)),
@@ -102,16 +102,16 @@ class StrSort(ProxySort):
             z3.IndexOf(self.expr, other.expr, start.expr),
             z3.IntVal(-1, ctx=ctx.z3_ctx),
         )
-        return registry.int(expr=expr)
+        return types.int(expr=expr)
 
     @methods.add(name='__len__')
     def m_len(self, ctx: 'Context') -> 'IntSort':
         assert self.expr is not None
-        return registry.int(expr=z3.Length(self.expr))
+        return types.int(expr=z3.Length(self.expr))
 
     @methods.add(name='__add__')
     def m_add(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
-        if not isinstance(other, registry.str):
+        if not isinstance(other, types.str):
             msg = 'can only concatenate str (not "{}") to {}'
             msg = msg.format(other.type_name, self.type_name)
             ctx.add_exception(TypeError, msg)
@@ -120,7 +120,7 @@ class StrSort(ProxySort):
 
     @methods.add(name='__mul__')
     def m_mul(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
-        if not isinstance(other, registry.int):
+        if not isinstance(other, types.int):
             msg = "can't multiply sequence by non-int of type '{}'"
             msg = msg.format(other.type_name)
             ctx.add_exception(TypeError, msg)

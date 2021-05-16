@@ -5,7 +5,7 @@ import z3
 from ._funcs import not_expr, random_name, wrap
 from ._method import Mutation
 from ._proxy import ProxySort
-from ._registry import registry
+from ._registry import types
 
 
 if typing.TYPE_CHECKING:
@@ -15,7 +15,7 @@ if typing.TYPE_CHECKING:
     from ._list import ListSort
 
 
-@registry.add
+@types.add
 class SetSort(ProxySort):
     type_name = 'set'
     methods = ProxySort.methods.copy()
@@ -44,7 +44,7 @@ class SetSort(ProxySort):
 
     @methods.add(name='add', pure=False)
     def r_add(self, item: 'ProxySort', ctx: 'Context') -> 'SetSort':
-        return registry.set(
+        return types.set(
             expr=z3.SetAdd(s=self.expr, e=item.expr),
         )
 
@@ -59,7 +59,7 @@ class SetSort(ProxySort):
 
     @methods.add(name='__contains__')
     def m_contains(self, item: 'ProxySort', ctx: 'Context') -> 'BoolSort':
-        return registry.bool(expr=z3.IsMember(e=item.expr, s=self.expr))
+        return types.bool(expr=z3.IsMember(e=item.expr, s=self.expr))
 
     @methods.add(name='__pos__')
     def m_pos(self, ctx: 'Context') -> 'SetSort':
@@ -78,71 +78,71 @@ class SetSort(ProxySort):
     @methods.add(name='__or__')
     def m_or(self, other: 'ProxySort', ctx: 'Context') -> 'SetSort':
         # TODO: `set.union` supports any iterable
-        if not isinstance(other, registry.set):
+        if not isinstance(other, types.set):
             return self._bad_bin_op(other=other, op='|', ctx=ctx)
         expr = z3.SetUnion(self.expr, other.expr)
-        return registry.set(expr=expr)
+        return types.set(expr=expr)
 
     @methods.add(name='intersection')
     @methods.add(name='intersection_update', pure=False)
     @methods.add(name='__and__')
     def m_and(self, other: 'ProxySort', ctx: 'Context') -> 'SetSort':
         # TODO: `set.intersection` supports any iterable
-        if not isinstance(other, registry.set):
+        if not isinstance(other, types.set):
             return self._bad_bin_op(other=other, op='&', ctx=ctx)
         expr = z3.SetIntersect(self.expr, other.expr)
-        return registry.set(expr=expr)
+        return types.set(expr=expr)
 
     @methods.add(name='symmetric_difference')
     @methods.add(name='symmetric_difference_update', pure=False)
     @methods.add(name='__xor__')
     def m_xor(self, other: 'ProxySort', ctx: 'Context') -> 'SetSort':
         # TODO: `set.symmetric_difference` supports any iterable
-        if not isinstance(other, registry.set):
+        if not isinstance(other, types.set):
             return self._bad_bin_op(other=other, op='^', ctx=ctx)
         expr = z3.SetUnion(
             z3.SetDifference(self.expr, other.expr),
             z3.SetDifference(other.expr, self.expr),
         )
-        return registry.set(expr=expr)
+        return types.set(expr=expr)
 
     @methods.add(name='difference')
     @methods.add(name='difference_update', pure=False)
     def r_difference(self, other: 'ProxySort', ctx: 'Context') -> 'SetSort':
         # TODO: `set.difference` supports any iterable
-        if not isinstance(other, registry.set):
+        if not isinstance(other, types.set):
             msg = "'{}' object is not iterable".format(other.type_name)
             ctx.add_exception(TypeError, msg)
             return self
         expr = z3.SetDifference(self.expr, other.expr)
-        return registry.set(expr=expr)
+        return types.set(expr=expr)
 
     @methods.add(name='issuperset')
     def r_issuperset(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         # TODO: `set.issuperset` supports any iterable
-        if not isinstance(other, registry.set):
+        if not isinstance(other, types.set):
             msg = "'{}' object is not iterable".format(other.type_name)
             ctx.add_exception(TypeError, msg)
-            return registry.bool.val(False)
+            return types.bool.val(False)
         return other.r_issubset(self, ctx=ctx)
 
     @methods.add(name='issubset')
     def r_issubset(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         # TODO: `set.issubset` supports any iterable
-        if not isinstance(other, registry.set):
+        if not isinstance(other, types.set):
             msg = "'{}' object is not iterable".format(other.type_name)
             ctx.add_exception(TypeError, msg)
-            return registry.bool.val(False)
+            return types.bool.val(False)
         expr = z3.IsSubset(self.expr, other.expr)
-        return registry.bool(expr=expr)
+        return types.bool(expr=expr)
 
     @methods.add(name='isdisjoint')
     def r_isdisjoint(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         # TODO: `set.isdisjoint` supports any iterable
-        if not isinstance(other, registry.set):
+        if not isinstance(other, types.set):
             msg = "'{}' object is not iterable".format(other.type_name)
             ctx.add_exception(TypeError, msg)
-            return registry.bool.val(False)
+            return types.bool.val(False)
         empty = self.make_empty(sort=other.expr.domain())
         return self.m_and(other, ctx=ctx).m_eq(empty, ctx=ctx)
 
@@ -150,7 +150,7 @@ class SetSort(ProxySort):
     def r_discard(self, item: 'ProxySort', ctx: 'Context') -> 'SetSort':
         # TODO: check sort
         expr = z3.SetDel(self.expr, item.expr)
-        return registry.set(expr=expr)
+        return types.set(expr=expr)
 
     @methods.add(name='remove', pure=False)
     def r_remove(self, item: 'ProxySort', ctx: 'Context') -> 'SetSort':
@@ -163,25 +163,25 @@ class SetSort(ProxySort):
             cond=not_expr(self.m_contains(item, ctx=ctx), ctx=ctx),
         ))
         expr = z3.SetDel(self.expr, item.expr)
-        return registry.set(expr=expr)
+        return types.set(expr=expr)
 
     @methods.add(name='__eq__')
     def m_eq(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         # type mismatch
-        if not isinstance(other, registry.set):
-            return registry.bool.val(False)
+        if not isinstance(other, types.set):
+            return types.bool.val(False)
         # other is untyped
         if isinstance(other, UntypedSetSort):
             empty = self.make_empty_expr(sort=self.expr.domain())
             expr = self.expr == empty
-            return registry.bool(expr=expr)
+            return types.bool(expr=expr)
         return super().m_eq(other, ctx=ctx)
 
     def m_list(self, ctx: 'Context') -> 'ListSort':
         sort = self.expr.domain()
         expr = z3.Const(random_name('set2list'), z3.SeqSort(sort))
         x = z3.Const(random_name('set_item'), sort)
-        ctx.given.add(registry.bool(
+        ctx.given.add(types.bool(
             z3.ForAll([x], z3.And(
                 z3.Implies(
                     z3.IsMember(e=x, s=self.expr),
@@ -191,7 +191,7 @@ class SetSort(ProxySort):
                 # z3.IndexOf(expr, z3.Unit(x), 0) == z3.LastIndexOf(expr, z3.Unit(x)),
             )),
         ))
-        return registry.list(expr=expr)
+        return types.list(expr=expr)
 
     @methods.add(name='__len__')
     def m_len(self, ctx: 'Context') -> 'IntSort':
@@ -204,7 +204,7 @@ class SetSort(ProxySort):
         item = wrap(expr)
         ctx.given.add(self.m_contains(item, ctx=ctx))
         return Mutation(
-            new_value=registry.set(expr=z3.SetDel(self.expr, item.expr)),
+            new_value=types.set(expr=z3.SetDel(self.expr, item.expr)),
             result=item,
         )
 
@@ -231,11 +231,11 @@ class UntypedSetSort(SetSort):
     @methods.add(name='__eq__')
     def m_eq(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         # type mismatch
-        if not isinstance(other, registry.set):
-            return registry.bool.val(False)
+        if not isinstance(other, types.set):
+            return types.bool.val(False)
         # both are empty
         if isinstance(other, type(self)):
-            return registry.bool.val(True)
+            return types.bool.val(True)
         # other is a typed set
         empty = SetSort.make_empty(sort=other.expr.domain())
         return other.m_eq(empty, ctx=ctx)
@@ -247,4 +247,4 @@ class UntypedSetSort(SetSort):
 
     @methods.add(name='__len__')
     def m_len(self, ctx: 'Context') -> 'IntSort':
-        return registry.int.val(0)
+        return types.int.val(0)

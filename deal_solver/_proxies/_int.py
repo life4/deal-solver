@@ -5,7 +5,7 @@ import z3
 
 from .._exceptions import UnsupportedError
 from ._proxy import ProxySort
-from ._registry import registry
+from ._registry import types
 
 
 if typing.TYPE_CHECKING:
@@ -18,7 +18,7 @@ if typing.TYPE_CHECKING:
 INT_BITS = 64
 
 
-@registry.add
+@types.add
 class IntSort(ProxySort):
     type_name = 'int'
     methods = ProxySort.methods.copy()
@@ -54,11 +54,11 @@ class IntSort(ProxySort):
 
     @methods.add(name='__str__')
     def m_str(self, ctx: 'Context') -> 'StrSort':
-        return registry.str(expr=z3.IntToStr(self.expr))
+        return types.str(expr=z3.IntToStr(self.expr))
 
     @methods.add(name='__bool__')
     def m_bool(self, ctx: 'Context') -> 'BoolSort':
-        return registry.bool(expr=self.expr != z3.IntVal(0))
+        return types.bool(expr=self.expr != z3.IntVal(0))
 
     @property
     def abs(self) -> 'IntSort':
@@ -66,7 +66,7 @@ class IntSort(ProxySort):
         return type(self)(expr=expr)
 
     def _math_op(self, other: ProxySort, handler: typing.Callable, ctx: 'Context') -> ProxySort:
-        as_float = isinstance(other, registry.float)
+        as_float = isinstance(other, types.float)
         if as_float:
             other = other.m_int(ctx=ctx)
         result = super()._math_op(other=other, handler=handler, ctx=ctx)
@@ -76,63 +76,63 @@ class IntSort(ProxySort):
 
     @methods.add(name='__add__')
     def m_add(self, other: ProxySort, ctx: 'Context') -> 'ProxySort':
-        if isinstance(other, registry.bool):
+        if isinstance(other, types.bool):
             other = other.m_int(ctx=ctx)
-        if not isinstance(other, (registry.int, registry.float)):
+        if not isinstance(other, (types.int, types.float)):
             return self._bad_bin_op(other, op='+', ctx=ctx)
         return self._math_op(other=other, handler=operator.__add__, ctx=ctx)
 
     @methods.add(name='__sub__')
     def m_sub(self, other: ProxySort, ctx: 'Context') -> 'ProxySort':
-        if isinstance(other, registry.bool):
+        if isinstance(other, types.bool):
             other = other.m_int(ctx=ctx)
-        if not isinstance(other, (registry.int, registry.float)):
+        if not isinstance(other, (types.int, types.float)):
             return self._bad_bin_op(other, op='-', ctx=ctx)
         return self._math_op(other=other, handler=operator.__sub__, ctx=ctx)
 
     @methods.add(name='__mul__')
     def m_mul(self, other: ProxySort, ctx: 'Context') -> 'ProxySort':
-        if isinstance(other, registry.bool):
+        if isinstance(other, types.bool):
             other = other.m_int(ctx=ctx)
-        if isinstance(other, (registry.str, registry.tuple)):
+        if isinstance(other, (types.str, types.tuple)):
             return other.m_mul(self, ctx=ctx)
-        if isinstance(other, (registry.int, registry.float)):
+        if isinstance(other, (types.int, types.float)):
             return self._math_op(other=other, handler=operator.__mul__, ctx=ctx)
         return self._bad_bin_op(other, op='*', ctx=ctx)
 
     @methods.add(name='__pow__')
     def m_pow(self, other: ProxySort, ctx: 'Context') -> 'ProxySort':
-        if isinstance(other, registry.bool):
+        if isinstance(other, types.bool):
             other = other.m_int(ctx=ctx)
-        if not isinstance(other, (registry.int, registry.float)):
+        if not isinstance(other, (types.int, types.float)):
             return self._bad_bin_op(other, op='** or pow()', ctx=ctx)
         return self._math_op(other=other, handler=operator.__pow__, ctx=ctx)
 
     @methods.add(name='__truediv__')
     def m_truediv(self, other: ProxySort, ctx: 'Context') -> 'FloatSort':
         real = z3.ToReal(self.expr)
-        if isinstance(other, (registry.int, registry.bool)):
-            return registry.float(expr=real / other.m_real(ctx=ctx).expr)
-        if not isinstance(other, registry.float):
+        if isinstance(other, (types.int, types.bool)):
+            return types.float(expr=real / other.m_real(ctx=ctx).expr)
+        if not isinstance(other, types.float):
             self._bad_bin_op(other, op='/', ctx=ctx)
             return self.m_float(ctx=ctx)
         if other.is_real:
             expr = real / other.m_real(ctx=ctx).expr
         else:
             expr = self.m_fp(ctx=ctx).expr / other.m_fp(ctx=ctx).expr
-        return registry.float(expr=expr)
+        return types.float(expr=expr)
 
     @methods.add(name='__floordiv__')
     def m_floordiv(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
-        if isinstance(other, registry.bool):
+        if isinstance(other, types.bool):
             other = other.m_int(ctx=ctx)
-        if not isinstance(other, (registry.int, registry.float)):
+        if not isinstance(other, (types.int, types.float)):
             return self._bad_bin_op(other, op='//', ctx=ctx)
-        as_float = isinstance(other, registry.float)
+        as_float = isinstance(other, types.float)
         if as_float:
             other = other.m_int(ctx=ctx)
         zero = self.val(0).expr
-        result = registry.int(z3.If(
+        result = types.int(z3.If(
             other.expr >= zero,
             self.expr / other.expr,
             -self.expr / -other.expr,
@@ -144,15 +144,15 @@ class IntSort(ProxySort):
 
     @methods.add(name='__mod__')
     def m_mod(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
-        if isinstance(other, registry.bool):
+        if isinstance(other, types.bool):
             other = other.m_int(ctx=ctx)
-        if not isinstance(other, (registry.int, registry.float)):
+        if not isinstance(other, (types.int, types.float)):
             return self._bad_bin_op(other, op='%', ctx=ctx)
-        as_float = isinstance(other, registry.float)
+        as_float = isinstance(other, types.float)
         if as_float:
             other = other.m_int(ctx=ctx)
         zero = self.val(0).expr
-        result = registry.int(z3.If(
+        result = types.int(z3.If(
             other.expr >= zero,
             self.expr % other.expr,
             -(-self.expr % -other.expr),
@@ -168,20 +168,20 @@ class IntSort(ProxySort):
         zero = z3.IntVal(0)
         modulo = z3.IntVal(2 ** INT_BITS)
         expr = z3.If(self.expr >= zero, expr - modulo, expr)
-        return registry.int(expr=expr)
+        return types.int(expr=expr)
 
     def _bitwise_op(self, other: 'ProxySort', handler: typing.Callable, ctx: 'Context') -> 'IntSort':
         expr = z3.BV2Int(handler(
             z3.Int2BV(self.expr, INT_BITS),
             z3.Int2BV(other.expr, INT_BITS),
         ))
-        return registry.int(expr=expr)
+        return types.int(expr=expr)
 
     @methods.add(name='__and__')
     def m_and(self, other: 'ProxySort', ctx: 'Context'):
         """self & other
         """
-        if not isinstance(other, registry.int):
+        if not isinstance(other, types.int):
             return self._bad_bin_op(other, op='&', ctx=ctx)
         return self._bitwise_op(other=other, handler=operator.__and__, ctx=ctx)
 
@@ -189,7 +189,7 @@ class IntSort(ProxySort):
     def m_or(self, other: 'ProxySort', ctx: 'Context'):
         """self | other
         """
-        if not isinstance(other, registry.int):
+        if not isinstance(other, types.int):
             return self._bad_bin_op(other, op='|', ctx=ctx)
         return self._bitwise_op(other=other, handler=operator.__or__, ctx=ctx)
 
@@ -197,7 +197,7 @@ class IntSort(ProxySort):
     def m_xor(self, other: 'ProxySort', ctx: 'Context'):
         """self ^ other
         """
-        if not isinstance(other, registry.int):
+        if not isinstance(other, types.int):
             return self._bad_bin_op(other, op='^', ctx=ctx)
         return self._bitwise_op(other=other, handler=operator.__xor__, ctx=ctx)
 
@@ -205,7 +205,7 @@ class IntSort(ProxySort):
     def m_lshift(self, other: 'ProxySort', ctx: 'Context'):
         """self << other
         """
-        if not isinstance(other, registry.int):
+        if not isinstance(other, types.int):
             return self._bad_bin_op(other, op='<<', ctx=ctx)
         return self._bitwise_op(other=other, handler=operator.__lshift__, ctx=ctx)
 
@@ -213,12 +213,12 @@ class IntSort(ProxySort):
     def m_rshift(self, other: 'ProxySort', ctx: 'Context'):
         """self >> other
         """
-        if not isinstance(other, registry.int):
+        if not isinstance(other, types.int):
             return self._bad_bin_op(other, op='>>', ctx=ctx)
         return self._bitwise_op(other=other, handler=operator.__rshift__, ctx=ctx)
 
     def _comp_op(self, other: 'ProxySort', handler: typing.Callable, ctx: 'Context') -> 'BoolSort':
-        if isinstance(other, registry.float):
+        if isinstance(other, types.float):
             return self.m_float(ctx=ctx)._comp_op(other=other, handler=handler, ctx=ctx)
         return super()._comp_op(other=other, handler=handler, ctx=ctx)
 
