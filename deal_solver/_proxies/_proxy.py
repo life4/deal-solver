@@ -6,6 +6,7 @@ import z3
 from .._exceptions import UnsupportedError
 from ._funcs import not_expr, wrap
 from ._methods import Methods
+from ._type_info import TypeInfo
 
 
 if typing.TYPE_CHECKING:
@@ -34,6 +35,16 @@ class ProxySort:
 
     def __init__(self, expr) -> None:
         raise NotImplementedError
+
+    def get_type_info(self, ctx: 'Context') -> TypeInfo:
+        raise NotImplementedError
+
+    def evolve(self: T, **kwargs) -> T:
+        cls = type(self)
+        obj = cls.__new__(cls)
+        obj.__dict__.update(self.__dict__)
+        obj.__dict__.update(kwargs)
+        return obj
 
     @classmethod
     def var(cls, *, name: str, ctx: z3.Context) -> 'ProxySort':

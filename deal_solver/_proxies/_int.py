@@ -6,6 +6,7 @@ import z3
 from .._exceptions import UnsupportedError
 from ._proxy import ProxySort
 from ._registry import types
+from ._type_info import TypeInfo
 
 
 if typing.TYPE_CHECKING:
@@ -35,6 +36,14 @@ class IntSort(ProxySort):
     @staticmethod
     def val(x: int, ctx: 'Context') -> 'IntSort':
         return types.int(expr=z3.IntVal(x, ctx=ctx.z3_ctx))
+
+    @classmethod
+    def get_type_info(cls, ctx: 'Context') -> TypeInfo:
+        return TypeInfo(
+            type=cls,
+            default=cls.val(0, ctx=ctx),
+            subtypes=(),
+        )
 
     @methods.add(name='__int__')
     @methods.add(name='conjugate')

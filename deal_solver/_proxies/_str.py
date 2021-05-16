@@ -6,6 +6,7 @@ import z3
 from .._exceptions import UnsupportedError
 from ._proxy import ProxySort
 from ._registry import types
+from ._type_info import TypeInfo
 
 
 if typing.TYPE_CHECKING:
@@ -36,6 +37,14 @@ class StrSort(ProxySort):
     @staticmethod
     def val(val: str, ctx: 'Context') -> 'StrSort':
         return types.str(expr=z3.StringVal(val, ctx=ctx.z3_ctx))
+
+    @classmethod
+    def get_type_info(cls, ctx: 'Context') -> TypeInfo:
+        return TypeInfo(
+            type=cls,
+            default=cls.val("", ctx=ctx),
+            subtypes=(),
+        )
 
     @methods.add(name='__int__')
     def m_int(self, ctx: 'Context') -> 'IntSort':

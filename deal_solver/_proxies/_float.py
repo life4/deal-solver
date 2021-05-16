@@ -9,6 +9,7 @@ from .._exceptions import UnsupportedError
 from ._funcs import and_expr, switch
 from ._proxy import ProxySort
 from ._registry import types
+from ._type_info import TypeInfo
 
 
 if typing.TYPE_CHECKING:
@@ -47,6 +48,14 @@ class FloatSort(ProxySort):
             sort=cls.sort(ctx=ctx),
         )
         return cls(expr=expr)
+
+    @classmethod
+    def get_type_info(cls, ctx: 'Context') -> TypeInfo:
+        return TypeInfo(
+            type=cls,
+            default=cls.val(0.0, ctx=ctx),
+            subtypes=(),
+        )
 
     @classmethod
     def sort(cls, ctx: z3.Context = None) -> z3.SortRef:

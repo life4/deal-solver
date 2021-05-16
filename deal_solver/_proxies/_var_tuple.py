@@ -7,6 +7,7 @@ from .._exceptions import UnsupportedError
 from ._funcs import random_name, wrap
 from ._proxy import ProxySort
 from ._registry import types
+from ._type_info import TypeInfo
 
 
 if typing.TYPE_CHECKING:
@@ -20,17 +21,31 @@ T = typing.TypeVar('T', bound='VarTupleSort')
 
 @types.add
 class VarTupleSort(ProxySort):
-    expr: z3.SeqRef
     type_name = 'tuple'
     methods = ProxySort.methods.copy()
 
-    def __init__(self, expr) -> None:
+    expr: z3.SeqRef
+    subtypes: typing.Tuple[TypeInfo, ...]
+
+    def __init__(self, expr, subtypes=()) -> None:
+        assert len(subtypes) <= 1
         assert z3.is_seq(expr)
         assert not z3.is_string(expr)
         self.expr = expr
+        self.subtypes = subtypes
 
     def sort(self) -> z3.SeqSortRef:
         return self.expr.sort()
+
+    def get_type_info(self, ctx: 'Context') -> TypeInfo:
+        sort = self.expr.sort().basis()
+        expr = self.make_empty_expr(sort)
+        empty = self.evolve(expr=expr)
+        return TypeInfo(
+            type=type(self),
+            default=empty,
+            subtypes=self.subtypes,
+        )
 
     @classmethod
     def from_items(cls: typing.Type[T], values: typing.List[ProxySort], ctx: 'Context') -> T:
@@ -38,12 +53,8 @@ class VarTupleSort(ProxySort):
         for value in values:
             item = z3.Unit(value.expr)
             items = z3.Concat(items, item)
-        return cls(expr=items)
-
-    @classmethod
-    def make_empty(cls: typing.Type[T], sort: z3.SortRef) -> T:
-        expr = cls.make_empty_expr(sort)
-        return cls(expr=expr)
+        value_type = values[0].get_type_info(ctx=ctx)
+        return cls(expr=items, subtypes=(value_type,))
 
     @staticmethod
     def make_empty_expr(sort):
@@ -63,7 +74,12 @@ class VarTupleSort(ProxySort):
             cond=types.bool(expr=index.expr >= z3.Length(self.expr)),
             message='{} index out of range'.format(self.type_name),
         ))
-        return wrap(self.expr[index.expr])
+        expr = self.expr[index.expr]
+        if self.subtypes:
+            item = self.subtypes[0].wrap(expr)
+        else:
+            item = wrap(expr)
+        return item
 
     def get_slice(self, start: ProxySort, stop: ProxySort, ctx: 'Context') -> ProxySort:
         start_expr = start.expr
@@ -156,6 +172,7 @@ class VarTupleSort(ProxySort):
 
 class UntypedVarTupleSort(VarTupleSort):
     methods = VarTupleSort.methods.copy()
+    subtypes = ()
 
     def __init__(self) -> None:
         pass

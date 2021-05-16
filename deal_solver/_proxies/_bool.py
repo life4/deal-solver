@@ -5,6 +5,7 @@ import z3
 from ._funcs import if_expr
 from ._proxy import ProxySort
 from ._registry import types
+from ._type_info import TypeInfo
 
 
 if typing.TYPE_CHECKING:
@@ -38,6 +39,14 @@ class BoolSort(ProxySort):
         if ctx is not None:
             ctx = ctx.z3_ctx
         return cls(expr=z3.BoolVal(x, ctx=ctx))
+
+    @classmethod
+    def get_type_info(cls, ctx: 'Context') -> TypeInfo:
+        return TypeInfo(
+            type=cls,
+            default=cls.val(False, ctx=ctx),
+            subtypes=(),
+        )
 
     @methods.add(name='__bool__')
     def m_bool(self, ctx: 'Context') -> 'BoolSort':

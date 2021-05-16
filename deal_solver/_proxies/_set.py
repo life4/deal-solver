@@ -6,6 +6,7 @@ from ._funcs import not_expr, random_name, wrap
 from ._method import Mutation
 from ._proxy import ProxySort
 from ._registry import types
+from ._type_info import TypeInfo
 
 
 if typing.TYPE_CHECKING:
@@ -20,10 +21,13 @@ class SetSort(ProxySort):
     type_name = 'set'
     methods = ProxySort.methods.copy()
     expr: z3.ArrayRef
+    subtypes: typing.Tuple[TypeInfo, ...]
 
-    def __init__(self, expr) -> None:
+    def __init__(self, expr, subtypes=()) -> None:
+        assert len(subtypes) <= 1
         assert z3.is_array(expr)
         self.expr = expr
+        self.subtypes = subtypes
 
     @classmethod
     def var(cls, subtype: ProxySort = None, *, name: str, ctx: z3.Context) -> 'SetSort':
@@ -31,14 +35,19 @@ class SetSort(ProxySort):
         expr = z3.Const(name=name, sort=z3.SetSort(subtype.sort()))
         return cls(expr=expr)
 
+    def get_type_info(self, ctx: 'Context') -> TypeInfo:
+        sort = self.expr.domain()
+        expr = self.make_empty_expr(sort)
+        empty = self.evolve(expr=expr)
+        return TypeInfo(
+            type=type(self),
+            default=empty,
+            subtypes=self.subtypes,
+        )
+
     @staticmethod
     def make_empty_expr(sort):
         return z3.EmptySet(sort)
-
-    @classmethod
-    def make_empty(cls, sort: z3.SortRef) -> 'SetSort':
-        expr = cls.make_empty_expr(sort)
-        return cls(expr=expr)
 
     @classmethod
     def from_items(cls, values: typing.List[ProxySort], ctx: 'Context') -> 'SetSort':
@@ -47,7 +56,8 @@ class SetSort(ProxySort):
         items = cls.make_empty_expr(sort=values[0].expr.sort())
         for value in values:
             items = z3.SetAdd(items, value.expr)
-        return cls(expr=items)
+        value_type = values[0].get_type_info(ctx=ctx)
+        return cls(expr=items, subtypes=(value_type,))
 
     @methods.add(name='add', pure=False)
     def r_add(self, item: ProxySort, ctx: 'Context') -> 'SetSort':
@@ -62,7 +72,8 @@ class SetSort(ProxySort):
     @methods.add(name='clear', pure=False)
     def r_clear(self, ctx: 'Context') -> 'SetSort':
         sort = self.expr.sort().domain()
-        return self.make_empty(sort=sort)
+        expr = self.make_empty_expr(sort)
+        return self.evolve(expr=expr)
 
     @methods.add(name='__contains__')
     def m_contains(self, item: ProxySort, ctx: 'Context') -> 'BoolSort':
@@ -150,7 +161,9 @@ class SetSort(ProxySort):
             msg = "'{}' object is not iterable".format(other.type_name)
             ctx.add_exception(TypeError, msg)
             return types.bool.val(False, ctx=ctx)
-        empty = self.make_empty(sort=other.expr.domain())
+        sort = other.expr.domain()
+        expr = self.make_empty_expr(sort)
+        empty = self.evolve(expr=expr)
         return self.m_and(other, ctx=ctx).m_eq(empty, ctx=ctx)
 
     @methods.add(name='discard', pure=False)
@@ -208,7 +221,10 @@ class SetSort(ProxySort):
     def r_pop(self, ctx: 'Context') -> Mutation:
         # TODO: KeyError for empty set
         expr = z3.Const(random_name('set_item'), self.expr.domain())
-        item = wrap(expr)
+        if self.subtypes:
+            item = self.subtypes[0].wrap(expr)
+        else:
+            item = wrap(expr)
         ctx.given.add(self.m_contains(item, ctx=ctx))
         return Mutation(
             new_value=types.set(expr=z3.SetDel(self.expr, item.expr)),
@@ -232,7 +248,9 @@ class UntypedSetSort(SetSort):
 
     @methods.add(name='add', pure=False)
     def r_add(self, item: ProxySort, ctx: 'Context') -> 'SetSort':
-        result = SetSort.make_empty(item.sort())
+        expr = self.make_empty_expr(item.sort())
+        subtype = item.get_type_info(ctx=ctx)
+        result = SetSort(expr, subtypes=(subtype,))
         return result.r_add(item, ctx=ctx)
 
     @methods.add(name='__eq__')
@@ -244,7 +262,9 @@ class UntypedSetSort(SetSort):
         if isinstance(other, type(self)):
             return types.bool.val(True, ctx=ctx)
         # other is a typed set
-        empty = SetSort.make_empty(sort=other.expr.domain())
+        sort = other.expr.domain()
+        expr = self.make_empty_expr(sort)
+        empty = self.evolve(expr=expr)
         return other.m_eq(empty, ctx=ctx)
 
     @methods.add(name='pop', pure=False)

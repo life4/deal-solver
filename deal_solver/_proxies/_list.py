@@ -32,9 +32,9 @@ class ListSort(VarTupleSort):
 
     @methods.add(name='clear', pure=False)
     def m_clear(self, ctx: 'Context') -> 'ListSort':
-        return self.make_empty(
-            sort=self.expr.sort().basis(),
-        )
+        sort = self.expr.sort().basis()
+        expr = self.make_empty_expr(sort)
+        return self.evolve(expr=expr)
 
     @methods.add(name='append', pure=False)
     def r_append(self, item: ProxySort, ctx: 'Context') -> 'ListSort':
@@ -58,6 +58,7 @@ class ListSort(VarTupleSort):
 
 class UntypedListSort(ListSort):
     methods = ListSort.methods.copy()
+    subtypes = ()
 
     def __init__(self) -> None:
         pass
