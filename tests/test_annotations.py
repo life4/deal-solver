@@ -6,31 +6,20 @@ from .helpers import prove_f
 
 
 @pytest.mark.parametrize('setup, ann, check', [
-    (
-        '',
-        'int',
-        'a - a == 0',
-    ),
-    (
-        '',
-        '"int"',
-        'a - a == 0',
-    ),
-    (
-        '',
-        'float',
-        'a + 0.0 == a or not (a > 10 or a <= 10)',
-    ),
-    (
-        '',
-        'str',
-        'len(a) >= 0 and a.startswith(a)',
-    ),
-    (
-        '',
-        'str',
-        'len(a) >= 0',
-    ),
+    # simple annotations
+    ('', 'int',     'a - a == 0'),
+    ('', '"int"',   'a - a == 0'),
+    ('', 'float',   'a + 0.0 == a or not (a > 10 or a <= 10)'),
+    ('', 'str',     'len(a) >= 0 and a.startswith(a)'),
+    ('', 'str',     'len(a) >= 0'),
+
+    # generics
+    ('', 'list[int]',       '(a != []) or (a == [])'),
+    ('', 'set[int]',        '(a != set()) or (a == set())'),
+    ('', 'tuple[int, ...]', '(a != ()) or (a == ())'),
+    # ('', 'dict[str, int]',  '(a != {}) or (a == {})'),
+
+    # typing module
     (
         'from typing import List',
         'List[int]',
@@ -39,11 +28,6 @@ from .helpers import prove_f
     (
         'from typing import List',
         'List[int]',
-        '(a != []) or (a == [])',
-    ),
-    (
-        'from typing import List',
-        'list[int]',
         '(a != []) or (a == [])',
     ),
     (
@@ -52,18 +36,8 @@ from .helpers import prove_f
         '(a != set()) or (a == set())',
     ),
     (
-        '',
-        'set[int]',
-        '(a != set()) or (a == set())',
-    ),
-    (
         'from typing import Tuple',
         'Tuple[int, ...]',
-        'len(a) >= 0',
-    ),
-    (
-        '',
-        'tuple[int, ...]',
         'len(a) >= 0',
     ),
 ])
