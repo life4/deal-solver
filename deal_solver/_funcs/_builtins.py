@@ -41,6 +41,8 @@ def builtins_min(a: ProxySort, b: ProxySort = None, *, ctx: Context, **kwargs) -
     if b is not None:
         return if_expr(a.m_lt(b, ctx=ctx), a, b, ctx=ctx)
 
+    if not isinstance(a, (types.list, types.tuple)):
+        raise UnsupportedError(f'cannot iterate over {a.type_name}')
     items = a.expr
     f = z3.RecFunction(
         random_name('min'),
@@ -69,6 +71,8 @@ def builtins_max(a: ProxySort, b: ProxySort = None, *, ctx: Context, **kwargs) -
     if b is not None:
         return if_expr(a.m_gt(b, ctx=ctx), a, b, ctx=ctx)
 
+    if not isinstance(a, (types.list, types.tuple)):
+        raise UnsupportedError(f'cannot iterate over {a.type_name}')
     items = a.expr
     f = z3.RecFunction(
         random_name('max'),
