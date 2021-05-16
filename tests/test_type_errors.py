@@ -135,6 +135,7 @@ from .helpers import prove_f
 
     # built-in functions
     ('len(12)',     "object of type 'int' has no len()"),
+    ('abs([])',     "bad operand type for abs(): 'list'"),
 ])
 def test_type_error__table(prefer_real, expr, err):
     with pytest.raises(TypeError, match=re.escape(err)):

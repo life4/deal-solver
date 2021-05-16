@@ -64,11 +64,13 @@ class ProxySort:
         """
         raise NotImplementedError
 
-    @property
-    def abs(self) -> 'ProxySort':
+    @methods.add(name='__abs__')
+    def m_abs(self, ctx: 'Context') -> 'ProxySort':
         """abs(self)
         """
-        raise UnsupportedError('{}.__abs__ is not defined'.format(self.type_name))
+        msg = "bad operand type for abs(): '{}'".format(self.type_name)
+        ctx.add_exception(TypeError, msg)
+        return self
 
     @methods.add(name='__int__')
     def m_int(self, ctx: 'Context') -> 'IntSort':

@@ -62,10 +62,10 @@ class IntSort(ProxySort):
     def m_bool(self, ctx: 'Context') -> 'BoolSort':
         return types.bool(expr=self.expr != z3.IntVal(0))
 
-    @property
-    def abs(self) -> 'IntSort':
-        expr = z3.If(self.expr >= z3.IntVal(0), self.expr, -self.expr)
-        return type(self)(expr=expr)
+    @methods.add(name='__abs__')
+    def m_abs(self, ctx: 'Context') -> 'ProxySort':
+        expr = z3.If(self.expr >= z3.IntVal(0, ctx=ctx.z3_ctx), self.expr, -self.expr)
+        return types.int(expr=expr)
 
     def _math_op(self, other: ProxySort, handler: typing.Callable, ctx: 'Context') -> ProxySort:
         as_float = isinstance(other, types.float)

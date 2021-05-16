@@ -207,9 +207,9 @@ class RealSort(FloatSort):
     def m_bool(self, ctx: 'Context') -> 'BoolSort':
         return types.bool(expr=self.expr != z3.RealVal(0))
 
-    @property
-    def abs(self) -> 'RealSort':
-        expr = z3.If(self.expr >= z3.RealVal(0), self.expr, -self.expr)
+    @methods.add(name='__abs__')
+    def m_abs(self, ctx: 'Context') -> 'ProxySort':
+        expr = z3.If(self.expr >= z3.RealVal(0), self.expr, -self.expr, ctx=ctx.z3_ctx)
         return type(self)(expr=expr)
 
     @property
@@ -286,9 +286,9 @@ class FPSort(FloatSort):
     def is_nan(self) -> 'BoolSort':
         return types.bool(expr=z3.fpIsNaN(self.expr))
 
-    @property
-    def abs(self) -> 'FPSort':
-        return FPSort(expr=z3.fpAbs(self.expr))
+    @methods.add(name='__abs__')
+    def m_abs(self, ctx: 'Context') -> 'ProxySort':
+        return FPSort(expr=z3.fpAbs(self.expr, ctx=ctx.z3_ctx))
 
     def _binary_op(self, other: ProxySort, handler: typing.Callable, ctx: 'Context'):
         real_handler = handler

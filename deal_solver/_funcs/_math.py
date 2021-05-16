@@ -36,12 +36,12 @@ def math_isclose(
         right = right.m_fp(ctx=ctx)
 
     builtin_max = FUNCTIONS['builtins.max']
-    abs_max = builtin_max(left.abs, right.abs, ctx=ctx)
+    abs_max = builtin_max(left.m_abs(ctx=ctx), right.m_abs(ctx=ctx), ctx=ctx)
     delta = builtin_max(rel_tol.m_mul(abs_max, ctx=ctx), abs_tol, ctx=ctx)
     return if_expr(
         and_expr(left.is_nan, right.is_nan, ctx=ctx),
         BoolSort.val(True),
-        left.m_sub(right, ctx=ctx).abs.m_le(delta, ctx=ctx),
+        left.m_sub(right, ctx=ctx).m_abs(ctx=ctx).m_le(delta, ctx=ctx),
         ctx=ctx,
     )
 

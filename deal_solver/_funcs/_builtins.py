@@ -112,8 +112,8 @@ def builtins_ord(val: ProxySort, ctx: Context, **kwargs) -> IntSort:
 
 
 @register('builtins.abs')
-def builtins_abs(a: ProxySort, ctx: Context, **kwargs) -> ProxySort:
-    return a.abs
+def builtins_abs(x: ProxySort, ctx: Context, **kwargs) -> ProxySort:
+    return x.m_abs(ctx=ctx)
 
 
 @register('builtins.len')
