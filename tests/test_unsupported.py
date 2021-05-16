@@ -48,12 +48,15 @@ def test_timeout():
     ('str(12.34)',          'cannot convert float to str'),
     ('min([], default=13)', 'keyword function arguments are unsupported'),
     ('[1 for i in "12" for j in "34"]', 'to many loops inside list compr'),
+    ('[1 for i in {1}]',    'cannot iterate over set'),
+    ('[1 for i in {1} if 1]', 'cannot iterate over set'),
+    ('sum({1})',            'cannot iterate over set'),
     ('a, b = 3, 4',         'cannot assign to Tuple'),
 
     # unsupported arguments
     ('dict([(1,2)])',       'unsupported argument for dict()'),
-    ('list({1, 2})',       'unsupported argument for list()'),
-    ('set([1, 2])',       'unsupported argument for set()'),
+    ('list({1, 2})',        'unsupported argument for list()'),
+    ('set([1, 2])',         'unsupported argument for set()'),
 
     # unsupported attributes
     ('"Ab".swapcase()',     'unsupported attribute for type str'),

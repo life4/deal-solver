@@ -168,7 +168,7 @@ def _compr_apply_ifs(
     comp: astroid.Comprehension,
     items: ProxySort,
 ) -> ProxySort:
-    if not isinstance(items, types.list):
+    if not isinstance(items, (types.list, types.tuple)):
         raise UnsupportedError(f'cannot iterate over {items.type_name}')
     one = z3.IntVal(1, ctx=ctx.z3_ctx)
     zero = z3.IntVal(0, ctx=ctx.z3_ctx)
@@ -208,6 +208,8 @@ def _compr_apply_body(
     comp: astroid.Comprehension,
     items: ProxySort,
 ) -> ProxySort:
+    if not isinstance(items, (types.list, types.tuple)):
+        raise UnsupportedError(f'cannot iterate over {items.type_name}')
     one = z3.IntVal(1, ctx=ctx.z3_ctx)
     zero = z3.IntVal(0, ctx=ctx.z3_ctx)
     index = z3.Int(random_name('index'))

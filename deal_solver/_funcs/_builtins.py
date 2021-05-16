@@ -3,7 +3,7 @@ import z3
 from .._context import Context, ExceptionInfo
 from .._exceptions import UnsupportedError
 from .._proxies import (
-    BoolSort, DictSort, IntSort, ListSort, ProxySort, SetSort, StrSort,
+    IntSort, ProxySort, StrSort, types,
     UntypedDictSort, UntypedListSort, UntypedSetSort, if_expr, random_name, wrap,
 )
 from ._registry import register
@@ -15,8 +15,9 @@ def builtins_ignore(*args, **kwargs) -> None:
 
 
 @register('builtins.sum')
-def builtins_sum(items, ctx: Context, **kwargs) -> ProxySort:
-    items = items.expr
+def builtins_sum(items: ProxySort, ctx: Context, **kwargs) -> ProxySort:
+    if not isinstance(items, (types.list, types.tuple)):
+        raise UnsupportedError(f'cannot iterate over {items.type_name}')
     f = z3.RecFunction(
         random_name('sum'),
         z3.IntSort(ctx=ctx.z3_ctx),
@@ -27,10 +28,10 @@ def builtins_sum(items, ctx: Context, **kwargs) -> ProxySort:
     zero = z3.IntVal(0, ctx=ctx.z3_ctx)
     z3.RecAddDefinition(f, i, z3.If(
         i == zero,
-        items[zero],
-        items[i] + f(i - one),
+        items.expr[zero],
+        items.expr[i] + f(i - one),
     ))
-    result = f(z3.Length(items) - one)
+    result = f(items.m_len(ctx=ctx).expr - one)
     return wrap(result)
 
 
@@ -106,8 +107,8 @@ def builtins_ord(val: ProxySort, ctx: Context, **kwargs) -> IntSort:
         message='ord() expected a character, but string of length N found',
     ))
     bv = z3.BitVec(random_name('ord_bv'), 8)
-    ctx.given.add(BoolSort(z3.Unit(bv) == val.expr))
-    return IntSort(z3.BV2Int(bv))
+    ctx.given.add(types.bool(z3.Unit(bv) == val.expr))
+    return types.int(z3.BV2Int(bv))
 
 
 @register('builtins.abs')
@@ -136,32 +137,32 @@ def builtins_str(obj: ProxySort, ctx: Context, **kwargs) -> StrSort:
 
 
 @register('builtins.bool')
-def builtins_bool(obj: ProxySort, ctx: Context, **kwargs) -> BoolSort:
+def builtins_bool(obj: ProxySort, ctx: Context, **kwargs) -> ProxySort:
     return obj.m_bool(ctx=ctx)
 
 
 @register('builtins.set')
-def builtins_set(iterable=None, **kwargs) -> SetSort:
+def builtins_set(iterable=None, **kwargs) -> ProxySort:
     if iterable is not None:
-        if isinstance(iterable, SetSort):
+        if isinstance(iterable, types.set):
             return iterable
         raise UnsupportedError('unsupported argument for set()')
     return UntypedSetSort()
 
 
 @register('builtins.list')
-def builtins_list(iterable=None, **kwargs) -> ListSort:
+def builtins_list(iterable=None, **kwargs) -> ProxySort:
     if iterable is not None:
-        if isinstance(iterable, ListSort):
+        if isinstance(iterable, types.list):
             return iterable
         raise UnsupportedError('unsupported argument for list()')
     return UntypedListSort()
 
 
 @register('builtins.dict')
-def builtins_dict(iterable=None, **kwargs) -> DictSort:
+def builtins_dict(iterable=None, **kwargs) -> ProxySort:
     if iterable is not None:
-        if isinstance(iterable, DictSort):
+        if isinstance(iterable, types.dict):
             return iterable
         raise UnsupportedError('unsupported argument for dict()')
     return UntypedDictSort()
