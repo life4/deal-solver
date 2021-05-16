@@ -37,7 +37,9 @@ class BoolSort(ProxySort):
 
     @methods.add(name='__int__')
     def m_int(self, ctx: 'Context') -> 'IntSort':
-        return if_expr(self, types.int.val(1), types.int.val(0), ctx=ctx)
+        one = types.int.val(1, ctx=ctx)
+        zero = types.int.val(0, ctx=ctx)
+        return if_expr(self, one, zero, ctx=ctx)
 
     @methods.add(name='__float__')
     def m_float(self, ctx: 'Context') -> 'FloatSort':

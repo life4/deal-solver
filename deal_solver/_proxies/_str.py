@@ -89,7 +89,7 @@ class StrSort(ProxySort):
     def r_index(self, other: 'ProxySort', start: 'ProxySort' = None, *, ctx: 'Context') -> 'IntSort':
         assert self.expr is not None
         if start is None:
-            start = types.int.val(0)
+            start = types.int.val(0, ctx=ctx)
         # TODO: emit IndexError
         return types.int(expr=z3.IndexOf(self.expr, other.expr, start.expr))
 
@@ -97,7 +97,7 @@ class StrSort(ProxySort):
     def r_find(self, other: 'ProxySort', start: 'ProxySort' = None, *, ctx: 'Context') -> 'IntSort':
         assert self.expr is not None
         if start is None:
-            start = types.int.val(0)
+            start = types.int.val(0, ctx=ctx)
         expr = z3.If(
             z3.Contains(
                 z3.SubString(self.expr, offset=start.expr, length=z3.Length(self.expr)),

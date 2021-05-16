@@ -183,7 +183,7 @@ class UntypedDictSort(DictSort):
     @methods.add(name='__getitem__', pure=False)
     def m_getitem(self, key: ProxySort, ctx: 'Context') -> ProxySort:
         ctx.add_exception(KeyError, '')
-        return types.int.val(0)
+        return self
 
     @methods.add(name='clear', pure=False)
     def r_clear(self, ctx: 'Context') -> 'DictSort':

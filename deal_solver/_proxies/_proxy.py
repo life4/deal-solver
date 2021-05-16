@@ -111,7 +111,7 @@ class ProxySort:
         from ._registry import types
         msg = "object of type '{}' has no len()".format(self.type_name)
         ctx.add_exception(TypeError, msg)
-        return types.int.val(0)
+        return types.int.val(0, ctx=ctx)
 
     @methods.add(name='__getitem__')
     def m_getitem(self, item: 'ProxySort', ctx: 'Context') -> 'ProxySort':

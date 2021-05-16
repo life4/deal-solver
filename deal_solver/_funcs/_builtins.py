@@ -99,11 +99,11 @@ def builtins_ord(val: ProxySort, ctx: Context, **kwargs) -> IntSort:
         msg = 'ord() expected string of length 1, but {} found'
         msg = msg .format(val.type_name)
         ctx.add_exception(TypeError, msg)
-        return IntSort.val(0)
+        return types.int.val(0, ctx=ctx)
     ctx.exceptions.add(ExceptionInfo(
         name='TypeError',
         names={'TypeError', 'Exception', 'BaseException'},
-        cond=val.m_len(ctx=ctx).m_ne(IntSort.val(1), ctx=ctx),
+        cond=val.m_len(ctx=ctx).m_ne(types.int.val(1, ctx=ctx), ctx=ctx),
         message='ord() expected a character, but string of length N found',
     ))
     bv = z3.BitVec(random_name('ord_bv'), 8)

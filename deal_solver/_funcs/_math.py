@@ -3,7 +3,7 @@ import math
 import z3
 
 from .._context import Context
-from .._proxies import BoolSort, FloatSort, IntSort, ProxySort, and_expr, if_expr
+from .._proxies import BoolSort, FloatSort, IntSort, ProxySort, and_expr, if_expr, types
 from ._registry import FUNCTIONS, register
 
 
@@ -82,7 +82,7 @@ def math_sin(x: ProxySort, ctx: Context, **kwargs) -> ProxySort:
     nominator: FloatSort = x
     for positive, pow in series:
         nominator = nominator.m_mul(x, ctx=ctx).m_mul(x, ctx=ctx)
-        denominator = IntSort.val(math.factorial(pow))
+        denominator = types.int.val(math.factorial(pow), ctx=ctx)
         diff = nominator.m_truediv(denominator, ctx=ctx)
         if positive:
             result = result.m_add(diff, ctx=ctx)
@@ -93,15 +93,15 @@ def math_sin(x: ProxySort, ctx: Context, **kwargs) -> ProxySort:
 
 @register('math.trunc')
 def math_trunc(x: ProxySort, ctx: Context, **kwargs) -> ProxySort:
-    if not isinstance(x, FloatSort):
+    if not isinstance(x, types.float):
         return x.m_int(ctx=ctx)
     return if_expr(
         x.m_int(ctx=ctx).m_float(ctx=ctx).m_eq(x, ctx=ctx),
         x.m_int(ctx=ctx),
         if_expr(
-            x.m_gt(FloatSort.val(0, ctx=ctx), ctx=ctx),
+            x.m_gt(types.float.val(0, ctx=ctx), ctx=ctx),
             x.m_int(ctx=ctx),
-            x.m_int(ctx=ctx).m_add(IntSort.val(1), ctx=ctx),
+            x.m_int(ctx=ctx).m_add(types.int.val(1, ctx=ctx), ctx=ctx),
             ctx=ctx,
         ),
         ctx=ctx,

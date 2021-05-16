@@ -248,4 +248,4 @@ class UntypedSetSort(SetSort):
 
     @methods.add(name='__len__')
     def m_len(self, ctx: 'Context') -> 'IntSort':
-        return types.int.val(0)
+        return types.int.val(0, ctx=ctx)

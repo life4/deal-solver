@@ -28,10 +28,8 @@ class IntSort(ProxySort):
         self.expr = expr
 
     @staticmethod
-    def val(x: int, ctx: 'Context' = None) -> 'IntSort':
-        if ctx is not None:
-            ctx = ctx.z3_ctx
-        return types.int(expr=z3.IntVal(x, ctx=ctx))
+    def val(x: int, ctx: 'Context') -> 'IntSort':
+        return types.int(expr=z3.IntVal(x, ctx=ctx.z3_ctx))
 
     @methods.add(name='__int__')
     @methods.add(name='conjugate')
@@ -133,7 +131,7 @@ class IntSort(ProxySort):
         as_float = isinstance(other, types.float)
         if as_float:
             other = other.m_int(ctx=ctx)
-        zero = self.val(0).expr
+        zero = self.val(0, ctx=ctx).expr
         result = types.int(z3.If(
             other.expr >= zero,
             self.expr / other.expr,
@@ -153,7 +151,7 @@ class IntSort(ProxySort):
         as_float = isinstance(other, types.float)
         if as_float:
             other = other.m_int(ctx=ctx)
-        zero = self.val(0).expr
+        zero = self.val(0, ctx=ctx).expr
         result = types.int(z3.If(
             other.expr >= zero,
             self.expr % other.expr,
@@ -226,11 +224,11 @@ class IntSort(ProxySort):
 
     @methods.add(name='denominator', prop=True)
     def m_denominator(self, ctx: 'Context') -> 'IntSort':
-        return self.val(1)
+        return self.val(1, ctx=ctx)
 
     @methods.add(name='imag', prop=True)
     def m_imag(self, ctx: 'Context') -> 'IntSort':
-        return self.val(0)
+        return self.val(0, ctx=ctx)
 
     @methods.add(name='as_integer_ratio')
     @methods.add(name='bit_length')
