@@ -44,7 +44,7 @@ class SetSort(ProxySort):
         return cls(expr=items)
 
     @methods.add(name='add', pure=False)
-    def r_add(self, item: 'ProxySort', ctx: 'Context') -> 'SetSort':
+    def r_add(self, item: ProxySort, ctx: 'Context') -> 'SetSort':
         return types.set(
             expr=z3.SetAdd(s=self.expr, e=item.expr),
         )
@@ -59,7 +59,7 @@ class SetSort(ProxySort):
         return self.make_empty(sort=sort)
 
     @methods.add(name='__contains__')
-    def m_contains(self, item: 'ProxySort', ctx: 'Context') -> 'BoolSort':
+    def m_contains(self, item: ProxySort, ctx: 'Context') -> 'BoolSort':
         return types.bool(expr=z3.IsMember(e=item.expr, s=self.expr))
 
     @methods.add(name='__pos__')
@@ -77,7 +77,7 @@ class SetSort(ProxySort):
     @methods.add(name='union')
     @methods.add(name='update', pure=False)
     @methods.add(name='__or__')
-    def m_or(self, other: 'ProxySort', ctx: 'Context') -> 'SetSort':
+    def m_or(self, other: ProxySort, ctx: 'Context') -> 'SetSort':
         # TODO: `set.union` supports any iterable
         if not isinstance(other, types.set):
             return self._bad_bin_op(other=other, op='|', ctx=ctx)
@@ -87,7 +87,7 @@ class SetSort(ProxySort):
     @methods.add(name='intersection')
     @methods.add(name='intersection_update', pure=False)
     @methods.add(name='__and__')
-    def m_and(self, other: 'ProxySort', ctx: 'Context') -> 'SetSort':
+    def m_and(self, other: ProxySort, ctx: 'Context') -> 'SetSort':
         # TODO: `set.intersection` supports any iterable
         if not isinstance(other, types.set):
             return self._bad_bin_op(other=other, op='&', ctx=ctx)
@@ -97,7 +97,7 @@ class SetSort(ProxySort):
     @methods.add(name='symmetric_difference')
     @methods.add(name='symmetric_difference_update', pure=False)
     @methods.add(name='__xor__')
-    def m_xor(self, other: 'ProxySort', ctx: 'Context') -> 'SetSort':
+    def m_xor(self, other: ProxySort, ctx: 'Context') -> 'SetSort':
         # TODO: `set.symmetric_difference` supports any iterable
         if not isinstance(other, types.set):
             return self._bad_bin_op(other=other, op='^', ctx=ctx)
@@ -109,7 +109,7 @@ class SetSort(ProxySort):
 
     @methods.add(name='difference')
     @methods.add(name='difference_update', pure=False)
-    def r_difference(self, other: 'ProxySort', ctx: 'Context') -> 'SetSort':
+    def r_difference(self, other: ProxySort, ctx: 'Context') -> 'SetSort':
         # TODO: `set.difference` supports any iterable
         if not isinstance(other, types.set):
             msg = "'{}' object is not iterable".format(other.type_name)
@@ -119,7 +119,7 @@ class SetSort(ProxySort):
         return types.set(expr=expr)
 
     @methods.add(name='issuperset')
-    def r_issuperset(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
+    def r_issuperset(self, other: ProxySort, ctx: 'Context') -> 'BoolSort':
         # TODO: `set.issuperset` supports any iterable
         if not isinstance(other, types.set):
             msg = "'{}' object is not iterable".format(other.type_name)
@@ -128,7 +128,7 @@ class SetSort(ProxySort):
         return other.r_issubset(self, ctx=ctx)
 
     @methods.add(name='issubset')
-    def r_issubset(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
+    def r_issubset(self, other: ProxySort, ctx: 'Context') -> 'BoolSort':
         # TODO: `set.issubset` supports any iterable
         if not isinstance(other, types.set):
             msg = "'{}' object is not iterable".format(other.type_name)
@@ -138,7 +138,7 @@ class SetSort(ProxySort):
         return types.bool(expr=expr)
 
     @methods.add(name='isdisjoint')
-    def r_isdisjoint(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
+    def r_isdisjoint(self, other: ProxySort, ctx: 'Context') -> 'BoolSort':
         # TODO: `set.isdisjoint` supports any iterable
         if not isinstance(other, types.set):
             msg = "'{}' object is not iterable".format(other.type_name)
@@ -148,13 +148,13 @@ class SetSort(ProxySort):
         return self.m_and(other, ctx=ctx).m_eq(empty, ctx=ctx)
 
     @methods.add(name='discard', pure=False)
-    def r_discard(self, item: 'ProxySort', ctx: 'Context') -> 'SetSort':
+    def r_discard(self, item: ProxySort, ctx: 'Context') -> 'SetSort':
         # TODO: check sort
         expr = z3.SetDel(self.expr, item.expr)
         return types.set(expr=expr)
 
     @methods.add(name='remove', pure=False)
-    def r_remove(self, item: 'ProxySort', ctx: 'Context') -> 'SetSort':
+    def r_remove(self, item: ProxySort, ctx: 'Context') -> 'SetSort':
         from .._context import ExceptionInfo
 
         # TODO: check sort
@@ -167,7 +167,7 @@ class SetSort(ProxySort):
         return types.set(expr=expr)
 
     @methods.add(name='__eq__')
-    def m_eq(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
+    def m_eq(self, other: ProxySort, ctx: 'Context') -> 'BoolSort':
         # type mismatch
         if not isinstance(other, types.set):
             return types.bool.val(False, ctx=ctx)
@@ -225,12 +225,12 @@ class UntypedSetSort(SetSort):
         return z3.Empty(self.sort())
 
     @methods.add(name='add', pure=False)
-    def r_add(self, item: 'ProxySort', ctx: 'Context') -> 'SetSort':
+    def r_add(self, item: ProxySort, ctx: 'Context') -> 'SetSort':
         result = SetSort.make_empty(item.sort())
         return result.r_add(item, ctx=ctx)
 
     @methods.add(name='__eq__')
-    def m_eq(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
+    def m_eq(self, other: ProxySort, ctx: 'Context') -> 'BoolSort':
         # type mismatch
         if not isinstance(other, types.set):
             return types.bool.val(False, ctx=ctx)

@@ -37,7 +37,7 @@ class ListSort(VarTupleSort):
         return cls(expr=self.expr + unit)
 
     @methods.add(name='extend', pure=False)
-    def r_extend(self, other: ProxySort, ctx: 'Context') -> 'ProxySort':
+    def r_extend(self, other: ProxySort, ctx: 'Context') -> ProxySort:
         return self.m_add(other, ctx=ctx)
 
     @methods.add(name='insert')
@@ -69,16 +69,16 @@ class UntypedListSort(ListSort):
         return types.bool.val(False, ctx=ctx)
 
     @methods.add(name='__getitem__')
-    def m_getitem(self, index: 'ProxySort', ctx: 'Context') -> 'ProxySort':
+    def m_getitem(self, index: ProxySort, ctx: 'Context') -> ProxySort:
         msg = '{} index out of range'.format(self.type_name)
         ctx.add_exception(IndexError, msg)
         return self
 
-    def get_slice(self, start: 'ProxySort', stop: 'ProxySort', ctx: 'Context') -> 'ProxySort':
+    def get_slice(self, start: ProxySort, stop: ProxySort, ctx: 'Context') -> ProxySort:
         return self
 
     @methods.add(name='__contains__')
-    def m_contains(self, item: 'ProxySort', ctx: 'Context') -> 'BoolSort':
+    def m_contains(self, item: ProxySort, ctx: 'Context') -> 'BoolSort':
         return types.bool.val(False, ctx=ctx)
 
     @methods.add(name='__len__')
@@ -86,7 +86,7 @@ class UntypedListSort(ListSort):
         return types.int(expr=z3.IntVal(0))
 
     @methods.add(name='count')
-    def r_count(self, item: 'ProxySort', ctx: 'Context') -> 'IntSort':
+    def r_count(self, item: ProxySort, ctx: 'Context') -> 'IntSort':
         return types.int(expr=z3.IntVal(0))
 
     @methods.add(name='clear', pure=False)
@@ -98,7 +98,7 @@ class UntypedListSort(ListSort):
         return ListSort.from_items([item], ctx=ctx)
 
     @methods.add(name='__add__', pure=False)
-    def m_add(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
+    def m_add(self, other: ProxySort, ctx: 'Context') -> ProxySort:
         if not isinstance(other, ListSort):
             msg = 'can only concatenate {s} (not "{o}") to {s}'
             msg = msg.format(s=self.type_name, o=other.type_name)

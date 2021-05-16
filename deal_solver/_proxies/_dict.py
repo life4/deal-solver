@@ -98,7 +98,7 @@ class DictSort(ProxySort):
         )
 
     @methods.add(name='pop', pure=False)
-    def r_pop(self, key: 'ProxySort', ctx: 'Context') -> Mutation:
+    def r_pop(self, key: ProxySort, ctx: 'Context') -> Mutation:
         # get the value
         item = z3.Select(self.expr, key.expr)
         expr = self.item_sort.value(item)
@@ -116,7 +116,7 @@ class DictSort(ProxySort):
         return Mutation(new_value=new_value, result=result)
 
     @methods.add(name='__contains__')
-    def m_contains(self, key: 'ProxySort', ctx: 'Context') -> 'BoolSort':
+    def m_contains(self, key: ProxySort, ctx: 'Context') -> 'BoolSort':
         item = z3.Select(self.expr, key.expr)
         expr = self.item_sort.exists(item)
         return types.bool(expr=expr)
@@ -128,7 +128,7 @@ class DictSort(ProxySort):
         return types.bool(expr=expr)
 
     @methods.add(name='__eq__')
-    def m_eq(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
+    def m_eq(self, other: ProxySort, ctx: 'Context') -> 'BoolSort':
         # type mismatch
         if not isinstance(other, types.dict):
             return types.bool.val(False, ctx=ctx)
@@ -194,5 +194,5 @@ class UntypedDictSort(DictSort):
         return default
 
     @methods.add(name='__contains__')
-    def m_contains(self, key: 'ProxySort', ctx: 'Context') -> 'BoolSort':
+    def m_contains(self, key: ProxySort, ctx: 'Context') -> 'BoolSort':
         return types.bool.val(False, ctx=ctx)

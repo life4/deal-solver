@@ -87,7 +87,7 @@ class FloatSort(ProxySort):
         raise NotImplementedError
 
     @methods.add(name='__pow__')
-    def m_pow(self, other: ProxySort, ctx: 'Context') -> 'ProxySort':
+    def m_pow(self, other: ProxySort, ctx: 'Context') -> ProxySort:
         if isinstance(other, types.bool):
             other = other.m_int(ctx=ctx)
         if not isinstance(other, (types.int, types.float)):
@@ -138,7 +138,7 @@ class FloatSort(ProxySort):
         return self._math_op(other=other, handler=operator.__mul__, ctx=ctx)  # type: ignore
 
     @methods.add(name='__add__')
-    def m_add(self, other: ProxySort, ctx: 'Context') -> 'ProxySort':
+    def m_add(self, other: ProxySort, ctx: 'Context') -> ProxySort:
         if isinstance(other, types.bool):
             other = other.m_int(ctx=ctx)
         if not isinstance(other, (types.float, types.int)):
@@ -146,7 +146,7 @@ class FloatSort(ProxySort):
         return self._math_op(other=other, handler=operator.__add__, ctx=ctx)
 
     @methods.add(name='__sub__')
-    def m_sub(self, other: ProxySort, ctx: 'Context') -> 'ProxySort':
+    def m_sub(self, other: ProxySort, ctx: 'Context') -> ProxySort:
         if isinstance(other, types.bool):
             other = other.m_int(ctx=ctx)
         if not isinstance(other, (types.float, types.int)):
@@ -154,7 +154,7 @@ class FloatSort(ProxySort):
         return self._math_op(other=other, handler=operator.__sub__, ctx=ctx)
 
     @methods.add(name='__mod__')
-    def m_mod(self, other: ProxySort, ctx: 'Context') -> 'ProxySort':
+    def m_mod(self, other: ProxySort, ctx: 'Context') -> ProxySort:
         if isinstance(other, types.bool):
             other = other.m_int(ctx=ctx)
         if not isinstance(other, (types.float, types.int)):
@@ -208,7 +208,7 @@ class RealSort(FloatSort):
         return types.bool(expr=self.expr != z3.RealVal(0))
 
     @methods.add(name='__abs__')
-    def m_abs(self, ctx: 'Context') -> 'ProxySort':
+    def m_abs(self, ctx: 'Context') -> ProxySort:
         expr = z3.If(self.expr >= z3.RealVal(0), self.expr, -self.expr, ctx=ctx.z3_ctx)
         return type(self)(expr=expr)
 
@@ -287,7 +287,7 @@ class FPSort(FloatSort):
         return types.bool(expr=z3.fpIsNaN(self.expr))
 
     @methods.add(name='__abs__')
-    def m_abs(self, ctx: 'Context') -> 'ProxySort':
+    def m_abs(self, ctx: 'Context') -> ProxySort:
         return FPSort(expr=z3.fpAbs(self.expr, ctx=ctx.z3_ctx))
 
     def _binary_op(self, other: ProxySort, handler: typing.Callable, ctx: 'Context'):

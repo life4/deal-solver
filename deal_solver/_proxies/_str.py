@@ -53,7 +53,7 @@ class StrSort(ProxySort):
         return types.bool(expr=expr)
 
     @methods.add(name='__getitem__')
-    def m_getitem(self, index: 'ProxySort', ctx: 'Context') -> 'ProxySort':
+    def m_getitem(self, index: ProxySort, ctx: 'Context') -> ProxySort:
         # TODO: emit IndexError
         expr = z3.SubString(
             s=self.expr,
@@ -63,7 +63,7 @@ class StrSort(ProxySort):
         return types.str(expr=expr)
 
     @methods.add(name='__contains__')
-    def m_contains(self, item: 'ProxySort', ctx: 'Context') -> 'BoolSort':
+    def m_contains(self, item: ProxySort, ctx: 'Context') -> 'BoolSort':
         if not isinstance(item, types.str):
             msg = "'in <string>' requires string as left operand, not {}"
             msg = msg.format(item.type_name)
@@ -74,19 +74,19 @@ class StrSort(ProxySort):
         return types.bool(expr=expr)
 
     @methods.add(name='startswith')
-    def r_startswith(self, prefix: 'ProxySort', ctx: 'Context') -> 'BoolSort':
+    def r_startswith(self, prefix: ProxySort, ctx: 'Context') -> 'BoolSort':
         assert self.expr is not None
         expr = z3.PrefixOf(prefix.expr, self.expr)
         return types.bool(expr=expr)
 
     @methods.add(name='endswith')
-    def r_endswith(self, suffix: 'ProxySort', ctx: 'Context') -> 'BoolSort':
+    def r_endswith(self, suffix: ProxySort, ctx: 'Context') -> 'BoolSort':
         assert self.expr is not None
         expr = z3.SuffixOf(suffix.expr, self.expr)
         return types.bool(expr=expr)
 
     @methods.add(name='index')
-    def r_index(self, other: 'ProxySort', start: 'ProxySort' = None, *, ctx: 'Context') -> 'IntSort':
+    def r_index(self, other: ProxySort, start: ProxySort = None, *, ctx: 'Context') -> 'IntSort':
         assert self.expr is not None
         if start is None:
             start = types.int.val(0, ctx=ctx)
@@ -94,7 +94,7 @@ class StrSort(ProxySort):
         return types.int(expr=z3.IndexOf(self.expr, other.expr, start.expr))
 
     @methods.add(name='find')
-    def r_find(self, other: 'ProxySort', start: 'ProxySort' = None, *, ctx: 'Context') -> 'IntSort':
+    def r_find(self, other: ProxySort, start: ProxySort = None, *, ctx: 'Context') -> 'IntSort':
         assert self.expr is not None
         if start is None:
             start = types.int.val(0, ctx=ctx)
@@ -114,7 +114,7 @@ class StrSort(ProxySort):
         return types.int(expr=z3.Length(self.expr))
 
     @methods.add(name='__add__')
-    def m_add(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
+    def m_add(self, other: ProxySort, ctx: 'Context') -> ProxySort:
         if not isinstance(other, types.str):
             msg = 'can only concatenate str (not "{}") to {}'
             msg = msg.format(other.type_name, self.type_name)
@@ -123,7 +123,7 @@ class StrSort(ProxySort):
         return self._math_op(other=other, handler=operator.__add__, ctx=ctx)
 
     @methods.add(name='__mul__')
-    def m_mul(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':
+    def m_mul(self, other: ProxySort, ctx: 'Context') -> ProxySort:
         if not isinstance(other, types.int):
             msg = "can't multiply sequence by non-int of type '{}'"
             msg = msg.format(other.type_name)
@@ -132,13 +132,13 @@ class StrSort(ProxySort):
         raise UnsupportedError('cannot multiply str')
 
     @methods.add(name='__mod__')
-    def m_mod(self, other: 'ProxySort', ctx: 'Context') -> 'StrSort':
+    def m_mod(self, other: ProxySort, ctx: 'Context') -> 'StrSort':
         msg = 'not all arguments converted during string formatting'
         ctx.add_exception(TypeError, msg)
         return self
 
     @methods.add(name='__sub__')
-    def m_sub(self, other: 'ProxySort', ctx: 'Context') -> 'StrSort':
+    def m_sub(self, other: ProxySort, ctx: 'Context') -> 'StrSort':
         return self._bad_bin_op(other, op='-', ctx=ctx)
 
     @methods.add(name='__pos__')
