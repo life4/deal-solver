@@ -7,6 +7,7 @@ from .._exceptions import UnsupportedError
 from ._method import Mutation
 from ._proxy import ProxySort
 from ._registry import types
+from ._type_info import TypeInfo
 
 
 if typing.TYPE_CHECKING:
@@ -20,31 +21,48 @@ class DictSort(ProxySort):
     methods = ProxySort.methods.copy()
 
     expr: z3.ArrayRef
-    item_sort: z3.DatatypeSortRef
-    value_sort: typing.Type[ProxySort]
+    subtypes: typing.Tuple[TypeInfo, ...]
 
-    def __init__(self, expr, item_sort, value_sort: type) -> None:
+    def __init__(self, expr, subtypes: tuple) -> None:
         assert z3.is_array(expr)
-        assert type(item_sort) is z3.DatatypeSortRef
-        assert value_sort is not None
+        assert len(subtypes) == 2
         self.expr = expr
-        self.item_sort = item_sort
-        self.value_sort = value_sort
+        self.subtypes = subtypes
+
+    @property
+    def key_type(self) -> TypeInfo:
+        return self.subtypes[0]
+
+    @property
+    def val_type(self) -> TypeInfo:
+        return self.subtypes[1]
+
+    @cached_property
+    def item_sort(self):
+        item_sort = z3.Datatype(f'dict_val__{self.val_type.type_name}')
+        item_sort.declare(
+            'new',
+            ('exists', z3.BoolSort()),
+            ('value', self.val_type.sort),
+        )
+        return item_sort.create()
 
     @classmethod
     def var(
         cls, ktype: ProxySort = None, vtype: ProxySort = None,
         *, name: str, ctx: z3.Context,
     ) -> 'DictSort':
+        from .._context import Context
         assert ktype
         assert vtype
-        empty = cls.make_empty(ktype, vtype)
+        ctx = Context.make_empty(get_contracts=None, z3_ctx=ctx)  # type: ignore
+        empty = cls.make_empty(ktype, vtype, ctx=ctx)
         expr = z3.Array(name, ktype.sort(), vtype.sort())
         empty.expr = expr
         return empty
 
     @classmethod
-    def make_empty(cls, key: ProxySort, value: ProxySort) -> 'DictSort':
+    def make_empty(cls, key: ProxySort, value: ProxySort, ctx: 'Context') -> 'DictSort':
         item_sort = z3.Datatype(f'dict_val__{value.type_name}')
         item_sort.declare(
             'new',
@@ -55,20 +73,17 @@ class DictSort(ProxySort):
         item = item_sort.new(z3.BoolVal(False), value.expr)
         return cls(
             expr=z3.K(dom=key.sort(), v=item),
-            item_sort=item_sort,
-            value_sort=type(value),
+            subtypes=(
+                key.get_type_info(ctx=ctx),
+                value.get_type_info(ctx=ctx),
+            ),
         )
 
     @methods.add(name='__setitem__', pure=False)
     def m_setitem(self, key: ProxySort, value: ProxySort, ctx: 'Context') -> 'DictSort':
-        cls = type(self)
         item = self.item_sort.new(z3.BoolVal(True), value.expr)
         expr = z3.Update(self.expr, key.expr, item)
-        return cls(
-            expr=expr,
-            item_sort=self.item_sort,
-            value_sort=type(value),
-        )
+        return self.evolve(expr=expr)
 
     @methods.add(name='__getitem__', pure=False)
     def m_getitem(self, key: ProxySort, ctx: 'Context') -> ProxySort:
@@ -83,7 +98,7 @@ class DictSort(ProxySort):
         ))
 
         expr = self.item_sort.value(item)
-        return self.value_sort(expr)
+        return self.val_type.wrap(expr)
 
     @methods.add(name='get')
     def r_get(self, key: ProxySort, default: ProxySort, *, ctx: 'Context') -> ProxySort:
@@ -93,7 +108,7 @@ class DictSort(ProxySort):
             self.item_sort.value(item),
             default.expr,
         )
-        return self.value_sort(expr)
+        return self.val_type.wrap(expr)
 
     @methods.add(name='copy')
     def r_copy(self, ctx: 'Context') -> 'DictSort':
@@ -101,30 +116,20 @@ class DictSort(ProxySort):
 
     @methods.add(name='clear', pure=False)
     def r_clear(self, ctx: 'Context') -> 'DictSort':
-        cls = type(self)
         item = self.expr.default()
-        return cls(
-            expr=z3.K(self.expr.domain(), item),
-            item_sort=self.item_sort,
-            value_sort=self.value_sort,
-        )
+        expr = z3.K(self.expr.domain(), item)
+        return self.evolve(expr=expr)
 
     @methods.add(name='pop', pure=False)
     def r_pop(self, key: ProxySort, ctx: 'Context') -> Mutation:
         # get the value
         item = z3.Select(self.expr, key.expr)
         expr = self.item_sort.value(item)
-        result = self.value_sort(expr)
+        result = self.val_type.wrap(expr)
 
         # remove the item
         expr = z3.Update(self.expr, key.expr, self.expr.default())
-        cls = type(self)
-        new_value = cls(
-            expr=expr,
-            item_sort=self.item_sort,
-            value_sort=self.value_sort,
-        )
-
+        new_value = self.evolve(expr=expr)
         return Mutation(new_value=new_value, result=result)
 
     @methods.add(name='__contains__')
@@ -186,10 +191,7 @@ class UntypedDictSort(DictSort):
 
     @methods.add(name='__setitem__', pure=False)
     def m_setitem(self, key: ProxySort, value: ProxySort, ctx: 'Context') -> 'DictSort':
-        dict_val = DictSort.make_empty(
-            key=key,
-            value=value,
-        )
+        dict_val = DictSort.make_empty(key, value, ctx=ctx)
         return dict_val.m_setitem(key=key, value=value, ctx=ctx)
 
     @methods.add(name='__getitem__', pure=False)
