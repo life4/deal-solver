@@ -28,8 +28,6 @@ def wrap(expr) -> 'ProxySort':
         return types.str(expr=expr)
     if z3.is_seq(expr):
         return types.list(expr=expr)
-    if z3.is_array(expr):
-        return types.set(expr=expr)
     if z3.is_fp(expr):
         return FPSort.wrap(expr)
     if z3.is_real(expr):

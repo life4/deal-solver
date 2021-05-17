@@ -24,7 +24,7 @@ class SetSort(ProxySort):
     subtypes: typing.Tuple[TypeInfo, ...]
 
     def __init__(self, expr, subtypes=()) -> None:
-        assert len(subtypes) <= 1
+        assert len(subtypes) == 1
         assert z3.is_array(expr)
         self.expr = expr
         self.subtypes = subtypes
@@ -36,9 +36,11 @@ class SetSort(ProxySort):
 
     @classmethod
     def var(cls, subtype: ProxySort = None, *, name: str, ctx: z3.Context) -> 'SetSort':
+        from .._context import Context
         assert subtype
         expr = z3.Const(name=name, sort=z3.SetSort(subtype.sort()))
-        return cls(expr=expr)
+        ctx = Context.make_empty(get_contracts=None, z3_ctx=ctx)  # type: ignore
+        return cls(expr=expr, subtypes=(subtype.get_type_info(ctx=ctx), ))
 
     def get_type_info(self, ctx: 'Context') -> TypeInfo:
         sort = self.expr.domain()
@@ -239,7 +241,6 @@ class SetSort(ProxySort):
 
 class UntypedSetSort(SetSort):
     methods = SetSort.methods.copy()
-    subtypes = ()
 
     def __new__(cls, expr=None, **kwargs):
         if expr is not None:
@@ -253,13 +254,11 @@ class UntypedSetSort(SetSort):
         return TypeInfo(
             type=type(self),
             default=self,
-            subtypes=self.subtypes,
+            subtypes=(types.int.get_type_info(ctx=ctx), ),
         )
 
     def evolve(self, **kwargs):
-        if kwargs:
-            return SetSort(**kwargs)
-        return self
+        raise NotImplementedError
 
     @staticmethod
     def sort() -> z3.SeqSortRef:
@@ -267,7 +266,7 @@ class UntypedSetSort(SetSort):
 
     @property
     def expr(self):
-        return z3.z3.EmptySet(self.sort())
+        return z3.EmptySet(self.sort())
 
     @methods.add(name='add', pure=False)
     def r_add(self, item: ProxySort, ctx: 'Context') -> 'SetSort':
