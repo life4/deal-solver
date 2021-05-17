@@ -55,7 +55,7 @@ class SetSort(ProxySort):
         return z3.EmptySet(sort)
 
     @classmethod
-    def from_items(cls, values: typing.List[ProxySort], ctx: 'Context') -> 'SetSort':
+    def val(cls, values: typing.List[ProxySort], ctx: 'Context') -> 'SetSort':
         if not values:
             return UntypedSetSort()
         items = cls.make_empty_expr(sort=values[0].expr.sort())

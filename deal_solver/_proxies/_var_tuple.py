@@ -53,7 +53,7 @@ class VarTupleSort(ProxySort):
         )
 
     @classmethod
-    def from_items(cls: typing.Type[T], values: typing.List[ProxySort], ctx: 'Context') -> T:
+    def val(cls: typing.Type[T], values: typing.List[ProxySort], ctx: 'Context') -> T:
         items = cls.make_empty_expr(sort=values[0].expr.sort())
         for value in values:
             item = z3.Unit(value.expr)

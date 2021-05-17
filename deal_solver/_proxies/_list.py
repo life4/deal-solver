@@ -107,7 +107,7 @@ class UntypedListSort(ListSort):
 
     @methods.add(name='append', pure=False)
     def r_append(self, item: ProxySort, ctx: 'Context') -> 'ListSort':
-        return ListSort.from_items([item], ctx=ctx)
+        return ListSort.val([item], ctx=ctx)
 
     @methods.add(name='__add__', pure=False)
     def m_add(self, other: ProxySort, ctx: 'Context') -> ProxySort:

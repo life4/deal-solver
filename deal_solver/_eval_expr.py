@@ -117,7 +117,7 @@ def eval_list(node: astroid.List, ctx: Context) -> ProxySort:
     items = []
     for subnode in node.elts:
         items.append(eval_expr(node=subnode, ctx=ctx))
-    return types.list.from_items(items, ctx=ctx)
+    return types.list.val(items, ctx=ctx)
 
 
 @eval_expr.register(astroid.Set)
@@ -125,7 +125,7 @@ def eval_set(node: astroid.Set, ctx: Context) -> ProxySort:
     items = []
     for subnode in node.elts:
         items.append(eval_expr(node=subnode, ctx=ctx))
-    return types.set.from_items(items, ctx=ctx)
+    return types.set.val(items, ctx=ctx)
 
 
 @eval_expr.register(astroid.Dict)
@@ -145,7 +145,7 @@ def eval_tuple(node: astroid.Tuple, ctx: Context) -> ProxySort:
     items = []
     for subnode in node.elts:
         items.append(eval_expr(node=subnode, ctx=ctx))
-    return types.tuple.from_items(items, ctx=ctx)
+    return types.tuple.val(items, ctx=ctx)
 
 
 @eval_expr.register(astroid.ListComp)
