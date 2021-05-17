@@ -29,6 +29,11 @@ class SetSort(ProxySort):
         self.expr = expr
         self.subtypes = subtypes
 
+    def evolve(self, **kwargs):
+        params = dict(expr=self.expr, subtypes=self.subtypes)
+        params.update(kwargs)
+        return type(self)(**params)
+
     @classmethod
     def var(cls, subtype: ProxySort = None, *, name: str, ctx: z3.Context) -> 'SetSort':
         assert subtype
@@ -234,17 +239,28 @@ class SetSort(ProxySort):
 
 class UntypedSetSort(SetSort):
     methods = SetSort.methods.copy()
+    subtypes = ()
+
+    def __new__(cls, expr=None, **kwargs):
+        if expr is not None:
+            return SetSort(expr, **kwargs)
+        return super().__new__(cls)
 
     def __init__(self) -> None:
         pass
 
+    def evolve(self, **kwargs):
+        if kwargs:
+            return SetSort(**kwargs)
+        return self
+
     @staticmethod
     def sort() -> z3.SeqSortRef:
-        return z3.SeqSort(z3.IntSort())
+        return z3.SetSort(z3.IntSort())
 
     @property
     def expr(self):
-        return z3.Empty(self.sort())
+        return z3.z3.EmptySet(self.sort())
 
     @methods.add(name='add', pure=False)
     def r_add(self, item: ProxySort, ctx: 'Context') -> 'SetSort':

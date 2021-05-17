@@ -37,6 +37,11 @@ class VarTupleSort(ProxySort):
     def sort(self) -> z3.SeqSortRef:
         return self.expr.sort()
 
+    def evolve(self, **kwargs):
+        params = dict(expr=self.expr, subtypes=self.subtypes)
+        params.update(kwargs)
+        return type(self)(**params)
+
     def get_type_info(self, ctx: 'Context') -> TypeInfo:
         sort = self.expr.sort().basis()
         expr = self.make_empty_expr(sort)
@@ -173,6 +178,11 @@ class VarTupleSort(ProxySort):
 class UntypedVarTupleSort(VarTupleSort):
     methods = VarTupleSort.methods.copy()
     subtypes = ()
+
+    def __new__(cls, expr=None, **kwargs):
+        if expr is not None:
+            return VarTupleSort(expr, **kwargs)
+        return super().__new__(cls)
 
     def __init__(self) -> None:
         pass

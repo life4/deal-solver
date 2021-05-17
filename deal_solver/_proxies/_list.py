@@ -60,6 +60,11 @@ class UntypedListSort(ListSort):
     methods = ListSort.methods.copy()
     subtypes = ()
 
+    def __new__(cls, expr=None, **kwargs):
+        if expr is not None:
+            return ListSort(expr, **kwargs)
+        return super().__new__(cls)
+
     def __init__(self) -> None:
         pass
 

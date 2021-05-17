@@ -77,6 +77,13 @@ from ..helpers import prove_f
     'not []',
     '[1]',
     '[1, 2]',
+
+    # different subtypes
+    '[5][0] == 5',
+    '[[5]][0] == [5]',
+    '[[]][0] == []',
+    '[{5}][0] == {5}',
+    '[set()][0] == set()',
 ])
 def test_expr_asserts_ok(check: str) -> None:
     assert eval(check)

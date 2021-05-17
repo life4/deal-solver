@@ -29,6 +29,11 @@ class DictSort(ProxySort):
         self.expr = expr
         self.subtypes = subtypes
 
+    def evolve(self, **kwargs):
+        params = dict(expr=self.expr, subtypes=self.subtypes)
+        params.update(kwargs)
+        return type(self)(**params)
+
     @property
     def key_type(self) -> TypeInfo:
         return self.subtypes[0]

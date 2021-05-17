@@ -39,13 +39,6 @@ class ProxySort:
     def get_type_info(self, ctx: 'Context') -> TypeInfo:
         raise NotImplementedError
 
-    def evolve(self: T, **kwargs) -> T:
-        cls = type(self)
-        obj = cls.__new__(cls)
-        obj.__dict__.update(self.__dict__)
-        obj.__dict__.update(kwargs)
-        return obj
-
     @classmethod
     def var(cls, *, name: str, ctx: z3.Context) -> 'ProxySort':
         raise NotImplementedError
