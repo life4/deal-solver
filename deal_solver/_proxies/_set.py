@@ -66,7 +66,7 @@ class SetSort(ProxySort):
 
     @methods.add(name='add', pure=False)
     def r_add(self, item: ProxySort, ctx: 'Context') -> 'SetSort':
-        return types.set(
+        return self.evolve(
             expr=z3.SetAdd(s=self.expr, e=item.expr),
         )
 
@@ -104,7 +104,7 @@ class SetSort(ProxySort):
         if not isinstance(other, types.set):
             return self._bad_bin_op(other=other, op='|', ctx=ctx)
         expr = z3.SetUnion(self.expr, other.expr)
-        return types.set(expr=expr)
+        return self.evolve(expr=expr)
 
     @methods.add(name='intersection')
     @methods.add(name='intersection_update', pure=False)
@@ -114,7 +114,7 @@ class SetSort(ProxySort):
         if not isinstance(other, types.set):
             return self._bad_bin_op(other=other, op='&', ctx=ctx)
         expr = z3.SetIntersect(self.expr, other.expr)
-        return types.set(expr=expr)
+        return self.evolve(expr=expr)
 
     @methods.add(name='symmetric_difference')
     @methods.add(name='symmetric_difference_update', pure=False)
@@ -127,7 +127,7 @@ class SetSort(ProxySort):
             z3.SetDifference(self.expr, other.expr),
             z3.SetDifference(other.expr, self.expr),
         )
-        return types.set(expr=expr)
+        return self.evolve(expr=expr)
 
     @methods.add(name='difference')
     @methods.add(name='difference_update', pure=False)
@@ -138,7 +138,7 @@ class SetSort(ProxySort):
             ctx.add_exception(TypeError, msg)
             return self
         expr = z3.SetDifference(self.expr, other.expr)
-        return types.set(expr=expr)
+        return self.evolve(expr=expr)
 
     @methods.add(name='issuperset')
     def r_issuperset(self, other: ProxySort, ctx: 'Context') -> 'BoolSort':
@@ -175,7 +175,7 @@ class SetSort(ProxySort):
     def r_discard(self, item: ProxySort, ctx: 'Context') -> 'SetSort':
         # TODO: check sort
         expr = z3.SetDel(self.expr, item.expr)
-        return types.set(expr=expr)
+        return self.evolve(expr=expr)
 
     @methods.add(name='remove', pure=False)
     def r_remove(self, item: ProxySort, ctx: 'Context') -> 'SetSort':
@@ -188,7 +188,7 @@ class SetSort(ProxySort):
             cond=not_expr(self.m_contains(item, ctx=ctx), ctx=ctx),
         ))
         expr = z3.SetDel(self.expr, item.expr)
-        return types.set(expr=expr)
+        return self.evolve(expr=expr)
 
     @methods.add(name='__eq__')
     def m_eq(self, other: ProxySort, ctx: 'Context') -> 'BoolSort':
@@ -232,7 +232,7 @@ class SetSort(ProxySort):
             item = wrap(expr)
         ctx.given.add(self.m_contains(item, ctx=ctx))
         return Mutation(
-            new_value=types.set(expr=z3.SetDel(self.expr, item.expr)),
+            new_value=self.evolve(expr=z3.SetDel(self.expr, item.expr)),
             result=item,
         )
 
@@ -248,6 +248,13 @@ class UntypedSetSort(SetSort):
 
     def __init__(self) -> None:
         pass
+
+    def get_type_info(self, ctx: 'Context') -> TypeInfo:
+        return TypeInfo(
+            type=type(self),
+            default=self,
+            subtypes=self.subtypes,
+        )
 
     def evolve(self, **kwargs):
         if kwargs:
@@ -279,8 +286,8 @@ class UntypedSetSort(SetSort):
             return types.bool.val(True, ctx=ctx)
         # other is a typed set
         sort = other.expr.domain()
-        expr = self.make_empty_expr(sort)
-        empty = self.evolve(expr=expr)
+        expr = other.make_empty_expr(sort)
+        empty = other.evolve(expr=expr)
         return other.m_eq(empty, ctx=ctx)
 
     @methods.add(name='pop', pure=False)
