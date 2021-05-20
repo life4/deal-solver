@@ -5,7 +5,7 @@ if typing.TYPE_CHECKING:
     from ._proxy import ProxySort
 
 
-class TypeInfo(typing.NamedTuple):
+class TypeFactory(typing.NamedTuple):
     type: typing.Type['ProxySort']
     default: 'ProxySort'
     subtypes: typing.Tuple[object, ...]

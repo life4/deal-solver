@@ -9,7 +9,7 @@ from .._exceptions import UnsupportedError
 from ._funcs import and_expr, switch
 from ._proxy import ProxySort
 from ._registry import types
-from ._type_info import TypeInfo
+from ._type_factory import TypeFactory
 
 
 if typing.TYPE_CHECKING:
@@ -50,13 +50,13 @@ class FloatSort(ProxySort):
         return cls(expr=expr)
 
     @property
-    def factory(self) -> TypeInfo:
+    def factory(self) -> TypeFactory:
         cls = type(self)
         if self.is_real:
             default = z3.RealVal(.0, ctx=self.expr.ctx)
         else:
             default = z3.FPVal(.0, cls.sort(), ctx=self.expr.ctx)
-        return TypeInfo(
+        return TypeFactory(
             type=cls,
             default=default,
             subtypes=(),

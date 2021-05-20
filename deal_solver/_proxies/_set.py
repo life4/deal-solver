@@ -6,7 +6,7 @@ from ._funcs import not_expr, random_name
 from ._method import Mutation
 from ._proxy import ProxySort
 from ._registry import types
-from ._type_info import TypeInfo
+from ._type_factory import TypeFactory
 
 
 if typing.TYPE_CHECKING:
@@ -21,7 +21,7 @@ class SetSort(ProxySort):
     type_name = 'set'
     methods = ProxySort.methods.copy()
     expr: z3.ArrayRef
-    subtypes: typing.Tuple[TypeInfo, ...]
+    subtypes: typing.Tuple[TypeFactory, ...]
 
     def __init__(self, expr, subtypes=()) -> None:
         assert len(subtypes) == 1
@@ -43,11 +43,11 @@ class SetSort(ProxySort):
         return cls(expr=expr, subtypes=(subtype.factory, ))
 
     @property
-    def factory(self) -> TypeInfo:
+    def factory(self) -> TypeFactory:
         sort = self.expr.domain()
         expr = self.make_empty_expr(sort)
         empty = self.evolve(expr=expr)
-        return TypeInfo(
+        return TypeFactory(
             type=type(self),
             default=empty,
             subtypes=self.subtypes,
@@ -248,8 +248,8 @@ class UntypedSetSort(SetSort):
         pass
 
     @property
-    def factory(self) -> TypeInfo:
-        return TypeInfo(
+    def factory(self) -> TypeFactory:
+        return TypeFactory(
             type=type(self),
             default=self,
             subtypes=(types.int.factory, ),

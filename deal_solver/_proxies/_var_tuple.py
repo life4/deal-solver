@@ -7,7 +7,7 @@ from .._exceptions import UnsupportedError
 from ._funcs import random_name, wrap
 from ._proxy import ProxySort
 from ._registry import types
-from ._type_info import TypeInfo
+from ._type_factory import TypeFactory
 
 
 if typing.TYPE_CHECKING:
@@ -25,7 +25,7 @@ class VarTupleSort(ProxySort):
     methods = ProxySort.methods.copy()
 
     expr: z3.SeqRef
-    subtypes: typing.Tuple[TypeInfo, ...]
+    subtypes: typing.Tuple[TypeFactory, ...]
 
     def __init__(self, expr, subtypes=()) -> None:
         assert len(subtypes) <= 1
@@ -43,11 +43,11 @@ class VarTupleSort(ProxySort):
         return type(self)(**params)
 
     @property
-    def factory(self) -> TypeInfo:
+    def factory(self) -> TypeFactory:
         sort = self.expr.sort().basis()
         expr = self.make_empty_expr(sort)
         empty = self.evolve(expr=expr)
-        return TypeInfo(
+        return TypeFactory(
             type=type(self),
             default=empty,
             subtypes=self.subtypes,

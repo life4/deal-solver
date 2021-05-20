@@ -6,7 +6,7 @@ import z3
 from .._exceptions import UnsupportedError
 from ._proxy import ProxySort
 from ._registry import types
-from ._type_info import TypeInfo
+from ._type_factory import TypeFactory
 
 
 if typing.TYPE_CHECKING:
@@ -39,9 +39,9 @@ class StrSort(ProxySort):
         return types.str(expr=z3.StringVal(val, ctx=ctx.z3_ctx))
 
     @property
-    def factory(self) -> TypeInfo:
+    def factory(self) -> TypeFactory:
         cls = type(self)
-        return TypeInfo(
+        return TypeFactory(
             type=cls,
             default=cls(expr=z3.StringVal("", ctx=self.expr.ctx)),
             subtypes=(),

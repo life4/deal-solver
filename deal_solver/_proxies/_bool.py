@@ -5,7 +5,7 @@ import z3
 from ._funcs import if_expr
 from ._proxy import ProxySort
 from ._registry import types
-from ._type_info import TypeInfo
+from ._type_factory import TypeFactory
 
 
 if typing.TYPE_CHECKING:
@@ -41,9 +41,9 @@ class BoolSort(ProxySort):
         return cls(expr=z3.BoolVal(x, ctx=ctx))
 
     @property
-    def factory(self) -> TypeInfo:
+    def factory(self) -> TypeFactory:
         cls = type(self)
-        return TypeInfo(
+        return TypeFactory(
             type=cls,
             default=cls(expr=z3.BoolVal(False, ctx=self.expr.ctx)),
             subtypes=(),

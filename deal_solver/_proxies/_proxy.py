@@ -6,7 +6,7 @@ import z3
 from .._exceptions import UnsupportedError
 from ._funcs import not_expr, wrap
 from ._methods import Methods
-from ._type_info import TypeInfo
+from ._type_factory import TypeFactory
 
 
 if typing.TYPE_CHECKING:
@@ -37,7 +37,7 @@ class ProxySort:
         raise NotImplementedError
 
     @property
-    def factory(self) -> TypeInfo:
+    def factory(self) -> TypeFactory:
         raise NotImplementedError
 
     @classmethod

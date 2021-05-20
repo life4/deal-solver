@@ -7,7 +7,7 @@ from .._exceptions import UnsupportedError
 from ._method import Mutation
 from ._proxy import ProxySort
 from ._registry import types
-from ._type_info import TypeInfo
+from ._type_factory import TypeFactory
 
 
 if typing.TYPE_CHECKING:
@@ -21,7 +21,7 @@ class DictSort(ProxySort):
     methods = ProxySort.methods.copy()
 
     expr: z3.ArrayRef
-    subtypes: typing.Tuple[TypeInfo, ...]
+    subtypes: typing.Tuple[TypeFactory, ...]
 
     def __init__(self, expr, subtypes: tuple) -> None:
         assert z3.is_array(expr)
@@ -35,7 +35,7 @@ class DictSort(ProxySort):
         return type(self)(**params)
 
     @property
-    def _val_type(self) -> TypeInfo:
+    def _val_type(self) -> TypeFactory:
         return self.subtypes[1]
 
     @cached_property
@@ -63,10 +63,10 @@ class DictSort(ProxySort):
         return empty
 
     @property
-    def factory(self) -> TypeInfo:
+    def factory(self) -> TypeFactory:
         expr = z3.K(dom=self.expr.domain(), v=self.expr.default())
         empty = self.evolve(expr=expr)
-        return TypeInfo(
+        return TypeFactory(
             type=type(self),
             default=empty,
             subtypes=self.subtypes,
@@ -191,7 +191,7 @@ class UntypedDictSort(DictSort):
         pass
 
     @property
-    def factory(self) -> TypeInfo:
+    def factory(self) -> TypeFactory:
         empty = DictSort.make_empty(
             key=types.int(expr=z3.IntVal(0)),
             value=types.int(expr=z3.IntVal(0)),
