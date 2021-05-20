@@ -18,7 +18,7 @@ class TypeInfo(typing.NamedTuple):
     def sort(self):
         return self.default.sort()
 
-    def wrap(self, expr, **kwargs) -> 'ProxySort':
+    def wrap(self, expr) -> 'ProxySort':
         if self.subtypes:
-            return self.type(expr, subtypes=self.subtypes, **kwargs)  # type: ignore
-        return self.type(expr, **kwargs)  # type: ignore
+            return self.type(expr, subtypes=self.subtypes)  # type: ignore
+        return self.type(expr)

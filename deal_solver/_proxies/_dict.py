@@ -57,13 +57,23 @@ class DictSort(ProxySort):
         assert ktype
         assert vtype
         ctx = Context.make_empty(get_contracts=None, z3_ctx=ctx)  # type: ignore
-        empty = cls.make_empty(ktype, vtype, ctx=ctx)
+        empty = cls.make_empty(ktype, vtype)
         expr = z3.Array(name, ktype.sort(), vtype.sort())
         empty.expr = expr
         return empty
 
+    @property
+    def factory(self) -> TypeInfo:
+        expr = z3.K(dom=self.expr.domain(), v=self.expr.default())
+        empty = self.evolve(expr=expr)
+        return TypeInfo(
+            type=type(self),
+            default=empty,
+            subtypes=self.subtypes,
+        )
+
     @classmethod
-    def make_empty(cls, key: ProxySort, value: ProxySort, ctx: 'Context') -> 'DictSort':
+    def make_empty(cls, key: ProxySort, value: ProxySort) -> 'DictSort':
         item_sort = z3.Datatype(f'dict_val__{value.type_name}')
         item_sort.declare(
             'new',
@@ -172,8 +182,21 @@ class DictSort(ProxySort):
 class UntypedDictSort(DictSort):
     methods = DictSort.methods.copy()
 
+    def __new__(cls, expr=None, **kwargs):
+        if expr is not None:
+            return DictSort(expr, **kwargs)
+        return super().__new__(cls)
+
     def __init__(self) -> None:
         pass
+
+    @property
+    def factory(self) -> TypeInfo:
+        empty = DictSort.make_empty(
+            key=types.int(expr=z3.IntVal(0)),
+            value=types.int(expr=z3.IntVal(0)),
+        )
+        return empty.factory
 
     @cached_property
     def item_sort(self):
@@ -192,7 +215,7 @@ class UntypedDictSort(DictSort):
 
     @methods.add(name='__setitem__', pure=False)
     def m_setitem(self, key: ProxySort, value: ProxySort, ctx: 'Context') -> 'DictSort':
-        dict_val = DictSort.make_empty(key, value, ctx=ctx)
+        dict_val = DictSort.make_empty(key, value)
         return dict_val.m_setitem(key=key, value=value, ctx=ctx)
 
     @methods.add(name='__getitem__', pure=False)

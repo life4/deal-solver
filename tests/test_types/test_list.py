@@ -80,10 +80,13 @@ from ..helpers import prove_f
 
     # different subtypes
     '[5][0] == 5',
+    '[5.1][0] == 5.1',
     '[[5]][0] == [5]',
     '[[]][0] == []',
     '[{5}][0] == {5}',
     '[set()][0] == set()',
+    '[{1: 2}][0] == {1: 2}',
+    '[{}][0] == {}',
 ])
 def test_expr_asserts_ok(check: str) -> None:
     assert eval(check)
