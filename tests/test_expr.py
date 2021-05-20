@@ -3,10 +3,8 @@ import math
 import hypothesis
 import hypothesis.strategies
 import pytest
-from z3 import Z3Exception
 
 from deal_solver import Conclusion
-from deal_solver._proxies import FloatSort
 
 from .helpers import prove_f
 
@@ -146,38 +144,6 @@ def test_asserts_ok(prefer_real: bool, check: str) -> None:
     text = text.format(check)
     theorem = prove_f(text)
     assert theorem.conclusion is Conclusion.OK
-
-
-@pytest.mark.parametrize('check', [
-    '8.0 // float("-inf") == -1.0',
-    '-8.0 // float("-inf") == 0.0',
-    '0.0 // float("inf") == 0.0',
-    'float("NaN") != 2.3',
-])
-def test_assert_ok_fp_only(check: str):
-    assert eval(check)
-    text = """
-        from typing import List
-        def f():
-            assert {}
-    """
-    text = text.format(check)
-
-    old_prefer_real = FloatSort.prefer_real
-    try:
-        FloatSort.prefer_real = False
-        theorem = prove_f(text)
-        assert theorem.conclusion is Conclusion.OK
-
-        FloatSort.prefer_real = True
-        try:
-            theorem = prove_f(text)
-        except Z3Exception:
-            pass
-        else:
-            assert theorem.conclusion in (Conclusion.SKIP, Conclusion.FAIL)
-    finally:
-        FloatSort.prefer_real = old_prefer_real
 
 
 @pytest.mark.parametrize('check', [
@@ -322,3 +288,27 @@ def test_fuzz_math_floats(left, right, op):
     text = text.format(expr=expr, expected=expected)
     theorem = prove_f(text)
     assert theorem.conclusion is Conclusion.OK
+
+
+VALUES = [
+    # regular concrete types
+    '""', '1', 'True',  # '3.4',
+    # empty generics
+    '[]',  '()',  'set()',  '{}',
+    # non-empty generic containers
+    '[1]', '(1, )', '{1}', '{1: 2}',
+]
+
+
+@pytest.mark.parametrize('left', VALUES)
+@pytest.mark.parametrize('right', VALUES)
+def test_equality(prefer_real: bool, left: str, right: str):
+    expr = f'{left} == {right}'
+    if not eval(expr):
+        expr = f'{left} != {right}'
+    assert eval(expr)
+    proof = prove_f(f"""
+        def f():
+            {expr}
+    """)
+    assert proof.conclusion == Conclusion.OK

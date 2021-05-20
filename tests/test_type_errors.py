@@ -148,8 +148,18 @@ def test_type_error__table(prefer_real, expr, err):
     assert proof.description == f'TypeError: {err}'
 
 
-@pytest.mark.parametrize('left', ['""', '[]', '()', 'set()', '1', '3.4', 'True'])
-@pytest.mark.parametrize('right', ['""', '[]', '()', 'set()', '1', '3.4', 'True'])
+VALUES = [
+    # regular concrete types
+    '""', '1', '3.4', 'True',
+    # empty generics
+    '[]', '()', 'set()', '{}',
+    # non-empty generic containers
+    '[1]', '(1, )', '{1}', '{1: 2}',
+]
+
+
+@pytest.mark.parametrize('left', VALUES)
+@pytest.mark.parametrize('right', VALUES)
 @pytest.mark.parametrize('op', [
     '+', '-', '*', '**', '/', '//', '%', '@',
     '|', '&', '^', '<<', '>>',

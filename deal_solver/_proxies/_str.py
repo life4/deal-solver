@@ -167,6 +167,12 @@ class StrSort(ProxySort):
     def m_neg(self, ctx: 'Context') -> 'StrSort':
         return self._bad_un_op(op='-', ctx=ctx)
 
+    @methods.add(name='__eq__')
+    def m_eq(self, other: ProxySort, ctx: 'Context') -> 'BoolSort':
+        if not isinstance(other, types.str):
+            return types.bool.val(False, ctx=ctx)
+        return types.bool(self.expr == other.expr)
+
     @methods.add(name='capitalize')
     @methods.add(name='casefold')
     @methods.add(name='center')

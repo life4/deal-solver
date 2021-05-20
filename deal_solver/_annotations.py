@@ -5,7 +5,7 @@ import astroid
 import z3
 
 from ._ast import get_full_name, get_name, infer
-from ._proxies import types, ProxySort, VarTupleSort
+from ._proxies import ProxySort, VarTupleSort, types
 from ._types import AstNode
 
 

@@ -116,3 +116,13 @@ class BoolSort(ProxySort):
     @methods.add(name='__inv__')
     def m_inv(self, ctx: 'Context') -> ProxySort:
         return self.m_int(ctx=ctx).m_inv(ctx=ctx)
+
+    @methods.add(name='__eq__')
+    def m_eq(self, other: ProxySort, ctx: 'Context') -> 'BoolSort':
+        if isinstance(other, types.int):
+            return other.m_eq(self.m_int(ctx=ctx), ctx=ctx)
+        if isinstance(other, types.float):
+            return other.m_eq(self.m_float(ctx=ctx), ctx=ctx)
+        if isinstance(other, types.bool):
+            return types.bool(self.expr == other.expr)
+        return types.bool.val(False, ctx=ctx)
