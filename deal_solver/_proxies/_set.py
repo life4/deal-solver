@@ -40,9 +40,10 @@ class SetSort(ProxySort):
         assert subtype
         expr = z3.Const(name=name, sort=z3.SetSort(subtype.sort()))
         ctx = Context.make_empty(get_contracts=None, z3_ctx=ctx)  # type: ignore
-        return cls(expr=expr, subtypes=(subtype.get_type_info(ctx=ctx), ))
+        return cls(expr=expr, subtypes=(subtype.factory, ))
 
-    def get_type_info(self, ctx: 'Context') -> TypeInfo:
+    @property
+    def factory(self) -> TypeInfo:
         sort = self.expr.domain()
         expr = self.make_empty_expr(sort)
         empty = self.evolve(expr=expr)
@@ -62,7 +63,7 @@ class SetSort(ProxySort):
         items = cls.make_empty_expr(sort=values[0].expr.sort())
         for value in values:
             items = z3.SetAdd(items, value.expr)
-        value_type = values[0].get_type_info(ctx=ctx)
+        value_type = values[0].factory
         return cls(expr=items, subtypes=(value_type,))
 
     @methods.add(name='add', pure=False)
@@ -246,11 +247,12 @@ class UntypedSetSort(SetSort):
     def __init__(self) -> None:
         pass
 
-    def get_type_info(self, ctx: 'Context') -> TypeInfo:
+    @property
+    def factory(self) -> TypeInfo:
         return TypeInfo(
             type=type(self),
             default=self,
-            subtypes=(types.int.get_type_info(ctx=ctx), ),
+            subtypes=(types.int.factory, ),
         )
 
     def evolve(self, **kwargs):
@@ -267,7 +269,7 @@ class UntypedSetSort(SetSort):
     @methods.add(name='add', pure=False)
     def r_add(self, item: ProxySort, ctx: 'Context') -> 'SetSort':
         expr = self.make_empty_expr(item.sort())
-        subtype = item.get_type_info(ctx=ctx)
+        subtype = item.factory
         result = SetSort(expr, subtypes=(subtype,))
         return result.r_add(item, ctx=ctx)
 

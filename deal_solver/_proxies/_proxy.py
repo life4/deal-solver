@@ -36,7 +36,8 @@ class ProxySort:
     def __init__(self, expr) -> None:
         raise NotImplementedError
 
-    def get_type_info(self, ctx: 'Context') -> TypeInfo:
+    @property
+    def factory(self) -> TypeInfo:
         raise NotImplementedError
 
     @classmethod

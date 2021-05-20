@@ -75,8 +75,8 @@ class DictSort(ProxySort):
         return cls(
             expr=z3.K(dom=key.sort(), v=item),
             subtypes=(
-                key.get_type_info(ctx=ctx),
-                value.get_type_info(ctx=ctx),
+                key.factory,
+                value.factory,
             ),
         )
 

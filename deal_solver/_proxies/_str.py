@@ -38,11 +38,12 @@ class StrSort(ProxySort):
     def val(val: str, ctx: 'Context') -> 'StrSort':
         return types.str(expr=z3.StringVal(val, ctx=ctx.z3_ctx))
 
-    @classmethod
-    def get_type_info(cls, ctx: 'Context') -> TypeInfo:
+    @property
+    def factory(self) -> TypeInfo:
+        cls = type(self)
         return TypeInfo(
             type=cls,
-            default=cls.val("", ctx=ctx),
+            default=cls(expr=z3.StringVal("", ctx=self.expr.ctx)),
             subtypes=(),
         )
 

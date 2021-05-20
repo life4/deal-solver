@@ -40,11 +40,12 @@ class BoolSort(ProxySort):
             ctx = ctx.z3_ctx
         return cls(expr=z3.BoolVal(x, ctx=ctx))
 
-    @classmethod
-    def get_type_info(cls, ctx: 'Context') -> TypeInfo:
+    @property
+    def factory(self) -> TypeInfo:
+        cls = type(self)
         return TypeInfo(
             type=cls,
-            default=cls.val(False, ctx=ctx),
+            default=cls(expr=z3.BoolVal(False, ctx=self.expr.ctx)),
             subtypes=(),
         )
 

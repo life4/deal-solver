@@ -42,7 +42,8 @@ class VarTupleSort(ProxySort):
         params.update(kwargs)
         return type(self)(**params)
 
-    def get_type_info(self, ctx: 'Context') -> TypeInfo:
+    @property
+    def factory(self) -> TypeInfo:
         sort = self.expr.sort().basis()
         expr = self.make_empty_expr(sort)
         empty = self.evolve(expr=expr)
@@ -58,7 +59,7 @@ class VarTupleSort(ProxySort):
         for value in values:
             item = z3.Unit(value.expr)
             items = z3.Concat(items, item)
-        value_type = values[0].get_type_info(ctx=ctx)
+        value_type = values[0].factory
         return cls(expr=items, subtypes=(value_type,))
 
     @staticmethod

@@ -37,11 +37,12 @@ class IntSort(ProxySort):
     def val(x: int, ctx: 'Context') -> 'IntSort':
         return types.int(expr=z3.IntVal(x, ctx=ctx.z3_ctx))
 
-    @classmethod
-    def get_type_info(cls, ctx: 'Context') -> TypeInfo:
+    @property
+    def factory(self) -> TypeInfo:
+        cls = type(self)
         return TypeInfo(
             type=cls,
-            default=cls.val(0, ctx=ctx),
+            default=cls(expr=z3.IntVal(0, ctx=self.expr.ctx)),
             subtypes=(),
         )
 

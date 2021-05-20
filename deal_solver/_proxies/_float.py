@@ -49,11 +49,16 @@ class FloatSort(ProxySort):
         )
         return cls(expr=expr)
 
-    @classmethod
-    def get_type_info(cls, ctx: 'Context') -> TypeInfo:
+    @property
+    def factory(self) -> TypeInfo:
+        cls = type(self)
+        if self.is_real:
+            default = z3.RealVal(.0, ctx=self.expr.ctx)
+        else:
+            default = z3.FPVal(.0, cls.sort(), ctx=self.expr.ctx)
         return TypeInfo(
             type=cls,
-            default=cls.val(0.0, ctx=ctx),
+            default=default,
             subtypes=(),
         )
 
