@@ -35,20 +35,16 @@ class DictSort(ProxySort):
         return type(self)(**params)
 
     @property
-    def key_type(self) -> TypeInfo:
-        return self.subtypes[0]
-
-    @property
-    def val_type(self) -> TypeInfo:
+    def _val_type(self) -> TypeInfo:
         return self.subtypes[1]
 
     @cached_property
     def item_sort(self):
-        item_sort = z3.Datatype(f'dict_val__{self.val_type.type_name}')
+        item_sort = z3.Datatype(f'dict_val__{self._val_type.type_name}')
         item_sort.declare(
             'new',
             ('exists', z3.BoolSort()),
-            ('value', self.val_type.sort),
+            ('value', self._val_type.sort),
         )
         return item_sort.create()
 
@@ -103,7 +99,7 @@ class DictSort(ProxySort):
         ))
 
         expr = self.item_sort.value(item)
-        return self.val_type.wrap(expr)
+        return self._val_type.wrap(expr)
 
     @methods.add(name='get')
     def r_get(self, key: ProxySort, default: ProxySort, *, ctx: 'Context') -> ProxySort:
@@ -113,7 +109,7 @@ class DictSort(ProxySort):
             self.item_sort.value(item),
             default.expr,
         )
-        return self.val_type.wrap(expr)
+        return self._val_type.wrap(expr)
 
     @methods.add(name='copy')
     def r_copy(self, ctx: 'Context') -> 'DictSort':
@@ -130,7 +126,7 @@ class DictSort(ProxySort):
         # get the value
         item = z3.Select(self.expr, key.expr)
         expr = self.item_sort.value(item)
-        result = self.val_type.wrap(expr)
+        result = self._val_type.wrap(expr)
 
         # remove the item
         expr = z3.Update(self.expr, key.expr, self.expr.default())

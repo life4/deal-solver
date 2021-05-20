@@ -2,7 +2,7 @@ import typing
 
 import z3
 
-from ._funcs import not_expr, random_name, wrap
+from ._funcs import not_expr, random_name
 from ._method import Mutation
 from ._proxy import ProxySort
 from ._registry import types
@@ -58,8 +58,7 @@ class SetSort(ProxySort):
 
     @classmethod
     def val(cls, values: typing.List[ProxySort], ctx: 'Context') -> 'SetSort':
-        if not values:
-            return UntypedSetSort()
+        assert values  # there is no literal for empty set
         items = cls.make_empty_expr(sort=values[0].expr.sort())
         for value in values:
             items = z3.SetAdd(items, value.expr)
@@ -228,10 +227,7 @@ class SetSort(ProxySort):
     def r_pop(self, ctx: 'Context') -> Mutation:
         # TODO: KeyError for empty set
         expr = z3.Const(random_name('set_item'), self.expr.domain())
-        if self.subtypes:
-            item = self.subtypes[0].wrap(expr)
-        else:
-            item = wrap(expr)
+        item = self.subtypes[0].wrap(expr)
         ctx.given.add(self.m_contains(item, ctx=ctx))
         return Mutation(
             new_value=self.evolve(expr=z3.SetDel(self.expr, item.expr)),
