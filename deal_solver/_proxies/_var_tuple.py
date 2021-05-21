@@ -106,9 +106,16 @@ class VarTupleSort(ProxySort):
 
     @methods.add(name='index')
     def r_index(self, other: ProxySort, start: ProxySort = None, *, ctx: 'Context') -> 'IntSort':
+        from .._context import ExceptionInfo
         if start is None:
             start = types.int(z3.IntVal(0))
         unit = z3.Unit(other.expr)
+        ctx.exceptions.add(ExceptionInfo(
+            name='ValueError',
+            names={'ValueError', 'Exception', 'BaseException'},
+            cond=types.bool(expr=z3.Not(z3.Contains(self.expr, unit))),
+            message='tuple.index(x): x not in tuple',
+        ))
         return types.int(expr=z3.IndexOf(self.expr, unit, start.expr))
 
     @methods.add(name='__len__')

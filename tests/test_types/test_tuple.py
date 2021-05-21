@@ -62,3 +62,23 @@ def test_expr_asserts_ok(check: str) -> None:
     text = text.format(check)
     theorem = prove_f(text)
     assert theorem.conclusion is Conclusion.OK
+
+
+@pytest.mark.parametrize('check, error', [
+    ('()[0]',           'IndexError: tuple index out of range'),
+    ('(1, 2)[6]',       'IndexError: tuple index out of range'),
+    ('().index(2)',     'ValueError: tuple.index(x): x not in tuple'),
+    ('(1,).index(2)',   'ValueError: tuple.index(x): x not in tuple'),
+])
+def test_expr_exception(check: str, error: str) -> None:
+    with pytest.raises(Exception):
+        eval(check)
+    text = """
+        from typing import List
+        def f():
+            {}
+    """
+    text = text.format(check)
+    theorem = prove_f(text)
+    assert theorem.conclusion is Conclusion.FAIL
+    assert theorem.description == error

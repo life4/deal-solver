@@ -36,14 +36,15 @@ def random_choice(seq, ctx: Context, **kwargs):
     return seq.m_getitem(index, ctx=ctx)
 
 
-@register('random.Random.random')
-def random_random(ctx: Context, **kwargs):
-    zero = types.float.val(0, ctx=ctx)
-    one = types.float.val(1, ctx=ctx)
-    result = types.float(z3.Const(
-        name=random_name('random'),
-        sort=types.float.sort(),
-    ))
-    ctx.given.add(result.m_ge(zero, ctx=ctx))
-    ctx.given.add(result.m_le(one, ctx=ctx))
-    return result
+# TODO: https://github.com/PyCQA/astroid/issues/991
+# @register('random.Random.random')
+# def random_random(ctx: Context, **kwargs):
+#     zero = types.float.val(0, ctx=ctx)
+#     one = types.float.val(1, ctx=ctx)
+#     result = types.float(z3.Const(
+#         name=random_name('random'),
+#         sort=types.float.sort(),
+#     ))
+#     ctx.given.add(result.m_ge(zero, ctx=ctx))
+#     ctx.given.add(result.m_le(one, ctx=ctx))
+#     return result
