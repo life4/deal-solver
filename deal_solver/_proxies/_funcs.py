@@ -18,10 +18,7 @@ T = typing.TypeVar('T', bound='ProxySort')
 
 def wrap(expr) -> 'ProxySort':
     from ._float import FPSort, RealSort
-    from ._proxy import ProxySort
 
-    if isinstance(expr, ProxySort):
-        return expr
     if z3.is_bool(expr):
         return types.bool(expr=expr)
     if z3.is_string(expr):

@@ -90,12 +90,12 @@ class VarTupleSort(ProxySort):
     def get_slice(self, start: ProxySort, stop: ProxySort, ctx: 'Context') -> ProxySort:
         start_expr = start.expr
         stop_expr = stop.expr
-        proxy = type(self)
-        return proxy(z3.SubSeq(
+        expr = z3.SubSeq(
             s=self.expr,
             offset=start_expr,
             length=stop_expr - start_expr,
-        ))
+        )
+        return self.evolve(expr=expr)
 
     @methods.add(name='__contains__')
     def m_contains(self, item: ProxySort, ctx: 'Context') -> 'BoolSort':
@@ -194,6 +194,17 @@ class UntypedVarTupleSort(VarTupleSort):
 
     def __init__(self) -> None:
         pass
+
+    @property
+    def factory(self) -> TypeFactory:
+        sort = self.expr.sort().basis()
+        expr = self.make_empty_expr(sort)
+        empty = self.evolve(expr=expr)
+        return TypeFactory(
+            type=type(self),
+            default=empty,
+            subtypes=(types.int.factory,),
+        )
 
     @staticmethod
     def sort() -> z3.SeqSortRef:

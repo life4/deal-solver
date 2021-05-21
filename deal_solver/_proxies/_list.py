@@ -6,6 +6,7 @@ from .._exceptions import UnsupportedError
 from ._proxy import ProxySort
 from ._registry import types
 from ._var_tuple import VarTupleSort
+from ._type_factory import TypeFactory
 
 
 if typing.TYPE_CHECKING:
@@ -67,6 +68,17 @@ class UntypedListSort(ListSort):
 
     def __init__(self) -> None:
         pass
+
+    @property
+    def factory(self) -> TypeFactory:
+        sort = self.expr.sort().basis()
+        expr = self.make_empty_expr(sort)
+        empty = self.evolve(expr=expr)
+        return TypeFactory(
+            type=type(self),
+            default=empty,
+            subtypes=(types.int.factory,),
+        )
 
     @staticmethod
     def sort() -> z3.SeqSortRef:
