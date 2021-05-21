@@ -1,3 +1,4 @@
+import math
 import pytest
 from z3 import Z3Exception
 
@@ -88,3 +89,31 @@ def test_assert_ok_fp_only(check: str):
             assert theorem.conclusion in (Conclusion.SKIP, Conclusion.FAIL)
     finally:
         FloatSort.prefer_real = old_prefer_real
+
+
+VALUES = ['1.0', '1.1', 'float("nan")', '0.0', '-1.0', '-1.1']
+
+
+@pytest.mark.parametrize('left', VALUES)
+@pytest.mark.parametrize('right', VALUES + ['True', '1'])
+@pytest.mark.parametrize('op', [
+    '+', '-', '*', '%', '/', '//',
+    '==', '<=', '<', '>=', '>', '!=',
+])
+def test_operations(prefer_real: bool, left: str, right: str, op: str):
+    expr = f'{left} {op} {right}'
+    try:
+        result = eval(expr)
+    except ZeroDivisionError:
+        return
+    if repr(result) == 'nan':
+        expr = f'math.isnan({expr})'
+    else:
+        expr = f'({expr}) == {result}'
+    assert eval(expr, dict(math=math))
+    proof = prove_f(f"""
+        import math
+        def f():
+            {expr}
+    """)
+    assert proof.conclusion == Conclusion.OK

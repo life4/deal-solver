@@ -117,7 +117,7 @@ class FloatSort(ProxySort):
         return self._math_op(other=other, handler=operator.__pow__, ctx=ctx)
 
     @methods.add(name='__floordiv__')
-    def m_floordiv(self, other: ProxySort, ctx: 'Context') -> 'FloatSort':
+    def m_floordiv(self, other: ProxySort, ctx: 'Context') -> 'ProxySort':
         if isinstance(other, types.bool):
             other = other.m_int(ctx=ctx)
         if not isinstance(other, (types.float, types.int)):
@@ -129,7 +129,12 @@ class FloatSort(ProxySort):
             other = other.m_fp(ctx=ctx)
         zero = self.val(0.0)
         minus_one = self.val(-1.0)
-        result = self.m_truediv(other, ctx=ctx).m_int(ctx=ctx).m_fp(ctx=ctx)
+        result: ProxySort
+        result = self.m_truediv(other, ctx=ctx).m_int(ctx=ctx)
+        if self.is_fp:
+            result = result.m_fp(ctx=ctx)
+        else:
+            result = result.m_real(ctx=ctx)
         if other.is_fp:
             result = switch(
                 (types.bool(z3.Not(z3.fpIsInf(other.expr))), result),
@@ -174,14 +179,6 @@ class FloatSort(ProxySort):
         if not isinstance(other, (types.float, types.int)):
             return self._bad_bin_op(other, op='-', ctx=ctx)
         return self._math_op(other=other, handler=operator.__sub__, ctx=ctx)
-
-    @methods.add(name='__mod__')
-    def m_mod(self, other: ProxySort, ctx: 'Context') -> ProxySort:
-        if isinstance(other, types.bool):
-            other = other.m_int(ctx=ctx)
-        if not isinstance(other, (types.float, types.int)):
-            return self._bad_bin_op(other, op='%', ctx=ctx)
-        return self._math_op(other=other, handler=operator.__mod__, ctx=ctx)
 
     @methods.add(name='imag', prop=True)
     def m_imag(self, ctx: 'Context') -> 'FloatSort':
@@ -267,6 +264,8 @@ class RealSort(FloatSort):
 
     @methods.add(name='__mod__')
     def m_mod(self, other: ProxySort, ctx: 'Context') -> ProxySort:
+        if isinstance(other, types.bool):
+            other = other.m_int(ctx=ctx)
         if isinstance(other, types.float):
             return self.m_fp(ctx=ctx).m_mod(other.m_fp(ctx=ctx), ctx=ctx)
         if isinstance(other, types.int):
@@ -354,3 +353,12 @@ class FPSort(FloatSort):
         if self.prefer_real:
             return RealSort(expr=self.m_real(ctx=ctx).expr / other.m_real(ctx=ctx).expr)
         return type(self)(expr=self.expr / other.m_fp(ctx=ctx).expr)
+
+    @methods.add(name='__mod__')
+    def m_mod(self, other: ProxySort, ctx: 'Context') -> ProxySort:
+        if isinstance(other, types.bool):
+            other = other.m_int(ctx=ctx)
+        if not isinstance(other, (types.float, types.int)):
+            return self._bad_bin_op(other, op='%', ctx=ctx)
+        expr = self.expr % other.m_fp(ctx=ctx).expr
+        return type(self)(expr=expr)
