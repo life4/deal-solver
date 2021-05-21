@@ -50,8 +50,7 @@ def _eval_pre(ctx: Context, args: list) -> typing.Optional[BoolSort]:
     contract = args[0]
     if not isinstance(contract, astroid.Lambda):
         return None
-    if not contract.args:
-        return None
+    assert contract.args
     return eval_expr(node=contract.body, ctx=ctx).m_bool(ctx=ctx)
 
 
@@ -59,8 +58,7 @@ def _eval_post(ctx: Context, args: list) -> typing.Iterator[BoolSort]:
     contract = args[0]
     if not isinstance(contract, astroid.Lambda):
         return
-    if not contract.args:
-        return
+    assert contract.args
     cargs = contract.args.arguments
     for ret in ctx.returns:
         ctx = ctx.evolve(scope=Scope.make_empty())
@@ -69,7 +67,7 @@ def _eval_post(ctx: Context, args: list) -> typing.Iterator[BoolSort]:
             value=ret.value,
         )
         # The contract is valid if the return value is not reached
-        # or it passed the pos-condition test.
+        # or it passed the post-condition test.
         yield or_expr(
             not_expr(ret.cond, ctx=ctx),
             eval_expr(node=contract.body, ctx=ctx),

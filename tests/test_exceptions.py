@@ -197,3 +197,12 @@ def test_raise_not_shadow_return():
             return 123
     """)
     assert theorem.conclusion is Conclusion.OK
+
+
+def test_ignore_invalid():
+    theorem = prove_f("""
+        @deal.raises(lambda:0)
+        def f():
+            assert True
+    """)
+    assert theorem.conclusion is Conclusion.OK

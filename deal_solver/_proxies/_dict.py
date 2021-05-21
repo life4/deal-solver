@@ -81,7 +81,7 @@ class DictSort(ProxySort):
             ('value', value.sort()),
         )
         item_sort = item_sort.create()
-        item = item_sort.new(z3.BoolVal(False), value.expr)
+        item = item_sort.new(z3.BoolVal(False), value.factory.default.expr)
         return cls(
             expr=z3.K(dom=key.sort(), v=item),
             subtypes=(
