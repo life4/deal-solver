@@ -1,6 +1,7 @@
 import pytest
 
 from deal_solver import Theorem
+from deal_solver._cached_property import cached_property
 
 from .helpers import prove_f
 
@@ -48,3 +49,7 @@ def test_ignore_method():
 def test_proof_str(expr, expected):
     proof = prove_f(expr)
     assert str(proof) == expected
+
+
+def test_cached_property():
+    assert type(Theorem.arguments) is cached_property

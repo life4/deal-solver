@@ -41,3 +41,22 @@ def test_pre_assert_conflict_prefer_assert():
     """)
     assert proof.conclusion is Conclusion.FAIL
     assert str(proof.example) == 'a=6'
+
+
+def test_pre_cannot_resolve():
+    theorem = prove_f("""
+        @deal.pre(unknown)
+        @deal.pre(lambda a: a > 5)
+        def f(a: int) -> int:
+            assert a > 3
+    """)
+    assert theorem.conclusion is Conclusion.OK
+
+
+def test_pre_ignore_empty():
+    theorem = prove_f("""
+        @deal.pre(lambda: True)
+        def f() -> int:
+            assert True
+    """)
+    assert theorem.conclusion is Conclusion.OK

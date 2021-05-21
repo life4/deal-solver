@@ -80,3 +80,22 @@ def test_post_condition_branching_many_branches():
             return -a
     """)
     assert theorem.conclusion is Conclusion.OK
+
+
+def test_post_cannot_resolve():
+    theorem = prove_f("""
+        @deal.post(unknown)
+        @deal.post(lambda a: a >= 0)
+        def f(a: int) -> int:
+            return a * a
+    """)
+    assert theorem.conclusion is Conclusion.OK
+
+
+def test_post_ignore_empty():
+    theorem = prove_f("""
+        @deal.post(lambda: False)
+        def f() -> int:
+            assert True
+    """)
+    assert theorem.conclusion is Conclusion.OK
