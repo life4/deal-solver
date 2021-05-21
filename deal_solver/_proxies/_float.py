@@ -198,6 +198,24 @@ class FloatSort(ProxySort):
         msg = 'unsupported attribute for type {}'.format(self.type_name)
         raise UnsupportedError(msg)
 
+    @methods.add(name='__eq__')
+    def m_eq(self, other: ProxySort, ctx: 'Context') -> 'BoolSort':
+        if isinstance(other, (types.int, types.bool, types.float)):
+            if self.is_real:
+                other = other.m_real(ctx=ctx)
+            else:
+                other = other.m_fp(ctx=ctx)
+        if not isinstance(other, types.float):
+            return types.bool.val(False, ctx=ctx)
+        if self.is_real and other.is_real:
+            expr = self.m_real(ctx=ctx).expr == other.m_real(ctx=ctx).expr
+            return types.bool(expr=expr)
+        expr = z3.fpEQ(
+            self.m_fp(ctx=ctx).expr,
+            other.m_fp(ctx=ctx).expr,
+        )
+        return types.bool(expr=expr)
+
 
 class RealSort(FloatSort):
     methods = FloatSort.methods.copy()

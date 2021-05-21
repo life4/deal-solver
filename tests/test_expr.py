@@ -292,7 +292,7 @@ def test_fuzz_math_floats(left, right, op):
 
 VALUES = [
     # regular concrete types
-    '""', '1', 'True',  # '3.4',
+    '""', '1', 'True',  '3.4',
     # empty generics
     '[]',  '()',  'set()',  '{}',
     # non-empty generic containers

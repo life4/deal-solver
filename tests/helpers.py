@@ -24,6 +24,6 @@ def prove_f(text: str, **kwargs) -> Proof:
     theorems = list(TestTheorem.from_text(text, **kwargs))
     theorem = theorems[-1]
     assert theorem.name == 'f'
-    result = theorem.prove()
-    print(repr(result))
-    return result
+    proof = theorem.prove()
+    print(repr(proof))
+    return proof
