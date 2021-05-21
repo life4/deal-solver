@@ -91,7 +91,7 @@ def test_assert_ok_fp_only(check: str):
         FloatSort.prefer_real = old_prefer_real
 
 
-VALUES = ['1.0', '1.1', 'float("nan")', '0.0', '-1.0', '-1.1']
+VALUES = ['1.0', '1.1', 'float("nan")', '0.0', '-1.0', '-1.1', '(5/2)']
 
 
 @pytest.mark.parametrize('left', VALUES)

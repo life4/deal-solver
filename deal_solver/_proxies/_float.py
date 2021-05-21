@@ -19,8 +19,6 @@ if typing.TYPE_CHECKING:
 
 
 FP_HANDLERS = {
-    operator.__eq__: z3.fpEQ,
-    operator.__ne__: z3.fpNEQ,
     operator.__gt__: z3.fpGT,
     operator.__ge__: z3.fpGEQ,
     operator.__lt__: z3.fpLT,
@@ -254,7 +252,7 @@ class RealSort(FloatSort):
         return types.bool.val(False)
 
     def _binary_op(self, other: ProxySort, handler: typing.Callable, ctx: 'Context'):
-        if isinstance(other, types.int):
+        if isinstance(other, (types.int, types.bool)):
             return handler(self.expr, other.m_real(ctx=ctx).expr)
         if other.is_real:
             return handler(self.expr, other.expr)
