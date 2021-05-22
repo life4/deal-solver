@@ -2,7 +2,7 @@ from ._bool import BoolSort
 from ._dict import DictSort, UntypedDictSort
 from ._float import FloatSort
 from ._func import FuncSort
-from ._funcs import and_expr, if_expr, not_expr, or_expr, random_name, wrap
+from ._funcs import and_expr, if_expr, not_expr, or_expr, random_name
 from ._int import IntSort
 from ._lambda import LambdaSort
 from ._list import ListSort, UntypedListSort
@@ -20,7 +20,6 @@ __all__ = [
     # funcs
     'if_expr',
     'random_name',
-    'wrap',
     'and_expr',
     'or_expr',
     'not_expr',

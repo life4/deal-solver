@@ -16,24 +16,6 @@ if typing.TYPE_CHECKING:
 T = typing.TypeVar('T', bound='ProxySort')
 
 
-def wrap(expr) -> 'ProxySort':
-    from ._float import FPSort, RealSort
-
-    if z3.is_bool(expr):
-        return types.bool(expr=expr)
-    if z3.is_string(expr):
-        return types.str(expr=expr)
-    if z3.is_seq(expr):
-        return types.list(expr=expr)
-    if z3.is_fp(expr):
-        return FPSort.wrap(expr)
-    if z3.is_real(expr):
-        return RealSort.wrap(expr=expr)
-    if z3.is_int(expr):
-        return types.int(expr=expr)
-    return expr
-
-
 def if_expr(
     test: 'ProxySort',
     val_then: T,

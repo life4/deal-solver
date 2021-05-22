@@ -218,7 +218,7 @@ class SetSort(ProxySort):
                 # z3.IndexOf(expr, z3.Unit(x), 0) == z3.LastIndexOf(expr, z3.Unit(x)),
             )),
         ))
-        return types.list(expr=expr)
+        return types.list(expr=expr, subtypes=self.subtypes)
 
     @methods.add(name='__len__')
     def m_len(self, ctx: 'Context') -> 'IntSort':

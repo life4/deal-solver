@@ -3,7 +3,7 @@ import typing
 import z3
 
 from .._exceptions import UnsupportedError
-from ._funcs import random_name, wrap
+from ._funcs import random_name
 from ._proxy import ProxySort
 from ._registry import types
 from ._type_factory import TypeFactory
@@ -27,11 +27,17 @@ class VarTupleSort(ProxySort):
     subtypes: typing.Tuple[TypeFactory, ...]
 
     def __init__(self, expr, subtypes=()) -> None:
-        assert len(subtypes) <= 1
+        assert len(subtypes) == 1
         assert z3.is_seq(expr)
         assert not z3.is_string(expr)
         self.expr = expr
         self.subtypes = subtypes
+
+    @classmethod
+    def var(cls: typing.Type[T], subtype: ProxySort = None, *, name: str, ctx: z3.Context) -> T:
+        assert subtype
+        expr = z3.Const(name=name, sort=z3.SeqSort(subtype.sort()))
+        return cls(expr=expr, subtypes=(subtype.factory, ))
 
     def sort(self) -> z3.SeqSortRef:
         return self.expr.sort()
@@ -80,11 +86,7 @@ class VarTupleSort(ProxySort):
             message='{} index out of range'.format(self.type_name),
         ))
         expr = self.expr[index.expr]
-        if self.subtypes:
-            item = self.subtypes[0].wrap(expr)
-        else:
-            item = wrap(expr)
-        return item
+        return self.subtypes[0].wrap(expr)
 
     def get_slice(self, start: ProxySort, stop: ProxySort, ctx: 'Context') -> ProxySort:
         start_expr = start.expr
@@ -184,7 +186,6 @@ class VarTupleSort(ProxySort):
 
 class UntypedVarTupleSort(VarTupleSort):
     methods = VarTupleSort.methods.copy()
-    subtypes = ()
 
     def __new__(cls, expr=None, **kwargs):
         if expr is not None:
@@ -193,6 +194,10 @@ class UntypedVarTupleSort(VarTupleSort):
 
     def __init__(self) -> None:
         pass
+
+    @property
+    def subtypes(self):
+        return (types.int.factory,)
 
     @property
     def factory(self) -> TypeFactory:

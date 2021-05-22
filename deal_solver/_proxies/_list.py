@@ -21,12 +21,6 @@ class ListSort(VarTupleSort):
     type_name = 'list'
     methods = VarTupleSort.methods.copy()
 
-    @classmethod
-    def var(cls, subtype: ProxySort = None, *, name: str, ctx: z3.Context) -> 'ListSort':
-        assert subtype
-        expr = z3.Const(name=name, sort=z3.SeqSort(subtype.sort()))
-        return cls(expr=expr)
-
     @methods.add(name='copy')
     def m_copy(self, ctx: 'Context') -> 'ListSort':
         return self
@@ -39,9 +33,8 @@ class ListSort(VarTupleSort):
 
     @methods.add(name='append', pure=False)
     def r_append(self, item: ProxySort, ctx: 'Context') -> 'ListSort':
-        cls = type(self)
         unit = z3.Unit(item.expr)
-        return cls(expr=self.expr + unit)
+        return self.evolve(expr=self.expr + unit)
 
     @methods.add(name='extend', pure=False)
     def r_extend(self, other: ProxySort, ctx: 'Context') -> ProxySort:
@@ -59,7 +52,6 @@ class ListSort(VarTupleSort):
 
 class UntypedListSort(ListSort):
     methods = ListSort.methods.copy()
-    subtypes = ()
 
     def __new__(cls, expr=None, **kwargs):
         if expr is not None:
@@ -68,6 +60,10 @@ class UntypedListSort(ListSort):
 
     def __init__(self) -> None:
         pass
+
+    @property
+    def subtypes(self):
+        return (types.int.factory,)
 
     @property
     def factory(self) -> TypeFactory:

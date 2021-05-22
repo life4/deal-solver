@@ -199,7 +199,8 @@ def _compr_apply_ifs(
         if_body,
         f(index - one) + if_body,
     ))
-    return types.list(f(z3.Length(items.expr) - one))
+    expr = f(z3.Length(items.expr) - one)
+    return types.list(expr=expr, subtypes=items.subtypes)
 
 
 def _compr_apply_body(
@@ -229,7 +230,8 @@ def _compr_apply_body(
         z3.Unit(body_ref),
         f(index - one) + z3.Unit(body_ref),
     ))
-    return types.list(f(z3.Length(items.expr) - one))
+    expr = f(z3.Length(items.expr) - one)
+    return types.list(expr=expr, subtypes=items.subtypes)
 
 
 @eval_expr.register(astroid.Subscript)

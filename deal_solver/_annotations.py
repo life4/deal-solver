@@ -100,8 +100,7 @@ def _sort_from_getattr(*, name: str, node: astroid.Subscript, ctx: z3.Context) -
             subtype = ann2type(name=name, node=nodes[0], ctx=ctx)
             if subtype is None:
                 return None
-            sort = z3.SeqSort(subtype.sort())
-            return VarTupleSort(expr=z3.Const(name=name, sort=sort))
+            return VarTupleSort.var(subtype, name=name, ctx=ctx)
         return None
 
     generic = GENERICS.get(type_name)
