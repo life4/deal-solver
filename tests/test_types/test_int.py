@@ -108,3 +108,24 @@ def test_fuzz_math_int(left, right, op):
     text = text.format(expr=expr, expected=expected)
     theorem = prove_f(text)
     assert theorem.conclusion is Conclusion.OK
+
+
+@pytest.mark.parametrize('left', ['1', '0', '-1'])
+@pytest.mark.parametrize('right', ['1', '0', '-1', 'True', '1.0', '(5/2)'])
+@pytest.mark.parametrize('op', [
+    '+', '-', '*', '%', '/', '//',
+    '==', '<=', '<', '>=', '>', '!=',
+])
+def test_operations(left: str, right: str, op: str):
+    expr = f'{left} {op} {right}'
+    try:
+        result = eval(expr)
+    except ZeroDivisionError:
+        return
+    expr = f'({expr}) == {result}'
+    assert eval(expr)
+    proof = prove_f(f"""
+        def f():
+            {expr}
+    """)
+    assert proof.conclusion == Conclusion.OK

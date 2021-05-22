@@ -76,14 +76,6 @@ class FloatSort(ProxySort):
             return RealSort.val(x, ctx=ctx)
         return FPSort.val(x, ctx=ctx)
 
-    @classmethod
-    def wrap(cls, expr) -> 'FloatSort':
-        if z3.is_real(expr):
-            return RealSort(expr=expr)
-        if z3.is_fp(expr):
-            return FPSort(expr=expr)
-        raise RuntimeError('unreachable')  # pragma: no cover
-
     @methods.add(name='__float__')
     @methods.add(name='conjugate')
     @methods.add(name='real', prop=True)

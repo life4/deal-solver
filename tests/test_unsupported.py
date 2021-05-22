@@ -43,6 +43,7 @@ def test_timeout():
     ('None',                'unsupported constant None'),
     ('2+3j',                'unsupported constant 3j'),
     ('"ab" * 3',            'cannot multiply str'),
+    ('3 * "ab"',            'cannot multiply str'),
     ('[1] * 3',             'cannot multiply list'),
     ('[1,2,3,4][::2]',      'slice step is not supported'),
     ('str(12.34)',          'cannot convert float to str'),
