@@ -1,5 +1,7 @@
 import math
 import pytest
+import hypothesis
+import hypothesis.strategies
 from z3 import Z3Exception
 
 from deal_solver import Conclusion
@@ -89,6 +91,63 @@ def test_assert_ok_fp_only(check: str):
             assert theorem.conclusion in (Conclusion.SKIP, Conclusion.FAIL)
     finally:
         FloatSort.prefer_real = old_prefer_real
+
+
+@pytest.mark.parametrize('expr', [
+    '1.2 + 3.4',
+    '1.2 - 3.4',
+    '1.2 * 3.4',
+    '1.2 // 3.4',
+    '1.2 / 3.4',
+    '4.3 % 2.1',
+    '3.5 + 3',
+    '3.5 - 3',
+    '3.5 * 3',
+    '3.5 / 3',
+    '3.5 // 3',
+    '3.5 % 3',
+])
+def test_float(prefer_real: bool, expr: str):
+    expected = eval(expr)
+    theorem = prove_f(f"""
+        import math
+        def f():
+            assert math.isclose({expr}, {expected})
+    """)
+    assert theorem.conclusion is Conclusion.OK
+
+
+float_strategy = hypothesis.strategies.one_of(
+    hypothesis.strategies.floats(min_value=.005),
+    hypothesis.strategies.floats(max_value=-.005),
+)
+
+
+@hypothesis.settings(report_multiple_bugs=False)
+@hypothesis.given(
+    left=float_strategy,
+    right=float_strategy,
+    op=hypothesis.strategies.sampled_from([
+        '+', '-', '*', '/', '//',
+        '==', '!=', '<=', '<', '>=', '>',
+    ]),
+)
+def test_fuzz_math_floats(left, right, op):
+    expr = '{l} {op} {r}'.format(l=left, op=op, r=right)
+    expected = eval(expr, {'inf': math.inf})
+    if math.isinf(expected):
+        hypothesis.reject()
+
+    text = """
+        import math
+        def f():
+            inf = float('inf')
+            nan = float('nan')
+            assert math.isclose({expr}, {expected})
+    """
+    text = text.format(expr=expr, expected=expected)
+    theorem = prove_f(text)
+    assert theorem.conclusion is Conclusion.OK
 
 
 VALUES = ['1.0', '1.1', 'float("nan")', '0.0', '-1.0', '-1.1', '(5/2)']

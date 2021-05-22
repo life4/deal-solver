@@ -1,7 +1,3 @@
-import math
-
-import hypothesis
-import hypothesis.strategies
 import pytest
 
 from deal_solver import Conclusion
@@ -203,90 +199,6 @@ def test_lambda_untyped():
             assert a(3) == 6
             assert a("ab") == "abab"
     """)
-    assert theorem.conclusion is Conclusion.OK
-
-
-@pytest.mark.parametrize('expr', [
-    '1.2 + 3.4',
-    '1.2 - 3.4',
-    '1.2 * 3.4',
-    '1.2 // 3.4',
-    '1.2 / 3.4',
-    '4.3 % 2.1',
-    '3.5 + 3',
-    '3.5 - 3',
-    '3.5 * 3',
-    '3.5 / 3',
-    '3.5 // 3',
-    '3.5 % 3',
-])
-def test_float(prefer_real: bool, expr: str):
-    expected = eval(expr)
-    theorem = prove_f(f"""
-        import math
-        def f():
-            assert math.isclose({expr}, {expected})
-    """)
-    assert theorem.conclusion is Conclusion.OK
-
-
-@hypothesis.settings(report_multiple_bugs=False)
-@hypothesis.given(
-    left=hypothesis.strategies.integers(),
-    right=hypothesis.strategies.integers(),
-    op=hypothesis.strategies.sampled_from([
-        '+', '-', '*', '/', '%', '//',
-        '<', '<=', '==', '!=', '>=', '>',
-    ]),
-)
-def test_fuzz_math_int(left, right, op):
-    expr = '{l} {op} {r}'.format(l=left, op=op, r=right)
-    expected = 0
-    try:
-        expected = eval(expr)
-    except ZeroDivisionError:
-        hypothesis.reject()
-
-    text = """
-        import math
-        def f():
-            assert math.isclose({expr}, {expected})
-    """
-    text = text.format(expr=expr, expected=expected)
-    theorem = prove_f(text)
-    assert theorem.conclusion is Conclusion.OK
-
-
-float_strategy = hypothesis.strategies.one_of(
-    hypothesis.strategies.floats(min_value=.005),
-    hypothesis.strategies.floats(max_value=-.005),
-)
-
-
-@hypothesis.settings(report_multiple_bugs=False)
-@hypothesis.given(
-    left=float_strategy,
-    right=float_strategy,
-    op=hypothesis.strategies.sampled_from([
-        '+', '-', '*', '/', '//',
-        '==', '!=', '<=', '<', '>=', '>',
-    ]),
-)
-def test_fuzz_math_floats(left, right, op):
-    expr = '{l} {op} {r}'.format(l=left, op=op, r=right)
-    expected = eval(expr, {'inf': math.inf})
-    if math.isinf(expected):
-        hypothesis.reject()
-
-    text = """
-        import math
-        def f():
-            inf = float('inf')
-            nan = float('nan')
-            assert math.isclose({expr}, {expected})
-    """
-    text = text.format(expr=expr, expected=expected)
-    theorem = prove_f(text)
     assert theorem.conclusion is Conclusion.OK
 
 

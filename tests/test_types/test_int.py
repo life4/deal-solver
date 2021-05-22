@@ -1,4 +1,6 @@
 import pytest
+import hypothesis
+import hypothesis.strategies
 
 from deal_solver import Conclusion
 
@@ -77,5 +79,32 @@ def test_expr_asserts_ok(check: str) -> None:
             assert {}
     """
     text = text.format(check)
+    theorem = prove_f(text)
+    assert theorem.conclusion is Conclusion.OK
+
+
+@hypothesis.settings(report_multiple_bugs=False)
+@hypothesis.given(
+    left=hypothesis.strategies.integers(),
+    right=hypothesis.strategies.integers(),
+    op=hypothesis.strategies.sampled_from([
+        '+', '-', '*', '/', '%', '//',
+        '<', '<=', '==', '!=', '>=', '>',
+    ]),
+)
+def test_fuzz_math_int(left, right, op):
+    expr = '{l} {op} {r}'.format(l=left, op=op, r=right)
+    expected = 0
+    try:
+        expected = eval(expr)
+    except ZeroDivisionError:
+        hypothesis.reject()
+
+    text = """
+        import math
+        def f():
+            assert math.isclose({expr}, {expected})
+    """
+    text = text.format(expr=expr, expected=expected)
     theorem = prove_f(text)
     assert theorem.conclusion is Conclusion.OK
