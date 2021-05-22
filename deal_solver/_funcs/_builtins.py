@@ -4,7 +4,7 @@ from .._context import Context, ExceptionInfo
 from .._exceptions import UnsupportedError
 from .._proxies import (
     IntSort, ProxySort, StrSort, UntypedDictSort, UntypedListSort,
-    UntypedSetSort, if_expr, random_name, types, wrap,
+    UntypedSetSort, if_expr, random_name, types,
 )
 from ._registry import register
 
@@ -32,7 +32,7 @@ def builtins_sum(items: ProxySort, ctx: Context, **kwargs) -> ProxySort:
         items.expr[i] + f(i - one),
     ))
     result = f(items.m_len(ctx=ctx).expr - one)
-    return wrap(result)
+    return items.subtypes[0].wrap(result)
 
 
 # TODO: support more than 2 explicit arguments.
@@ -63,7 +63,7 @@ def builtins_min(a: ProxySort, b: ProxySort = None, *, ctx: Context, **kwargs) -
         ),
     ))
     result = f(z3.Length(items) - one)
-    return wrap(result)
+    return a.subtypes[0].wrap(result)
 
 
 @register('builtins.max')
@@ -94,7 +94,7 @@ def builtins_max(a: ProxySort, b: ProxySort = None, *, ctx: Context, **kwargs) -
         ctx=ctx.z3_ctx,
     ))
     result = f(z3.Length(items) - one)
-    return wrap(result)
+    return a.subtypes[0].wrap(result)
 
 
 @register('builtins.ord')

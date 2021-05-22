@@ -84,7 +84,10 @@ class IntSort(ProxySort):
         as_float = isinstance(other, types.float)
         if as_float:
             other = other.m_int(ctx=ctx)
-        result = super()._math_op(other=other, handler=handler, ctx=ctx)
+        expr = self._binary_op(other=other, handler=handler, ctx=ctx)
+        if not z3.is_int(expr):
+            return types.float(expr=expr)
+        result = types.int(expr=expr)
         if as_float:
             return result.m_float(ctx=ctx)
         return result

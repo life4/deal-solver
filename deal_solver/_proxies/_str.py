@@ -1,4 +1,3 @@
-import operator
 import typing
 
 import z3
@@ -138,7 +137,7 @@ class StrSort(ProxySort):
             msg = msg.format(other.type_name, self.type_name)
             ctx.add_exception(TypeError, msg)
             return self
-        return self._math_op(other=other, handler=operator.__add__, ctx=ctx)
+        return types.str(self.expr + other.expr)
 
     @methods.add(name='__mul__')
     def m_mul(self, other: ProxySort, ctx: 'Context') -> ProxySort:

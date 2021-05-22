@@ -49,6 +49,7 @@ def test_timeout():
     ('min([], default=13)', 'keyword function arguments are unsupported'),
     ('[1 for i in "12" for j in "34"]', 'to many loops inside list compr'),
     ('a, b = 3, 4',         'cannot assign to Tuple'),
+    ('str([1.2])',          'cannot convert list to str'),
 
     ('[1 for i in {1}]',    'cannot iterate over set'),
     ('[1 for i in {1} if 1]', 'cannot iterate over set'),

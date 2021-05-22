@@ -112,7 +112,8 @@ class FloatSort(ProxySort):
             other = other.m_int(ctx=ctx)
         if not isinstance(other, (types.int, types.float)):
             return self._bad_bin_op(other, op='** or pow()', ctx=ctx)
-        return self._math_op(other=other, handler=operator.__pow__, ctx=ctx)
+        expr = self._binary_op(other=other, handler=operator.__pow__, ctx=ctx)
+        return types.float(expr)
 
     @methods.add(name='__floordiv__')
     def m_floordiv(self, other: ProxySort, ctx: 'Context') -> 'ProxySort':
@@ -160,7 +161,8 @@ class FloatSort(ProxySort):
             other = other.m_int(ctx=ctx)
         if not isinstance(other, (types.float, types.int)):
             return self._bad_bin_op(other, op='*', ctx=ctx)
-        return self._math_op(other=other, handler=operator.__mul__, ctx=ctx)  # type: ignore
+        expr = self._binary_op(other=other, handler=operator.__mul__, ctx=ctx)
+        return types.float(expr)
 
     @methods.add(name='__add__')
     def m_add(self, other: ProxySort, ctx: 'Context') -> ProxySort:
@@ -168,7 +170,8 @@ class FloatSort(ProxySort):
             other = other.m_int(ctx=ctx)
         if not isinstance(other, (types.float, types.int)):
             return self._bad_bin_op(other, op='+', ctx=ctx)
-        return self._math_op(other=other, handler=operator.__add__, ctx=ctx)
+        expr = self._binary_op(other=other, handler=operator.__add__, ctx=ctx)
+        return types.float(expr)
 
     @methods.add(name='__sub__')
     def m_sub(self, other: ProxySort, ctx: 'Context') -> ProxySort:
@@ -176,7 +179,8 @@ class FloatSort(ProxySort):
             other = other.m_int(ctx=ctx)
         if not isinstance(other, (types.float, types.int)):
             return self._bad_bin_op(other, op='-', ctx=ctx)
-        return self._math_op(other=other, handler=operator.__sub__, ctx=ctx)
+        expr = self._binary_op(other=other, handler=operator.__sub__, ctx=ctx)
+        return types.float(expr)
 
     @methods.add(name='imag', prop=True)
     def m_imag(self, ctx: 'Context') -> 'FloatSort':

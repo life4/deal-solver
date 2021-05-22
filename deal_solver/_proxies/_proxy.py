@@ -4,7 +4,7 @@ import typing
 import z3
 
 from .._exceptions import UnsupportedError
-from ._funcs import not_expr, wrap
+from ._funcs import not_expr
 from ._methods import Methods
 from ._type_factory import TypeFactory
 
@@ -232,9 +232,6 @@ class ProxySort:
         return self._bad_un_op(op='~', ctx=ctx)
 
     # math binary operations
-
-    def _math_op(self, other: 'ProxySort', handler: typing.Callable, ctx: 'Context') -> 'ProxySort':
-        return wrap(self._binary_op(other=other, handler=handler, ctx=ctx))
 
     @methods.add(name='__add__')
     def m_add(self, other: 'ProxySort', ctx: 'Context') -> 'ProxySort':

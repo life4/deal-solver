@@ -1,4 +1,3 @@
-import operator
 import typing
 
 import z3
@@ -147,7 +146,7 @@ class VarTupleSort(ProxySort):
             msg = msg.format(s=self.type_name, o=other.type_name)
             ctx.add_exception(TypeError, msg)
             return self
-        return self._math_op(other=other, handler=operator.__add__, ctx=ctx)
+        return self.evolve(expr=self.expr + other.expr)
 
     @methods.add(name='__mul__')
     def m_mul(self, other: ProxySort, ctx: 'Context') -> ProxySort:
