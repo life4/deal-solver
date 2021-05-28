@@ -52,6 +52,7 @@ def test_timeout():
     ('a, b = 3, 4',         'cannot assign to Tuple'),
     ('str([1.2])',          'cannot convert list to str'),
     ('1 is None',           'unsupported comparison operator is'),
+    ('2.0 ** 2',            'cannot raise float in a power'),
 
     ('[1 for i in {1}]',    'cannot iterate over set'),
     ('[1 for i in {1} if 1]', 'cannot iterate over set'),

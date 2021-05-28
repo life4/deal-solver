@@ -104,3 +104,11 @@ def test_unsupported(setup: str, ann: str) -> None:
     """)
     assert proof.conclusion == Conclusion.SKIP
     assert type(proof.error) is UnsupportedError
+
+
+def test_real(prefer_real: bool) -> None:
+    proof = prove_f("""
+        def f(a: float):
+            assert a == 0.0 or a != 0.0
+    """)
+    assert proof.conclusion is Conclusion.OK

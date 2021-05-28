@@ -100,12 +100,9 @@ class FloatSort(ProxySort):
 
     @methods.add(name='__pow__')
     def m_pow(self, other: ProxySort, ctx: 'Context') -> ProxySort:
-        if isinstance(other, types.bool):
-            other = other.m_int(ctx=ctx)
-        if not isinstance(other, (types.int, types.float)):
+        if not isinstance(other, (types.bool, types.int, types.float)):
             return self._bad_bin_op(other, op='** or pow()', ctx=ctx)
-        expr = self._binary_op(other=other, handler=operator.__pow__, ctx=ctx)
-        return types.float(expr)
+        raise UnsupportedError('cannot raise float in a power')
 
     @methods.add(name='__floordiv__')
     def m_floordiv(self, other: ProxySort, ctx: 'Context') -> 'ProxySort':
@@ -215,6 +212,10 @@ class RealSort(FloatSort):
     def __init__(self, expr) -> None:
         assert z3.is_real(expr), f'expected real, given {type(expr)}'
         self.expr = expr
+
+    @staticmethod
+    def sort(ctx: z3.Context = None):
+        return z3.RealSort(ctx=ctx)
 
     @classmethod
     def val(cls, x: float, ctx: z3.Context = None):
