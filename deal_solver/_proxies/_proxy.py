@@ -231,6 +231,14 @@ class ProxySort:
         """
         return self._bad_un_op(op='~', ctx=ctx)
 
+    @methods.add(name='not')
+    def m_not(self, ctx: 'Context') -> 'BoolSort':
+        """not self
+        """
+        from ._bool import BoolSort
+        expr = self.m_bool(ctx=ctx).expr
+        return BoolSort(expr=z3.Not(expr, ctx=ctx.z3_ctx))
+
     # math binary operations
 
     @methods.add(name='__add__')

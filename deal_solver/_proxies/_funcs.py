@@ -52,4 +52,5 @@ def or_expr(*args: 'ProxySort', ctx: Context) -> 'BoolSort':
 
 
 def not_expr(cond: 'ProxySort', *, ctx: Context) -> 'BoolSort':
-    return types.bool(z3.Not(cond.m_bool(ctx=ctx).expr))
+    # TODO: drop me
+    return cond.m_not(ctx=ctx)

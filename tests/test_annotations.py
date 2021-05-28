@@ -75,6 +75,8 @@ def test_asserts_ok(setup: str, ann: str, check: str) -> None:
 
     # unresolved names
     ('', 'unknown'),
+    ('', 'unknown.type'),
+    ('', 'unknown.type[0]'),
     ('', '"unknown"'),
     ('', 'int[unknown]'),
     ('', 'unknown[int]'),
@@ -87,6 +89,7 @@ def test_asserts_ok(setup: str, ann: str, check: str) -> None:
     ('', 'tuple[...]'),
     ('', 'max'),
     ('', 'max[int]'),
+    ('', '"hi"[0]'),
     ('from itertools import chain', 'chain'),
     ('from itertools import chain', 'chain[int]'),
     ('from glob import glob',       'glob'),

@@ -87,7 +87,8 @@ def eval_compare(node: astroid.Compare, ctx: Context) -> ProxySort:
     for op, right_node in node.ops:
         assert op, 'missed comparison operator'
         op_name = COMAPARISON.get(op)
-        assert op_name, 'unsupported comparison operator'
+        if not op_name:
+            raise UnsupportedError('unsupported comparison operator', op)
 
         right = eval_expr(node=right_node, ctx=ctx)
         # TODO: proper chain
@@ -316,8 +317,7 @@ def eval_unary_op(node: astroid.UnaryOp, ctx: Context) -> ProxySort:
     if node.op == '~':
         return value_ref.m_inv(ctx=ctx)
     if node.op == 'not':
-        expr = value_ref.m_bool(ctx=ctx).expr
-        return types.bool(expr=z3.Not(expr, ctx=ctx.z3_ctx))
+        return value_ref.m_not(ctx=ctx)
     raise RuntimeError('unsupported unary operation')
 
 

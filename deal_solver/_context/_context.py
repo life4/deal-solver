@@ -66,13 +66,15 @@ class Context(typing.NamedTuple):
             ctx=self,
         )
 
-    def add_exception(self, exc: type, msg: str) -> None:
-        from .._proxies import BoolSort
+    def add_exception(self, exc: type, msg: str = '', cond: 'BoolSort' = None) -> None:
+        if cond is None:
+            from .._proxies import BoolSort
+            cond = BoolSort.val(True, ctx=self)
 
         self.exceptions.add(ExceptionInfo(
             name=exc.__name__,
             names={base.__name__ for base in exc.mro()[:-1]},
-            cond=BoolSort.val(True, ctx=self),
+            cond=cond,
             message=msg,
         ))
 

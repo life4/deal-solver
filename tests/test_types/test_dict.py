@@ -1,6 +1,6 @@
 import pytest
 
-from deal_solver import Conclusion
+from deal_solver import Conclusion, UnsupportedError
 
 from ..helpers import prove_f
 
@@ -11,6 +11,7 @@ from ..helpers import prove_f
     '1 in {1: 2}',
     '3 in {1: 2, 3: 4}',
     '2 not in {1: 2}',
+    '"" not in {1: 2}',
 
     # getitem
     '{1: 2}[1] == 2',
@@ -21,6 +22,8 @@ from ..helpers import prove_f
     '{1: 2} != {2: 1}',
     '{1: 2} != {}',
     '{} != {1: 2}',
+    '{"1": 2} != {1: 2}',
+    '{1: "2"} != {1: 2}',
 
     # compare mismatching types
     '{1: 2} != {1}',
@@ -49,13 +52,56 @@ from ..helpers import prove_f
 def test_asserts_ok(check: str) -> None:
     assert eval(check)
     text = """
-        from typing import List
         def f():
             assert {}
     """
     text = text.format(check)
     theorem = prove_f(text)
     assert theorem.conclusion is Conclusion.OK
+
+
+@pytest.mark.parametrize('check, exc', [
+    ('d[3]',        KeyError),
+    ('e[1]',        KeyError),
+    ('d[""]',       KeyError),
+    ('e[""]',       KeyError),
+    ('d.pop(3)',    KeyError),
+    ('d.pop("")',   KeyError),
+])
+def test_exceptions(check: str, exc) -> None:
+    with pytest.raises(exc):
+        assert eval(check, dict(d={1: 2}, e={}))
+    text = """
+        def f():
+            d = {{1: 2}}
+            e = dict()
+            {}
+    """
+    text = text.format(check)
+    proof = prove_f(text)
+    assert proof.conclusion is Conclusion.FAIL
+    assert proof.description.startswith(exc.__name__)
+
+
+@pytest.mark.parametrize('check, msg', [
+    ('{1: 2, "3": 4}', 'key has type str, expected int'),
+    ('{1: 2, 3: "4"}', 'value has type str, expected int'),
+
+    ('{1: 2}.items()', 'unsupported attribute for type dict'),
+    ('{1: 2}.values()', 'unsupported attribute for type dict'),
+    ('{1: 2}.update({3: 4})', 'unsupported attribute for type dict'),
+])
+def test_unsupported(check: str, msg) -> None:
+    eval(check)
+    text = """
+        def f():
+            {}
+    """
+    text = text.format(check)
+    proof = prove_f(text)
+    assert proof.conclusion == Conclusion.SKIP
+    assert type(proof.error) is UnsupportedError
+    assert str(proof.error) == msg
 
 
 def test_dict_clear():
@@ -79,26 +125,6 @@ def test_dict_clear_empty():
     assert theorem.conclusion is Conclusion.OK
 
 
-def test_dict_getattr_fails():
-    theorem = prove_f("""
-        def f():
-            a = {1: 2}
-            a[2]
-    """)
-    assert theorem.conclusion is Conclusion.FAIL
-    assert str(theorem.description) == 'KeyError'
-
-
-def test_dict_getattr_fails_empty():
-    theorem = prove_f("""
-        def f():
-            a = {}
-            a[0]
-    """)
-    assert theorem.conclusion is Conclusion.FAIL
-    assert str(theorem.description) == 'KeyError'
-
-
 def test_pop():
     theorem = prove_f("""
         def f():
@@ -106,5 +132,16 @@ def test_pop():
             r = a.pop(3)
             assert r == 4
             assert a == {1: 2}
+    """)
+    assert theorem.conclusion is Conclusion.OK
+
+
+def test_copy():
+    theorem = prove_f("""
+        def f():
+            a = {1: 2, 3: 4}
+            b = a.copy()
+            a.pop(3)
+            assert b == {1: 2, 3: 4}
     """)
     assert theorem.conclusion is Conclusion.OK
