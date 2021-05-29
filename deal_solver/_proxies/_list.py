@@ -33,6 +33,10 @@ class ListSort(VarTupleSort):
 
     @methods.add(name='append', pure=False)
     def r_append(self, item: ProxySort, ctx: 'Context') -> 'ListSort':
+        if not isinstance(item, self.subtypes[0].type):
+            msg = 'element has type {}, expected {}'
+            msg = msg.format(item.type_name, self.subtypes[0].type_name)
+            raise UnsupportedError(msg)
         unit = z3.Unit(item.expr)
         return self.evolve(expr=self.expr + unit)
 
@@ -90,6 +94,11 @@ class UntypedListSort(ListSort):
 
     @methods.add(name='__getitem__')
     def m_getitem(self, index: ProxySort, ctx: 'Context') -> ProxySort:
+        if not isinstance(index, types.int):
+            msg = '{} indices must be integers or slices, not {}'
+            msg = msg.format(self.type_name, index.type_name)
+            ctx.add_exception(exc=TypeError, msg=msg)
+            return types.int.val(0, ctx=ctx)
         msg = '{} index out of range'.format(self.type_name)
         ctx.add_exception(IndexError, msg)
         return self

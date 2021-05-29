@@ -62,6 +62,10 @@ class VarTupleSort(ProxySort):
     def val(cls: typing.Type[T], values: typing.List[ProxySort], ctx: 'Context') -> T:
         items = cls.make_empty_expr(sort=values[0].expr.sort())
         for value in values:
+            if not isinstance(value, type(values[0])):
+                msg = 'element has type {}, expected {}'
+                msg = msg.format(value.type_name, values[0].type_name)
+                raise UnsupportedError(msg)
             item = z3.Unit(value.expr)
             items = z3.Concat(items, item)
         value_type = values[0].factory
@@ -78,13 +82,16 @@ class VarTupleSort(ProxySort):
 
     @methods.add(name='__getitem__')
     def m_getitem(self, index: ProxySort, ctx: 'Context') -> ProxySort:
-        from .._context import ExceptionInfo
-        ctx.exceptions.add(ExceptionInfo(
-            name='IndexError',
-            names={'IndexError', 'LookupError', 'Exception', 'BaseException'},
+        if not isinstance(index, types.int):
+            msg = '{} indices must be integers or slices, not {}'
+            msg = msg.format(self.type_name, index.type_name)
+            ctx.add_exception(exc=TypeError, msg=msg)
+            return self.subtypes[0].default
+        ctx.add_exception(
+            exc=IndexError,
+            msg='{} index out of range'.format(self.type_name),
             cond=types.bool(expr=index.expr >= z3.Length(self.expr)),
-            message='{} index out of range'.format(self.type_name),
-        ))
+        )
         expr = self.expr[index.expr]
         return self.subtypes[0].wrap(expr)
 
@@ -100,23 +107,21 @@ class VarTupleSort(ProxySort):
 
     @methods.add(name='__contains__')
     def m_contains(self, item: ProxySort, ctx: 'Context') -> 'BoolSort':
-        if not self.expr.sort().basis().eq(item.expr.sort()):
+        if not isinstance(item, self.subtypes[0].type):
             return types.bool.val(False, ctx=ctx)
         unit = z3.Unit(item.expr)
         return types.bool(expr=z3.Contains(self.expr, unit))
 
     @methods.add(name='index')
     def r_index(self, other: ProxySort, start: ProxySort = None, *, ctx: 'Context') -> 'IntSort':
-        from .._context import ExceptionInfo
         if start is None:
             start = types.int(z3.IntVal(0))
         unit = z3.Unit(other.expr)
-        ctx.exceptions.add(ExceptionInfo(
-            name='ValueError',
-            names={'ValueError', 'Exception', 'BaseException'},
+        ctx.add_exception(
+            exc=ValueError,
+            msg=f'tuple.index(x): x not in {self.type_name}',
             cond=types.bool(expr=z3.Not(z3.Contains(self.expr, unit))),
-            message='tuple.index(x): x not in tuple',
-        ))
+        )
         return types.int(expr=z3.IndexOf(self.expr, unit, start.expr))
 
     @methods.add(name='__len__')

@@ -1,6 +1,6 @@
 import pytest
 
-from deal_solver import Conclusion
+from deal_solver import Conclusion, UnsupportedError
 
 from ..helpers import prove_f
 
@@ -99,6 +99,49 @@ def test_expr_asserts_ok(check: str) -> None:
     text = text.format(check)
     theorem = prove_f(text)
     assert theorem.conclusion is Conclusion.OK
+
+
+@pytest.mark.parametrize('check, exc, msg', [
+    ('a[3]',        IndexError, 'list index out of range'),
+    ('e[1]',        IndexError, 'list index out of range'),
+    ('a.index(2)',  ValueError, ''),
+    ('e.index(2)',  ValueError, ''),
+    ('a[""]',       TypeError, 'list indices must be integers or slices, not str'),
+    ('e[""]',       TypeError, 'list indices must be integers or slices, not str'),
+])
+def test_exceptions(check: str, exc, msg) -> None:
+    with pytest.raises(exc):
+        assert eval(check, dict(a=[1], e=[]))
+    text = """
+        def f():
+            a = [1]
+            e = []
+            {}
+    """
+    text = text.format(check)
+    proof = prove_f(text)
+    assert proof.conclusion is Conclusion.FAIL
+    assert proof.description.startswith(exc.__name__)
+    if msg:
+        assert proof.description == f'{exc.__name__}: {msg}'
+
+
+@pytest.mark.parametrize('check, msg', [
+    ('[1, ""]', 'element has type str, expected int'),
+    ('a.append("")', 'element has type str, expected int'),
+])
+def test_unsupported(check: str, msg) -> None:
+    eval(check, dict(a=[]))
+    text = """
+        def f():
+            a = [1]
+            {}
+    """
+    text = text.format(check)
+    proof = prove_f(text)
+    assert proof.conclusion == Conclusion.SKIP
+    assert type(proof.error) is UnsupportedError
+    assert str(proof.error) == msg
 
 
 def test_list_append():
