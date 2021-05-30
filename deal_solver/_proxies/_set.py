@@ -2,7 +2,7 @@ import typing
 
 import z3
 
-from ._funcs import not_expr, random_name
+from ._funcs import random_name
 from ._method import Mutation
 from ._proxy import ProxySort
 from ._registry import types
@@ -184,7 +184,7 @@ class SetSort(ProxySort):
         # TODO: check sort
         ctx.add_exception(
             exc=KeyError,
-            cond=not_expr(self.m_contains(item, ctx=ctx), ctx=ctx),
+            cond=self.m_contains(item, ctx=ctx).m_not(ctx=ctx),
         )
         expr = z3.SetDel(self.expr, item.expr)
         return self.evolve(expr=expr)

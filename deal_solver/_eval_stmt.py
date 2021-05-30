@@ -8,7 +8,7 @@ from ._ast import infer
 from ._context import Context, ExceptionInfo, ReturnInfo
 from ._eval_expr import eval_expr
 from ._exceptions import UnsupportedError
-from ._proxies import if_expr, not_expr, or_expr, types
+from ._proxies import if_expr, or_expr, types
 from ._registry import HandlersRegistry
 
 
@@ -74,7 +74,7 @@ def eval_assign(node: astroid.Assign, ctx: Context) -> None:
 def eval_return(node: astroid.Return, ctx: Context) -> None:
     ctx.returns.add(ReturnInfo(
         value=eval_expr(node=node.value, ctx=ctx),
-        cond=not_expr(ctx.interrupted, ctx=ctx),
+        cond=ctx.interrupted.m_not(ctx=ctx),
     ))
 
 
@@ -150,7 +150,7 @@ def eval_raise(node: astroid.Raise, ctx: Context) -> None:
     ctx.exceptions.add(ExceptionInfo(
         name=next(_get_all_bases(node.exc)),
         names=names,
-        cond=not_expr(ctx.interrupted, ctx=ctx),
+        cond=ctx.interrupted.m_not(ctx=ctx),
     ))
 
 

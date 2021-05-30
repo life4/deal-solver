@@ -49,8 +49,3 @@ def and_expr(*args: 'ProxySort', ctx: Context) -> 'BoolSort':
 
 def or_expr(*args: 'ProxySort', ctx: Context) -> 'BoolSort':
     return types.bool(z3.Or(*[arg.m_bool(ctx=ctx).expr for arg in args]))
-
-
-def not_expr(cond: 'ProxySort', *, ctx: Context) -> 'BoolSort':
-    # TODO: drop me
-    return cond.m_not(ctx=ctx)

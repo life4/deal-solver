@@ -4,7 +4,6 @@ import typing
 import z3
 
 from .._exceptions import UnsupportedError
-from ._funcs import not_expr
 from ._methods import Methods
 from ._type_factory import TypeFactory
 
@@ -207,7 +206,7 @@ class ProxySort:
     def m_not_in(self, other: 'ProxySort', ctx: 'Context') -> 'BoolSort':
         """self in other
         """
-        return not_expr(other.m_contains(self, ctx=ctx), ctx=ctx)
+        return other.m_contains(self, ctx=ctx).m_not(ctx=ctx)
 
     # unary operations
 

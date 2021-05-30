@@ -5,7 +5,7 @@ import astroid
 from ._context import Context, Scope
 from ._eval_expr import eval_expr
 from ._goal import Goal
-from ._proxies import BoolSort, not_expr, or_expr
+from ._proxies import BoolSort, or_expr
 from ._types import AstNode
 
 
@@ -69,7 +69,7 @@ def _eval_post(ctx: Context, args: list) -> typing.Iterator[BoolSort]:
         # The contract is valid if the return value is not reached
         # or it passed the post-condition test.
         yield or_expr(
-            not_expr(ret.cond, ctx=ctx),
+            ret.cond.m_not(ctx=ctx),
             eval_expr(node=contract.body, ctx=ctx),
             ctx=ctx,
         )

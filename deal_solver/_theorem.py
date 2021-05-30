@@ -12,7 +12,7 @@ from ._eval_contracts import Contract, eval_contracts
 from ._eval_stmt import eval_stmt
 from ._exceptions import ProveError, UnsupportedError
 from ._model import Model
-from ._proxies import BoolSort, and_expr, not_expr
+from ._proxies import BoolSort, and_expr
 
 
 DEFAULT_TIMEOUT = 5.0
@@ -163,7 +163,7 @@ class Theorem:
                 description='assertion',
                 condition=self._imply(
                     given=given,
-                    expected=not_expr(constraint, ctx=self._context),
+                    expected=constraint.m_not(ctx=self._context),
                 ),
             )
         for constraint in contracts.post:
@@ -171,7 +171,7 @@ class Theorem:
                 description='post-condition',
                 condition=self._imply(
                     given=given,
-                    expected=not_expr(constraint, ctx=self._context),
+                    expected=constraint.m_not(ctx=self._context),
                 ),
             )
 
