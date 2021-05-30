@@ -1,6 +1,6 @@
 import z3
 
-from .._context import Context, ExceptionInfo
+from .._context import Context
 from .._exceptions import UnsupportedError
 from .._proxies import (
     IntSort, ProxySort, StrSort, UntypedDictSort, UntypedListSort,
@@ -104,12 +104,11 @@ def builtins_ord(val: ProxySort, ctx: Context, **kwargs) -> IntSort:
         msg = msg .format(val.type_name)
         ctx.add_exception(TypeError, msg)
         return types.int.val(0, ctx=ctx)
-    ctx.exceptions.add(ExceptionInfo(
-        name='TypeError',
-        names={'TypeError', 'Exception', 'BaseException'},
+    ctx.add_exception(
+        exc=TypeError,
+        msg='ord() expected a character, but string of length N found',
         cond=val.m_len(ctx=ctx).m_ne(types.int.val(1, ctx=ctx), ctx=ctx),
-        message='ord() expected a character, but string of length N found',
-    ))
+    )
     bv = z3.BitVec(random_name('ord_bv'), 8)
     ctx.given.add(types.bool(z3.Unit(bv) == val.expr))
     return types.int(z3.BV2Int(bv))

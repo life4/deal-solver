@@ -30,48 +30,9 @@ from .helpers import prove_f
     '3 * 5 * 2 == 30',
     '3 + 5 * 2 == 13',
 
-    # math for bool
-    'True + True == 2',
-    'True - True == 0',
-    'True * True == 1',
-    'True / True == 1.0',
-    'True // True == 1',
-    'True % True == 0',
-    '~True == -2',
-
-    # implicit bool to int
-    '2 + True == 3',
-    '2 - True == 1',
-    '2 * True == 2',
-    '2 ** True == 2',
-    '2 / True == 2.0',
-    '+True == 1',
-    '-True == -1',
-
-    # implicit bool to float
-    '2.3 + True == 3.3',
-    '2.4 - True == 1.4',
-    '2.3 * True == 2.3',
-    # '2.3 ** True == 2.3',
-    '2.3 / True == 2.3',
-
-    # bool functions
-    'int(True) == 1',
-    'int(False) == 0',
-    'float(True) == 1.0',
-    'float(False) == 0.0',
-    'bool(True)',
-    'not bool(False)',
-
     # other expressions
     'True if True else False',
     'False if False else True',
-
-    # empty sequences
-    # 'len(set()) == 0',
-    'len([]) == 0',
-    'len("") == 0',
-    '"" == ""',
 
     # sequences in sequences
     'len([""]) == 1',

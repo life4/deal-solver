@@ -181,14 +181,11 @@ class SetSort(ProxySort):
 
     @methods.add(name='remove', pure=False)
     def r_remove(self, item: ProxySort, ctx: 'Context') -> 'SetSort':
-        from .._context import ExceptionInfo
-
         # TODO: check sort
-        ctx.exceptions.add(ExceptionInfo(
-            name='KeyError',
-            names={'KeyError', 'LookupError', 'Exception', 'BaseException'},
+        ctx.add_exception(
+            exc=KeyError,
             cond=not_expr(self.m_contains(item, ctx=ctx), ctx=ctx),
-        ))
+        )
         expr = z3.SetDel(self.expr, item.expr)
         return self.evolve(expr=expr)
 

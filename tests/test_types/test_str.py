@@ -16,6 +16,7 @@ from ..helpers import prove_f
     '"a" > ""',
     '"ab" == "ab"',
     '"ab" != "cd"',
+    '"" == ""',
 
     # operations
     '"ab" + "cd" == "abcd"',
@@ -62,3 +63,23 @@ def test_expr_asserts_ok(check: str) -> None:
     text = text.format(check)
     theorem = prove_f(text)
     assert theorem.conclusion is Conclusion.OK
+
+
+@pytest.mark.parametrize('check, exc, msg', [
+    ('ord(1)',      TypeError, 'ord() expected string of length 1, but int found'),
+])
+def test_exceptions(check: str, exc, msg) -> None:
+    with pytest.raises(exc):
+        assert eval(check, dict(a='a', e=''))
+    text = """
+        def f():
+            a = 'a'
+            e = ''
+            {}
+    """
+    text = text.format(check)
+    proof = prove_f(text)
+    assert proof.conclusion is Conclusion.FAIL
+    assert proof.description.startswith(exc.__name__)
+    if msg:
+        assert proof.description == f'{exc.__name__}: {msg}'

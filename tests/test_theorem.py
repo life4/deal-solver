@@ -51,5 +51,16 @@ def test_proof_str(expr, expected):
     assert str(proof) == expected
 
 
+@pytest.mark.parametrize('expr, expected', [
+    ('def f(): assert 1',   'green'),
+    ('def f(): 13',         'green'),
+    ('def f(): zz',         'yellow'),
+    ('def f(): assert 0',   'red'),
+])
+def test_proof_color(expr, expected):
+    proof = prove_f(expr)
+    assert proof.color == expected
+
+
 def test_cached_property():
     assert type(Theorem.arguments) is cached_property
