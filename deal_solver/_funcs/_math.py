@@ -3,7 +3,7 @@ import math
 import z3
 
 from .._context import Context
-from .._proxies import BoolSort, FloatSort, IntSort, ProxySort, and_expr, if_expr, types
+from .._proxies import BoolSort, FloatSort, ProxySort, and_expr, if_expr, types
 from ._registry import FUNCTIONS, register
 
 
@@ -13,22 +13,32 @@ def math_isclose(
     rel_tol=None, abs_tol=None,
     *, ctx: Context, **kwargs,
 ) -> BoolSort:
-    if not isinstance(left, FloatSort) and not isinstance(right, FloatSort):
-        return left.m_eq(right, ctx=ctx)
-
-    if isinstance(left, IntSort):
+    if isinstance(left, (types.bool, types.int)):
         left = left.m_float(ctx=ctx)
-    if isinstance(right, IntSort):
+    if isinstance(right, (types.bool, types.int)):
         right = right.m_float(ctx=ctx)
 
+    if not isinstance(left, types.float):
+        ctx.add_exception(
+            exc=TypeError,
+            msg='must be real number, not {}'.format(left.type_name),
+        )
+        return types.bool.val(False, ctx=ctx)
+    if not isinstance(right, types.float):
+        ctx.add_exception(
+            exc=TypeError,
+            msg='must be real number, not {}'.format(right.type_name),
+        )
+        return types.bool.val(False, ctx=ctx)
+
     if rel_tol is None:
-        rel_tol = FloatSort.val(1e-09)
+        rel_tol = types.float.val(1e-09)
     rel_tol = rel_tol.m_float(ctx=ctx)
     if abs_tol is None:
-        abs_tol = FloatSort.val(0.0)
+        abs_tol = types.float.val(0.0)
     abs_tol = abs_tol.m_float(ctx=ctx)
 
-    if FloatSort.prefer_real:
+    if types.float.prefer_real:
         left = left.m_real(ctx=ctx)
         right = right.m_real(ctx=ctx)
     else:
@@ -48,7 +58,7 @@ def math_isclose(
 
 @register('math.isinf')
 def math_isinf(x, ctx: Context, **kwargs) -> BoolSort:
-    if not isinstance(x, FloatSort):
+    if not isinstance(x, types.float):
         return BoolSort.val(False)
     if not x.is_fp:
         return BoolSort.val(False)
@@ -57,7 +67,7 @@ def math_isinf(x, ctx: Context, **kwargs) -> BoolSort:
 
 @register('math.isnan')
 def math_isnan(x, ctx: Context, **kwargs) -> BoolSort:
-    if not isinstance(x, FloatSort):
+    if not isinstance(x, types.float):
         return BoolSort.val(False)
     if not x.is_fp:
         return BoolSort.val(False)
@@ -68,7 +78,7 @@ def math_isnan(x, ctx: Context, **kwargs) -> BoolSort:
 def math_sin(x: ProxySort, ctx: Context, **kwargs) -> ProxySort:
     """Taylor's Series of sin x
     """
-    if not isinstance(x, FloatSort):
+    if not isinstance(x, types.float):
         x = x.m_float(ctx=ctx)
 
     series = [

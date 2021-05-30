@@ -13,8 +13,6 @@ class Model:
         for decl in self._model.decls():
             name = decl.name()
             z3_val = self._model[decl]
-            if isinstance(z3_val, z3.FuncInterp):
-                continue
             py_val = eval(repr(z3_val))
             yield name, py_val
 

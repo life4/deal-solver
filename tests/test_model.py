@@ -45,3 +45,14 @@ def test_model_bool():
     assert proof.example is not None
     assert not proof.example
     assert str(proof.example) == ''
+
+
+def test_model_skip_helpers():
+    proof = prove_f("""
+        def f(i: int):
+            assert sum([3, i]) != 7
+    """)
+    assert proof.conclusion == Conclusion.FAIL
+    assert proof.example is not None
+    assert proof.example
+    assert str(proof.example) == 'i=4'
