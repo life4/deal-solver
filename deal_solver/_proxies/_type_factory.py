@@ -22,3 +22,13 @@ class TypeFactory(typing.NamedTuple):
         if self.subtypes:
             return self.type(expr, subtypes=self.subtypes)  # type: ignore
         return self.type(expr)
+
+    def match(self, factory: 'TypeFactory') -> bool:
+        if not issubclass(factory.type, self.type):
+            return False
+        for t1, t2 in zip(self.subtypes, factory.subtypes):
+            assert isinstance(t1, TypeFactory)
+            assert isinstance(t2, TypeFactory)
+            if not t1.match(t2):
+                return False
+        return True

@@ -92,12 +92,12 @@ class DictSort(ProxySort):
 
     @methods.add(name='__setitem__', pure=False)
     def m_setitem(self, key: ProxySort, value: ProxySort, ctx: 'Context') -> 'DictSort':
-        if not isinstance(key, self.subtypes[0].type):
+        if not self.subtypes[0].match(key.factory):
             raise UnsupportedError('key has type {}, expected {}'.format(
                 key.type_name,
                 self.subtypes[0].type_name,
             ))
-        if not isinstance(value, self.subtypes[1].type):
+        if not self.subtypes[1].match(value.factory):
             raise UnsupportedError('value has type {}, expected {}'.format(
                 value.type_name,
                 self.subtypes[1].type_name,
@@ -108,7 +108,7 @@ class DictSort(ProxySort):
 
     @methods.add(name='__getitem__', pure=False)
     def m_getitem(self, key: ProxySort, ctx: 'Context') -> ProxySort:
-        if not isinstance(key, self.subtypes[0].type):
+        if not self.subtypes[0].match(key.factory):
             ctx.add_exception(exc=KeyError)
             return self.subtypes[1].default
         ctx.add_exception(
@@ -141,7 +141,7 @@ class DictSort(ProxySort):
 
     @methods.add(name='pop', pure=False)
     def r_pop(self, key: ProxySort, ctx: 'Context') -> Mutation:
-        if not isinstance(key, self.subtypes[0].type):
+        if not self.subtypes[0].match(key.factory):
             ctx.add_exception(exc=KeyError)
             return Mutation(new_value=self, result=self.subtypes[1].default)
         ctx.add_exception(
@@ -160,7 +160,7 @@ class DictSort(ProxySort):
 
     @methods.add(name='__contains__')
     def m_contains(self, key: ProxySort, ctx: 'Context') -> 'BoolSort':
-        if not isinstance(key, self.subtypes[0].type):
+        if not self.subtypes[0].match(key.factory):
             return types.bool.val(False, ctx=ctx)
         item = z3.Select(self.expr, key.expr)
         expr = self.item_sort.exists(item)
@@ -174,16 +174,11 @@ class DictSort(ProxySort):
 
     @methods.add(name='__eq__')
     def m_eq(self, other: ProxySort, ctx: 'Context') -> 'BoolSort':
-        # type mismatch
-        if not isinstance(other, types.dict):
-            return types.bool.val(False, ctx=ctx)
         # other is untyped
         if isinstance(other, UntypedDictSort):
             return other.m_eq(self, ctx=ctx)
-        # subtypes mismatch
-        if self.subtypes[0].type is not other.subtypes[0].type:
-            return types.bool.val(False, ctx=ctx)
-        if self.subtypes[1].type is not other.subtypes[1].type:
+        # type mismatch
+        if not self.factory.match(other.factory):
             return types.bool.val(False, ctx=ctx)
         return super().m_eq(other, ctx=ctx)
 

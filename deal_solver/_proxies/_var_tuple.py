@@ -107,7 +107,7 @@ class VarTupleSort(ProxySort):
 
     @methods.add(name='__contains__')
     def m_contains(self, item: ProxySort, ctx: 'Context') -> 'BoolSort':
-        if not isinstance(item, self.subtypes[0].type):
+        if not self.subtypes[0].match(item.factory):
             return types.bool.val(False, ctx=ctx)
         unit = z3.Unit(item.expr)
         return types.bool(expr=z3.Contains(self.expr, unit))
