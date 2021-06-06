@@ -62,7 +62,7 @@ class VarTupleSort(ProxySort):
     def val(cls: typing.Type[T], values: typing.List[ProxySort], ctx: 'Context') -> T:
         items = cls.make_empty_expr(sort=values[0].expr.sort())
         for value in values:
-            if not isinstance(value, type(values[0])):
+            if not value.factory.match(values[0].factory):
                 msg = 'element has type {}, expected {}'
                 msg = msg.format(value.type_name, values[0].type_name)
                 raise UnsupportedError(msg)
@@ -166,14 +166,12 @@ class VarTupleSort(ProxySort):
 
     @methods.add(name='__eq__')
     def m_eq(self, other: ProxySort, ctx: 'Context') -> 'BoolSort':
-        # type mismatch
-        if not isinstance(other, types.tuple):
-            return types.bool.val(False, ctx=ctx)
-        # other is untyped
         if isinstance(other, UntypedVarTupleSort):
             empty = self.make_empty_expr(sort=self.sort().basis())
             expr = self.expr == empty
             return types.bool(expr=expr)
+        if not self.factory.match(other.factory):
+            return types.bool.val(False, ctx=ctx)
         return super().m_eq(other, ctx=ctx)
 
     @methods.add(name='__pos__')

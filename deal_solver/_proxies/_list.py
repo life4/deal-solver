@@ -33,7 +33,7 @@ class ListSort(VarTupleSort):
 
     @methods.add(name='append', pure=False)
     def r_append(self, item: ProxySort, ctx: 'Context') -> 'ListSort':
-        if not isinstance(item, self.subtypes[0].type):
+        if not self.subtypes[0].match(item.factory):
             msg = 'element has type {}, expected {}'
             msg = msg.format(item.type_name, self.subtypes[0].type_name)
             raise UnsupportedError(msg)

@@ -174,10 +174,8 @@ class DictSort(ProxySort):
 
     @methods.add(name='__eq__')
     def m_eq(self, other: ProxySort, ctx: 'Context') -> 'BoolSort':
-        # other is untyped
         if isinstance(other, UntypedDictSort):
             return other.m_eq(self, ctx=ctx)
-        # type mismatch
         if not self.factory.match(other.factory):
             return types.bool.val(False, ctx=ctx)
         return super().m_eq(other, ctx=ctx)
