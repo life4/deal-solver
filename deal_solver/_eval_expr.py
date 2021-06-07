@@ -94,7 +94,7 @@ def eval_compare(node: astroid.Compare, ctx: Context) -> ProxySort:
         # TODO: proper chain
         method = left.m_getattr(op_name, ctx=ctx)
         return method.m_call(right, ctx=ctx)
-    raise RuntimeError('unreachable')  # pragma: no cover
+    raise RuntimeError('unreachable')
 
 
 @eval_expr.register(astroid.BoolOp)
@@ -318,7 +318,7 @@ def eval_unary_op(node: astroid.UnaryOp, ctx: Context) -> ProxySort:
         return value_ref.m_inv(ctx=ctx)
     if node.op == 'not':
         return value_ref.m_not(ctx=ctx)
-    raise RuntimeError('unsupported unary operation')
+    raise RuntimeError('unreachable')
 
 
 @eval_expr.register(astroid.IfExp)

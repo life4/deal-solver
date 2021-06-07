@@ -235,7 +235,7 @@ class Theorem:
                 error=None,
                 example=Model(solver.model()),
             )
-        raise RuntimeError('unreachable')  # pragma: no cover
+        raise RuntimeError('unreachable')
 
     @staticmethod
     def _select_proof(proofs: typing.List[Proof]) -> Proof:
