@@ -190,27 +190,19 @@ class VarTupleSort(ProxySort):
 class UntypedVarTupleSort(VarTupleSort):
     methods = VarTupleSort.methods.copy()
 
-    def __new__(cls, expr=None, **kwargs):
-        if expr is not None:
-            return VarTupleSort(expr, **kwargs)
-        return super().__new__(cls)
-
-    def __init__(self) -> None:
+    def __init__(self, expr=None, subtypes=None) -> None:
         pass
 
     @property
     def subtypes(self):
-        return (types.int.factory,)
+        raise NotImplementedError
 
     @property
     def factory(self) -> TypeFactory:
-        sort = self.expr.sort().basis()
-        expr = self.make_empty_expr(sort)
-        empty = self.evolve(expr=expr)
         return TypeFactory(
             type=type(self),
-            default=empty,
-            subtypes=(types.int.factory,),
+            default=self,
+            subtypes=(),
         )
 
     @staticmethod
@@ -245,3 +237,12 @@ class UntypedVarTupleSort(VarTupleSort):
     @methods.add(name='count')
     def r_count(self, item: ProxySort, ctx: 'Context') -> 'IntSort':
         return types.int(expr=z3.IntVal(0))
+
+    @methods.add(name='__add__')
+    def m_add(self, other: ProxySort, ctx: 'Context') -> ProxySort:
+        if not isinstance(other, types.tuple) or isinstance(other, types.list):
+            msg = 'can only concatenate {s} (not "{o}") to {s}'
+            msg = msg.format(s=self.type_name, o=other.type_name)
+            ctx.add_exception(TypeError, msg)
+            return self
+        return other

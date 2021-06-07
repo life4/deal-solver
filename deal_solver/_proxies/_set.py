@@ -236,12 +236,7 @@ class SetSort(ProxySort):
 class UntypedSetSort(SetSort):
     methods = SetSort.methods.copy()
 
-    def __new__(cls, expr=None, **kwargs):
-        if expr is not None:
-            return SetSort(expr, **kwargs)
-        return super().__new__(cls)
-
-    def __init__(self) -> None:
+    def __init__(self, expr=None, subtypes=None) -> None:
         pass
 
     @property
@@ -249,7 +244,7 @@ class UntypedSetSort(SetSort):
         return TypeFactory(
             type=type(self),
             default=self,
-            subtypes=(types.int.factory, ),
+            subtypes=(),
         )
 
     def evolve(self, **kwargs):

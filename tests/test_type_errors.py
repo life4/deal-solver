@@ -77,6 +77,7 @@ from .helpers import prove_f
     ('[] // 3',  "unsupported operand type(s) for //: 'list' and 'int'"),
     ('[] % 3',   "unsupported operand type(s) for %: 'list' and 'int'"),
     ('[] + ""',  'can only concatenate list (not "str") to list'),
+    ('() + ""',  'can only concatenate tuple (not "str") to tuple'),
 
     # unary operations for list
     ('+[]',      "bad operand type for unary +: 'list'"),

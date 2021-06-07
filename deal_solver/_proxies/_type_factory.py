@@ -27,8 +27,6 @@ class TypeFactory(typing.NamedTuple):
         if not issubclass(factory.type, self.type):
             return False
         for t1, t2 in zip(self.subtypes, factory.subtypes):
-            if isinstance(t2, property):  # TODO: fix it, frop `types.int.factory`
-                continue
             assert isinstance(t1, TypeFactory)
             assert isinstance(t2, TypeFactory)
             if not t1.match(t2):

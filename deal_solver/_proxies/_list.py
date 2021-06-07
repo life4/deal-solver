@@ -57,27 +57,19 @@ class ListSort(VarTupleSort):
 class UntypedListSort(ListSort):
     methods = ListSort.methods.copy()
 
-    def __new__(cls, expr=None, **kwargs):
-        if expr is not None:
-            return ListSort(expr, **kwargs)
-        return super().__new__(cls)
-
-    def __init__(self) -> None:
+    def __init__(self, expr=None, subtypes=None) -> None:
         pass
 
     @property
     def subtypes(self):
-        return (types.int.factory,)
+        raise RuntimeError
 
     @property
     def factory(self) -> TypeFactory:
-        sort = self.expr.sort().basis()
-        expr = self.make_empty_expr(sort)
-        empty = self.evolve(expr=expr)
         return TypeFactory(
             type=type(self),
-            default=empty,
-            subtypes=(types.int.factory,),
+            default=self,
+            subtypes=(),
         )
 
     @staticmethod
@@ -128,7 +120,7 @@ class UntypedListSort(ListSort):
 
     @methods.add(name='__add__', pure=False)
     def m_add(self, other: ProxySort, ctx: 'Context') -> ProxySort:
-        if not isinstance(other, ListSort):
+        if not isinstance(other, types.list):
             msg = 'can only concatenate {s} (not "{o}") to {s}'
             msg = msg.format(s=self.type_name, o=other.type_name)
             ctx.add_exception(TypeError, msg)
