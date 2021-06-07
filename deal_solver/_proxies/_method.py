@@ -51,6 +51,6 @@ class Method(ProxySort):
             new_value = result
         if not self.pure and var_name:
             if not var_name.isidentifier():
-                raise UnsupportedError('cannot modify attribute', var_name)
+                raise UnsupportedError('cannot modify', var_name)
             ctx.scope.set(name=var_name, value=new_value)
         return result

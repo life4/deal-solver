@@ -79,6 +79,23 @@ def test_subclasses_custom_class():
     assert theorem.conclusion is Conclusion.OK
 
 
+def test_custom_error_bad_parents():
+    theorem = prove_f("""
+        def func(): pass
+
+        class CustomBase(IndexError):
+            pass
+
+        class Custom(CustomBase, func, object, sum):
+            pass
+
+        @deal.raises(LookupError)
+        def f():
+            raise Custom
+    """)
+    assert theorem.conclusion is Conclusion.OK
+
+
 def test_if_then_ok():
     theorem = prove_f("""
         def f():

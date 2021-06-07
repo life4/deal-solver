@@ -62,7 +62,7 @@ class UntypedListSort(ListSort):
 
     @property
     def subtypes(self):
-        raise RuntimeError
+        raise NotImplementedError
 
     @property
     def factory(self) -> TypeFactory:
