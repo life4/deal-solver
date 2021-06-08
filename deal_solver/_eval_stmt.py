@@ -64,10 +64,21 @@ def eval_expr_stmt(node: astroid.Expr, ctx: Context) -> None:
 def eval_assign(node: astroid.Assign, ctx: Context) -> None:
     assert node.targets
     for target in node.targets:
-        if not isinstance(target, astroid.AssignName):
-            raise UnsupportedError('cannot assign to', type(target).__name__)
-        value_ref = eval_expr(node=node.value, ctx=ctx)
-        ctx.scope.set(name=target.name, value=value_ref)
+        # set item
+        if isinstance(target, astroid.Subscript):
+            if isinstance(target.slice, astroid.Slice):
+                raise UnsupportedError('cannot set item for slice')
+            key_ref = eval_expr(node=target.slice, ctx=ctx)
+            target_ref = eval_expr(node=target.value, ctx=ctx)
+            value_ref = eval_expr(node=node.value, ctx=ctx)
+            target_ref.m_setitem(key_ref, value_ref, ctx=ctx)
+            continue
+        # assign to a variable
+        if isinstance(target, astroid.AssignName):
+            value_ref = eval_expr(node=node.value, ctx=ctx)
+            ctx.scope.set(name=target.name, value=value_ref)
+            continue
+        raise UnsupportedError('cannot assign to', type(target).__name__)
 
 
 @eval_stmt.register(astroid.Return)

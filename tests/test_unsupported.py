@@ -51,6 +51,8 @@ def test_timeout():
     ('min([], default=13)', 'keyword function arguments are unsupported'),
     ('[1 for i in "12" for j in "34"]', 'to many loops inside list compr'),
     ('a, b = 3, 4',         'cannot assign to Tuple'),
+    ('a, b = 3, 4',         'cannot assign to Tuple'),
+    ('items[1:2] = 3',      'cannot set item for slice'),
     ('str([1.2])',          'cannot convert list to str'),
     ('1 is None',           'unsupported comparison operator is'),
     ('2.0 ** 2',            'cannot raise float in a power'),
@@ -76,6 +78,7 @@ def test_timeout():
 def test_unsupported(expr, err):
     proof = prove_f(f"""
         def f():
+            items = [1, 2]
             {expr}
     """)
     assert proof.conclusion == Conclusion.SKIP

@@ -149,6 +149,18 @@ def test_type_error__table(prefer_real, expr, err):
     assert proof.description == f'TypeError: {err}'
 
 
+@pytest.mark.parametrize('stmt, err', [
+    ('1[2] = 3', "'int' object does not support item assignment"),
+])
+def test_type_error__statements(stmt, err):
+    proof = prove_f(f"""
+        def f():
+            {stmt}
+    """)
+    assert proof.conclusion == Conclusion.FAIL
+    assert proof.description == f'TypeError: {err}'
+
+
 VALUES = [
     # regular concrete types
     '""', '1', '3.4', 'True',

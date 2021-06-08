@@ -139,6 +139,15 @@ class ProxySort:
         ctx.add_exception(TypeError, msg)
         return self
 
+    @methods.add(name='__setitem__')
+    def m_setitem(self, key: 'ProxySort', value: 'ProxySort', ctx: 'Context') -> 'ProxySort':
+        """self[key] = value
+        """
+        msg = "'{}' object does not support item assignment"
+        msg = msg.format(self.type_name)
+        ctx.add_exception(TypeError, msg)
+        return self
+
     @methods.add(name='__contains__')
     def m_contains(self, item, ctx: 'Context') -> 'BoolSort':
         """item in self
