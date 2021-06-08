@@ -120,3 +120,13 @@ def test_unsupported_annotation():
     assert proof.conclusion == Conclusion.SKIP
     assert type(proof.error) is UnsupportedError
     assert str(proof.error) == 'unsupported annotation type Unknown'
+
+
+def test_set_item_to_not_a_name():
+    proof = prove_f("""
+        def f():
+            {1: 2}[1] = 4
+    """)
+    assert proof.conclusion == Conclusion.SKIP
+    assert type(proof.error) is UnsupportedError
+    assert str(proof.error) == 'cannot assign to Subscript'

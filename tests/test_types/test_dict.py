@@ -145,3 +145,13 @@ def test_copy():
             assert b == {1: 2, 3: 4}
     """)
     assert theorem.conclusion is Conclusion.OK
+
+
+def test_setitem():
+    theorem = prove_f("""
+        def f():
+            a = {1: 2}
+            a[3] = 4
+            assert a == {1: 2, 3: 4}
+    """)
+    assert theorem.conclusion is Conclusion.OK

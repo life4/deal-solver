@@ -58,7 +58,7 @@ class DictSort(ProxySort):
         assert vtype
         ctx = Context.make_empty(get_contracts=None, z3_ctx=ctx)  # type: ignore
         empty = cls.make_empty(ktype, vtype)
-        expr = z3.Array(name, ktype.sort(), vtype.sort())
+        expr = z3.Array(name, ktype.sort(), empty.item_sort)
         empty.expr = expr
         return empty
 
