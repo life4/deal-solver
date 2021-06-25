@@ -25,6 +25,31 @@ def test_model(xtype, xvalue):
     assert model['x'] == xvalue
 
 
+@pytest.mark.parametrize('xtype, xvalue', [
+    ('list[int]', []),
+    ('list[int]', [1]),
+    ('list[int]', [1, 2]),
+    ('list[str]', ["hi"]),
+    ('list[bool]', [True]),
+    # ('tuple[int]', ()),
+    # ('list[float]', []),
+    ('list[float]', [1.2]),
+    ('set[int]', set()),
+    ('set[int]', {1}),
+    ('set[int]', {1, 2}),
+    ('dict[int, int]', {1: 2}),
+])
+def test_model_generics(xtype, xvalue):
+    proof = prove_f(f"""
+        def f(x: {xtype}):
+            assert x != {repr(xvalue)}
+    """)
+    assert proof.conclusion == Conclusion.FAIL
+    assert proof.example is not None
+    model = dict(proof.example)
+    assert model['x'] == xvalue
+
+
 def test_model_str():
     proof = prove_f("""
         def f(b: bool, i: int):

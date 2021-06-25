@@ -3,6 +3,26 @@ import typing
 import z3
 
 
+def _store(items, k, v):
+    if isinstance(items, set):
+        items.add(k)
+    else:
+        items[k] = v
+    return items
+
+
+GLOBALS = dict(
+    Unit=lambda x: [x],
+    Seq=lambda _: [],
+    Empty=lambda x: x,
+    Concat=lambda x, y: x + y,
+    Int=int,
+    K=lambda x, y: set() if y is False else dict(),
+    Store=_store,
+    new=lambda exists, val: val,
+)
+
+
 class Model:
     _model: z3.ModelRef
 
@@ -15,7 +35,8 @@ class Model:
             z3_val = self._model[decl]
             if isinstance(z3_val, z3.FuncInterp):
                 continue
-            py_val = eval(repr(z3_val))
+            print(repr(z3_val))
+            py_val = eval(repr(z3_val), GLOBALS)
             yield name, py_val
 
     def __bool__(self) -> bool:
