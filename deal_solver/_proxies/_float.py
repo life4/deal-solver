@@ -56,7 +56,7 @@ class FloatSort(ProxySort):
             default = z3.FPVal(.0, cls.sort(), ctx=self.expr.ctx)
         return TypeFactory(
             type=cls,
-            default=default,
+            default=type(self)(default),
             subtypes=(),
         )
 

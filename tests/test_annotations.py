@@ -5,60 +5,35 @@ from deal_solver import Conclusion, UnsupportedError
 from .helpers import prove_f
 
 
-@pytest.mark.parametrize('setup, ann, check', [
+@pytest.mark.parametrize('ann, check', [
     # simple annotations
-    ('', 'int',     'a - a == 0'),
-    ('', '"int"',   'a - a == 0'),
-    ('', 'float',   'a + 0.0 == a or not (a > 10 or a <= 10)'),
-    ('', 'str',     'len(a) >= 0 and a.startswith(a)'),
-    ('', 'str',     'len(a) >= 0'),
+    ('int',     'a - a == 0'),
+    ('"int"',   'a - a == 0'),
+    ('float',   'a + 0.0 == a or not (a > 10 or a <= 10)'),
+    ('str',     'len(a) >= 0 and a.startswith(a)'),
+    ('str',     'len(a) >= 0'),
 
     # generics
-    ('', 'list[int]',       '(a != []) or (a == [])'),
-    ('', 'set[int]',        '(a != set()) or (a == set())'),
-    ('', 'tuple[int, ...]', '(a != ()) or (a == ())'),
-    ('', 'dict[str, int]',  '(a != {}) or (a == {})'),
+    ('list[int]',       '(a != []) or (a == [])'),
+    ('set[int]',        '(a != set()) or (a == set())'),
+    ('tuple[int, ...]', '(a != ()) or (a == ())'),
+    ('dict[str, int]',  '(a != {}) or (a == {})'),
 
     # typing module
-    (
-        'from typing import List',
-        'List[int]',
-        'len(a) >= 0',
-    ),
-    (
-        'from typing import List',
-        'List[int]',
-        '(a != []) or (a == [])',
-    ),
-    (
-        'from typing import Set',
-        'Set[int]',
-        '(a != set()) or (a == set())',
-    ),
-    (
-        'from typing import Tuple',
-        'Tuple[int, ...]',
-        'len(a) >= 0',
-    ),
-    (
-        'from typing import Dict',
-        'Dict[str, int]',
-        '(a != {}) or (a == {})',
-    ),
-    (
-        'from typing import Pattern',
-        'Pattern',
-        'a.fullmatch',
-    ),
+    ('typing.List[int]',        'a.append'),
+    ('typing.List[int]',        '(a != []) or (a == [])'),
+    ('typing.Set[int]',         'a.add'),
+    ('typing.Tuple[int, ...]',  'len(a) >= 0'),
+    ('typing.Dict[str, int]',   '(a != {}) or (a == {})'),
+    ('typing.Pattern',          'a.fullmatch'),
 ])
-def test_asserts_ok(setup: str, ann: str, check: str) -> None:
-    text = """
-        {s}
-        def f(a: {a}):
-            assert {c}
-    """
-    text = text.format(s=setup, a=ann, c=check)
-    theorem = prove_f(text)
+def test_asserts_ok(ann: str, check: str) -> None:
+    theorem = prove_f(f"""
+        import typing
+
+        def f(a: {ann}):
+            assert {check}
+    """)
     assert theorem.conclusion is Conclusion.OK
 
 
@@ -67,6 +42,7 @@ def test_asserts_ok(setup: str, ann: str, check: str) -> None:
     ('', 'set'),
     ('', '"set"'),
     ('', 'tuple'),
+    ('import typing', 'typing.List'),
 
     # unsupported yet
     ('', 'tuple[int]'),

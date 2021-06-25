@@ -49,6 +49,8 @@ GENERICS = MappingProxyType({
 
 
 def ann2type(*, name: str, node: AstNode, ctx: z3.Context) -> MaybeSort:
+    if isinstance(node, astroid.Attribute):
+        return _sort_from_attr(name=name, node=node, ctx=ctx)
     if isinstance(node, astroid.Name):
         return _sort_from_name(name=name, node=node, ctx=ctx)
     if isinstance(node, astroid.Const) and type(node.value) is str:
@@ -56,6 +58,20 @@ def ann2type(*, name: str, node: AstNode, ctx: z3.Context) -> MaybeSort:
     if isinstance(node, astroid.Subscript):
         return _sort_from_getattr(name=name, node=node, ctx=ctx)
     return None
+
+
+def _sort_from_attr(*, name: str, node: astroid.Attribute, ctx: z3.Context) -> MaybeSort:
+    definitions = infer(node)
+    if len(definitions) != 1:
+        return None
+    module_name, _ = get_full_name(definitions[0])
+    if module_name not in {'typing', 'builtins'}:
+        return None
+
+    sort = SIMPLE_SORTS.get(node.attrname)
+    if sort is None:
+        return None
+    return sort.var(name=name, ctx=ctx)
 
 
 def _sort_from_name(*, name: str, node: astroid.Name, ctx: z3.Context) -> MaybeSort:
@@ -83,7 +99,7 @@ def _sort_from_getattr(*, name: str, node: astroid.Subscript, ctx: z3.Context) -
     if len(definitions) != 1:
         return None
     module_name, _ = get_full_name(definitions[0])
-    if module_name != 'typing' and module_name != 'builtins':
+    if module_name not in {'typing', 'builtins'}:
         return None
 
     if isinstance(node.slice.value, astroid.Tuple):
@@ -92,6 +108,7 @@ def _sort_from_getattr(*, name: str, node: astroid.Subscript, ctx: z3.Context) -
         nodes = [node.slice.value]
 
     type_name = get_name(node.value) or ''
+    type_name = type_name.split('.')[-1]
     type_name = ALIASES.get(type_name, type_name)
 
     if type_name == 'tuple':
