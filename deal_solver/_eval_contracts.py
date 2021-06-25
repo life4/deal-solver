@@ -40,6 +40,9 @@ def eval_contracts(func: astroid.FunctionDef, ctx: Context) -> Contracts:
         if contract.name == 'post':
             for value in _eval_post(ctx=ctx, args=contract.args):
                 goals.post.add(value)
+        if contract.name == 'ensure':
+            for value in _eval_ensure(ctx=ctx, args=contract.args):
+                goals.post.add(value)
         if contract.name == 'raises':
             values = _eval_raises(ctx=ctx, args=contract.args)
             goals.raises.update(values)
@@ -51,6 +54,7 @@ def _eval_pre(ctx: Context, args: list) -> typing.Optional[BoolSort]:
     if not isinstance(contract, astroid.Lambda):
         return None
     assert contract.args
+    ctx = ctx.make_child()
     return eval_expr(node=contract.body, ctx=ctx).m_bool(ctx=ctx)
 
 
@@ -60,14 +64,32 @@ def _eval_post(ctx: Context, args: list) -> typing.Iterator[BoolSort]:
         return
     assert contract.args
     cargs = contract.args.arguments
+    ctx = ctx.evolve(scope=Scope.make_empty())
     for ret in ctx.returns:
-        ctx = ctx.evolve(scope=Scope.make_empty())
         ctx.scope.set(
             name=cargs[0].name,
             value=ret.value,
         )
         # The contract is valid if the return value is not reached
         # or it passed the post-condition test.
+        yield or_expr(
+            ret.cond.m_not(ctx=ctx),
+            eval_expr(node=contract.body, ctx=ctx),
+            ctx=ctx,
+        )
+
+
+def _eval_ensure(ctx: Context, args: list) -> typing.Iterator[BoolSort]:
+    contract = args[0]
+    if not isinstance(contract, astroid.Lambda):
+        return
+    assert contract.args
+    ctx = ctx.make_child()
+    for ret in ctx.returns:
+        ctx.scope.set(
+            name='result',
+            value=ret.value,
+        )
         yield or_expr(
             ret.cond.m_not(ctx=ctx),
             eval_expr(node=contract.body, ctx=ctx),
