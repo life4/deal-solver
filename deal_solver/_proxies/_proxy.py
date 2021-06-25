@@ -100,10 +100,10 @@ class ProxySort:
         raise UnsupportedError('cannot convert {} to float'.format(self.type_name))
 
     def m_real(self, ctx: 'Context') -> 'RealSort':
-        raise UnsupportedError('cannot convert {} to float'.format(self.type_name))
+        raise NotImplementedError
 
     def m_fp(self, ctx: 'Context') -> 'FPSort':
-        raise UnsupportedError('cannot convert {} to float'.format(self.type_name))
+        raise NotImplementedError
 
     @methods.add(name='__call__')
     def m_call(self, *args, ctx: 'Context', **kwargs) -> 'ProxySort':

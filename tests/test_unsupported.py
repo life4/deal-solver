@@ -130,3 +130,16 @@ def test_set_item_to_not_a_name():
     assert proof.conclusion == Conclusion.SKIP
     assert type(proof.error) is UnsupportedError
     assert str(proof.error) == 'cannot assign to Subscript'
+
+
+def test_no_return_value():
+    proof = prove_f("""
+        def f2() -> int:
+            pass
+
+        def f():
+            assert f2() > 0
+    """)
+    assert proof.conclusion == Conclusion.SKIP
+    assert type(proof.error) is UnsupportedError
+    assert str(proof.error) == 'cannot find return value for f2'

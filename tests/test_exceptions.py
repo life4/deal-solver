@@ -86,7 +86,7 @@ def test_custom_error_bad_parents():
         class CustomBase(IndexError):
             pass
 
-        class Custom(CustomBase, func, object, sum):
+        class Custom(CustomBase, func, object, sum, int.bit_length):
             pass
 
         @deal.raises(LookupError)

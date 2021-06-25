@@ -173,3 +173,18 @@ def test_re_module_type_error(expr: str, err: str) -> None:
     proof = prove_f(text)
     assert proof.conclusion is Conclusion.FAIL
     assert proof.description == f'TypeError: {err}'
+
+
+@pytest.mark.parametrize('pat', [
+    'Isaac (?=Asimov)',
+    '^hi$',
+])
+def test_unsupported(pat: str):
+    proof = prove_f(f"""
+        import re
+
+        def f():
+            re.compile('{pat}')
+    """)
+    assert proof.conclusion is Conclusion.SKIP
+    assert str(proof.error) == 'cannot interpret regexp'

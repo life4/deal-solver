@@ -77,3 +77,15 @@ def test_exc(expr: str, exc, msg: str) -> None:
     proof = prove_f(text)
     assert proof.conclusion is Conclusion.FAIL
     assert proof.description == f'{exc.__name__}: {msg}'
+
+
+def test_unsupported():
+    text = """
+        import math
+
+        def f():
+            math.atan2(0, 0)
+    """
+    proof = prove_f(text)
+    assert proof.conclusion is Conclusion.SKIP
+    assert str(proof.error) == 'no definition for math.atan2'

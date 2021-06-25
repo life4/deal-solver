@@ -22,11 +22,9 @@ def eval_func(node: astroid.FunctionDef, ctx: Context) -> None:
         args = [v.expr for v in ctx.scope.layer.values()]
         # generate function signature
         sorts = [arg.sort() for arg in args]
-        if not node.returns:
-            raise UnsupportedError('no return type annotation for', node.name)
+        assert node.returns, 'cannot find type annotation for already executed func'
         sort = ann2type(name='_', node=node.returns, ctx=ctx.z3_ctx)
-        if sort is None:
-            raise UnsupportedError('unsupported type annotation', node.name)
+        assert sort is not None, 'cannot eval type annotation for already executed func'
         sorts.append(sort.sort())
 
         func = z3.Function(node.name, *sorts)

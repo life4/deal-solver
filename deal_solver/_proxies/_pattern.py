@@ -113,8 +113,10 @@ class PatternSort(ProxySort):
                 sub_re = cls._parse_token(t_type, sre_constants.CATEGORY_WORD)
             if t_args == sre_constants.CATEGORY_NOT_SPACE:
                 sub_re = cls._parse_token(t_type, sre_constants.CATEGORY_SPACE)
-            if sub_re is not None:
-                return z3.Intersect(re_all, z3.Complement(sub_re))
+
+            # there are more categories defined but they seem to be unused
+            assert sub_re is not None, 'unknown re category'
+            return z3.Intersect(re_all, z3.Complement(sub_re))
 
         raise UnsupportedError('cannot interpret regexp')
 

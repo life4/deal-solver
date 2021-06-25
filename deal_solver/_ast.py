@@ -20,8 +20,7 @@ def get_name(expr) -> Optional[str]:
 
 
 def get_full_name(expr) -> Tuple[str, str]:
-    if expr.parent is None:
-        return '', expr.name
+    assert expr.parent is not None
 
     if type(expr.parent) is astroid.Module:
         return expr.parent.qname(), expr.name
