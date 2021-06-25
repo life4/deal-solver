@@ -1,6 +1,6 @@
 from deal_solver import Conclusion
 
-from .helpers import prove_f
+from ..helpers import prove_f
 
 
 def test_ok():
