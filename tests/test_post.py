@@ -19,6 +19,7 @@ def test_fail():
             return a
     """)
     assert theorem.conclusion is Conclusion.FAIL
+    assert theorem.example is not None
     assert dict(theorem.example)['a'] == 13
 
 
@@ -30,6 +31,7 @@ def test_fail_1_out_of_2():
             return a ** 2
     """)
     assert theorem.conclusion is Conclusion.FAIL
+    assert theorem.example is not None
     assert dict(theorem.example)['a'] in (3, -3)
 
 

@@ -39,7 +39,7 @@ class SetSort(ProxySort):
         from .._context import Context
         assert subtype
         expr = z3.Const(name=name, sort=z3.SetSort(subtype.sort()))
-        ctx = Context.make_empty(get_contracts=None, z3_ctx=ctx)  # type: ignore
+        ctx = Context.make_empty(get_contracts=None, z3_ctx=ctx)
         return cls(expr=expr, subtypes=(subtype.factory, ))
 
     @property

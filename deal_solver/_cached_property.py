@@ -5,7 +5,7 @@ T = TypeVar('T')
 
 
 class cached_property(Generic[T]):  # noqa: N801
-    func: Callable[[Any], T]
+    func: Callable[[Any, Any], T]
 
     def __init__(self, func: Callable[[Any], T]) -> None:
         self.func = func  # type: ignore

@@ -6,8 +6,6 @@ vars:
   VENVS: ./venvs/
   FLIT_ENV:   "{{.VENVS}}flit"
   TEST_ENV: "{{.VENVS}}tests"
-
-  TESTS_PATH: tests/
   NPROC:
     sh: nproc
 
@@ -64,15 +62,13 @@ tasks:
       - "{{.TEST_ENV}}/bin/flake8 ."
 
   mypy:run:
-    sources:
-      - deal_solver/**/*.py
     deps:
       - task: flit:install
         vars:
           ENV: "{{.TEST_ENV}}"
           EXTRA: tests
     cmds:
-      - "{{.TEST_ENV}}/bin/mypy --ignore-missing-imports --allow-redefinition deal_solver/"
+      - "{{.TEST_ENV}}/bin/mypy"
 
   pytest:run:
     deps:
@@ -81,7 +77,7 @@ tasks:
           ENV: "{{.TEST_ENV}}"
           EXTRA: tests
     cmds:
-      - "{{.TEST_ENV}}/bin/pytest -n {{.NPROC}} {{.ARGS}} {{.TESTS_PATH}}"
+      - "{{.TEST_ENV}}/bin/pytest -n {{.NPROC}} {{.CLI_ARGS}}"
 
   isort:run:
     sources:

@@ -1,7 +1,9 @@
+import typing
 from importlib import import_module
 
 
-FUNCTIONS = dict()
+T = typing.TypeVar('T', bound=typing.Callable)
+FUNCTIONS: typing.Dict[str, typing.Any] = dict()
 
 
 def init_all():
@@ -12,8 +14,8 @@ def init_all():
     import_module('._re', package=__package__)
 
 
-def register(name: str):
-    def wrapper(func):
+def register(name: str) -> typing.Callable[[T], T]:
+    def wrapper(func: T) -> T:
         FUNCTIONS[name] = func
         return func
     return wrapper
