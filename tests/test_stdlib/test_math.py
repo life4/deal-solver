@@ -45,6 +45,13 @@ from ..helpers import prove_f
     'math.trunc(12.9) == 12',
     'math.trunc(-12.9) == -12',
     'math.trunc(-12.0) == -12',
+
+    # constants
+    'math.pi == 3.141592653589793',
+    'math.e == 2.718281828459045',
+    'math.tau == math.pi * 2',
+    'math.inf > 1000',
+    'math.inf != math.nan',
 ])
 def test_math_module(prefer_real: bool, check: str) -> None:
     # assert eval(check, dict(math=math))
