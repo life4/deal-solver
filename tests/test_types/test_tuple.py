@@ -12,6 +12,8 @@ from ..helpers import prove_f
     '(1, 2) != (2, 1)',
     '() != (2, 1)',
     '(1, 2) != ()',
+    '() != (2.1,)',
+    '(1.2,) != ()',
     '() == ()',
 
     # compare mismatching types

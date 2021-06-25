@@ -11,6 +11,7 @@ from .helpers import prove_f
     (int, 12),
     (int, -12),
     (float, 12.1),
+    (str, ''),
     (str, 'hello world'),
 ])
 def test_model(xtype, xvalue):
@@ -32,14 +33,14 @@ def test_model(xtype, xvalue):
     ('list[str]', ["hi"]),
     ('list[bool]', [True]),
     # ('tuple[int]', ()),
-    # ('list[float]', []),
+    ('list[float]', []),
     ('list[float]', [1.2]),
     ('set[int]', set()),
     ('set[int]', {1}),
     ('set[int]', {1, 2}),
     ('dict[int, int]', {1: 2}),
 ])
-def test_model_generics(xtype, xvalue):
+def test_model_generics(xtype, xvalue, prefer_real):
     proof = prove_f(f"""
         def f(x: {xtype}):
             assert x != {repr(xvalue)}
@@ -76,6 +77,17 @@ def test_model_skip_helpers():
     proof = prove_f("""
         def f(i: int):
             assert sum([3, i]) != 7
+    """)
+    assert proof.conclusion == Conclusion.FAIL
+    assert proof.example is not None
+    assert proof.example
+    assert str(proof.example) == 'i=4'
+
+
+def test_model_skip_helpers2():
+    proof = prove_f("""
+        def f(i: int):
+            assert sum([x for x in [3, i]]) != 7
     """)
     assert proof.conclusion == Conclusion.FAIL
     assert proof.example is not None

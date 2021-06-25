@@ -44,6 +44,16 @@ class ListSort(VarTupleSort):
     def r_extend(self, other: ProxySort, ctx: 'Context') -> ProxySort:
         return self.m_add(other, ctx=ctx)
 
+    @methods.add(name='__eq__')
+    def m_eq(self, other: ProxySort, ctx: 'Context') -> 'BoolSort':
+        if isinstance(other, UntypedListSort):
+            empty = self.make_empty_expr(sort=self.sort().basis())
+            expr = self.expr == empty
+            return types.bool(expr=expr)
+        if not self.factory.match(other.factory):
+            return types.bool.val(False, ctx=ctx)
+        return super().m_eq(other, ctx=ctx)
+
     @methods.add(name='insert')
     @methods.add(name='pop')
     @methods.add(name='remove')
@@ -126,3 +136,11 @@ class UntypedListSort(ListSort):
             ctx.add_exception(TypeError, msg)
             return self
         return other
+
+    @methods.add(name='__eq__')
+    def m_eq(self, other: ProxySort, ctx: 'Context') -> 'BoolSort':
+        if isinstance(other, UntypedListSort):
+            return types.bool.val(True, ctx=ctx)
+        if isinstance(other, types.list):
+            return other.m_eq(other.factory.default, ctx=ctx)
+        return types.bool.val(False, ctx=ctx)

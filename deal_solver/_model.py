@@ -16,10 +16,14 @@ GLOBALS = dict(
     Seq=lambda _: [],
     Empty=lambda x: x,
     Concat=lambda x, y: x + y,
-    Int=int,
     K=lambda x, y: set() if y is False else dict(),
     Store=_store,
-    new=lambda exists, val: val,
+    new=lambda _, val: val,
+
+    # types
+    Int=int,
+    Real=float,
+    FPSort=lambda x, y: float,
 )
 
 
@@ -33,9 +37,8 @@ class Model:
         for decl in self._model.decls():
             name = decl.name()
             z3_val = self._model[decl]
-            if isinstance(z3_val, z3.FuncInterp):
+            if isinstance(z3_val, z3.FuncInterp):  # pragma: no cover
                 continue
-            print(repr(z3_val))
             py_val = eval(repr(z3_val), GLOBALS)
             yield name, py_val
 
