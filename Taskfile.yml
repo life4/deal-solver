@@ -3,6 +3,7 @@ version: "3"
 
 vars:
   PYTHON: python3.7
+  VENVS: .venvs
   NPROC:
     sh: nproc
 
@@ -23,7 +24,7 @@ tasks:
     deps:
       - install:base
     cmds:
-      - .venvs/base/bin/flitenv test install
+      - .venvs/base/bin/flitenv test install --venvs={{.VENVS}}
   install:lint:
     sources:
       - pyproject.toml
@@ -31,7 +32,7 @@ tasks:
     deps:
       - install:base
     cmds:
-      - .venvs/base/bin/flitenv lint install
+      - .venvs/base/bin/flitenv lint install --venvs={{.VENVS}}
 
   pytest:run:
     desc: "run Python tests"
