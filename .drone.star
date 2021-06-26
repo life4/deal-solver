@@ -39,7 +39,7 @@ def step(env, python):
             COVERAGE_FILE=".coverage.{}.{}".format(env, python),
         ),
         commands=[
-            # "apt-get install curl git gcc python3-venv",
+            "apt-get install curl git gcc python3-venv",
             "./bin/task VENVS=/opt/py{python}/ -f {env}:run".format(
                 python=python,
                 env=env,
