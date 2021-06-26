@@ -13,9 +13,9 @@ env:
 tasks:
   install:base:
     status:
-      - test -f .venvs/base/bin/flitenv
+      - test -f {{.VENVS}}/base/bin/flitenv
     cmds:
-      - "{{.PYTHON}} -m venv .venvs/base"
+      - "{{.PYTHON}} -m venv {{.VENVS}}/base"
       - >
         {{.VENVS}}/base/bin/python3 -m pip
         install -U flitenv pip-tools

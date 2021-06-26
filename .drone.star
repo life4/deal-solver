@@ -39,7 +39,7 @@ def step(env, python):
             COVERAGE_FILE=".coverage.{}.{}".format(env, python),
         ),
         commands=[
-            "./bin/task VENVS=/opt/py{python}/ -f {env}:run".format(
+            "./bin/task VENVS=/opt/py{python} -f {env}:run".format(
                 python=python,
                 env=env,
             ),
