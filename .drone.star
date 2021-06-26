@@ -32,14 +32,14 @@ def main(ctx):
 def step(env, python):
     result = dict(
         name="{} (py{})".format(env, python),
-        image="python:{}-buster".format(python),
+        image="python:{}-slim-buster".format(python),
         depends_on=["install task"],
         environment=dict(
             # set coverage database file name to avoid conflicts between steps
             COVERAGE_FILE=".coverage.{}.{}".format(env, python),
         ),
         commands=[
-            "apt-get install curl git gcc python3-venv",
+            # "apt-get install curl git gcc python3-venv",
             "./bin/task VENVS=/opt/py{python}/ -f {env}:run".format(
                 python=python,
                 env=env,
