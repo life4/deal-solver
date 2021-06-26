@@ -1,4 +1,5 @@
 /venvs/
+/.venvs/
 /.task/
 __pycache__/
 /.mypy_cache/

@@ -2,10 +2,7 @@
 version: "3"
 
 vars:
-  PYTHON_BIN: python3.7
-  VENVS: ./venvs/
-  FLIT_ENV:   "{{.VENVS}}flit"
-  TEST_ENV: "{{.VENVS}}tests"
+  PYTHON: python3.7
   NPROC:
     sh: nproc
 
@@ -13,79 +10,44 @@ env:
   FLIT_ROOT_INSTALL: "1"
 
 tasks:
-  venv:create:
+  install:base:
     status:
-      - "test -f {{.ENV}}/bin/activate"
+      - test -f .venvs/base/bin/flitenv
     cmds:
-      - "{{.PYTHON_BIN}} -m venv {{.ENV}}"
-      - "{{.ENV}}/bin/python3 -m pip install -U pip setuptools wheel"
-  flit:init:
-    status:
-      - "test -f {{.FLIT_ENV}}/bin/flit"
-    deps:
-      - task: venv:create
-        vars:
-          ENV: "{{.FLIT_ENV}}"
-    cmds:
-      - "{{.FLIT_ENV}}/bin/python3 -m pip install flit"
-  flit:install:
+      - "{{.PYTHON}} -m venv .venvs/base"
+      - .venvs/base/bin/python3 -m pip install -U flitenv pip-tools
+  install:test:
     sources:
       - pyproject.toml
-      - "{{.ENV}}/bin/activate"
+      - requirements.txt
     deps:
-      - flit:init
-      - task: venv:create
-        vars:
-          ENV: "{{.ENV}}"
+      - install:base
     cmds:
-      - >
-        {{.FLIT_ENV}}/bin/flit install
-        --python={{.ENV}}/bin/python3
-        --deps=production
-        --extras={{.EXTRA}}
-
-  flake8:install:
-    status:
-      - "test -f {{.TEST_ENV}}/bin/flake8"
-    deps:
-      - task: venv:create
-        vars:
-          ENV: "{{.TEST_ENV}}"
-    cmds:
-      - "{{.TEST_ENV}}/bin/python3 -m pip install -r requirements-flake.txt"
-  flake8:run:
+      - .venvs/base/bin/flitenv test install
+  install:lint:
     sources:
-      - "**/*.py"
+      - pyproject.toml
+      - requirements.txt
     deps:
-      - flake8:install
+      - install:base
     cmds:
-      - "{{.TEST_ENV}}/bin/flake8 ."
-
-  mypy:run:
-    deps:
-      - task: flit:install
-        vars:
-          ENV: "{{.TEST_ENV}}"
-          EXTRA: tests
-    cmds:
-      - "{{.TEST_ENV}}/bin/mypy"
+      - .venvs/base/bin/flitenv lint install
 
   pytest:run:
+    desc: "run Python tests"
     deps:
-      - task: flit:install
-        vars:
-          ENV: "{{.TEST_ENV}}"
-          EXTRA: tests
+      - install:test
     cmds:
-      - "{{.TEST_ENV}}/bin/pytest -n {{.NPROC}} {{.CLI_ARGS}}"
-
-  isort:run:
-    sources:
-      - "**/*.py"
+      - .venvs/base/bin/flitenv test run pytest -n {{.NPROC}} {{.CLI_ARGS}}
+  flake8:run:
+    desc: "lint Python code"
     deps:
-      - task: flit:install
-        vars:
-          ENV: "{{.TEST_ENV}}"
-          EXTRA: tests
+      - install:lint
     cmds:
-      - "{{.TEST_ENV}}/bin/isort ."
+      - .venvs/base/bin/flitenv lint run flake8 {{.ARGS}} .
+  mypy:run:
+    desc: "check type annotations"
+    deps:
+      - install:lint
+    cmds:
+      - .venvs/base/bin/flitenv lint run mypy {{.ARGS}}

@@ -30,13 +30,16 @@ requires = [
 ]
 
 [tool.flit.metadata.requires-extra]
-tests = [
+test = [
     "hypothesis",
-    "isort",
-    "mypy>=0.910",
     "pytest",
     "pytest-cov",
     "pytest-xdist",
+]
+lint = [
+    "flake8",
+    "isort",
+    "mypy>=0.910",
 ]
 
 [tool.isort]
@@ -73,7 +76,7 @@ exclude_lines = [
 [tool.mypy]
 files = ["./deal_solver", "tests"]
 check_untyped_defs = true
-disallow_untyped_decorators = true
+# disallow_untyped_decorators = true
 ignore_missing_imports = true
 show_error_codes = true
 strict_equality = true
