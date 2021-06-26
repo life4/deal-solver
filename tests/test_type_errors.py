@@ -59,7 +59,7 @@ from .helpers import prove_f
     ('"a" ** 3',  "unsupported operand type(s) for ** or pow(): 'str' and 'int'"),
     ('"a" / 3',   "unsupported operand type(s) for /: 'str' and 'int'"),
     ('"a" // 3',  "unsupported operand type(s) for //: 'str' and 'int'"),
-    ('"a" % 3',   "not all arguments converted during string formatting"),
+    ('"a" % 3',   'not all arguments converted during string formatting'),
     ('"a" + 3',   'can only concatenate str (not "int") to str'),
     ('13 in ""',  "'in <string>' requires string as left operand, not int"),
 

@@ -50,7 +50,7 @@ class PatternSort(ProxySort):
             token = cls._parse_token(t_type, t_args)
             result.append(token)
         if not result:
-            return z3.Re("")
+            return z3.Re('')
         if len(result) == 1:
             return result[0]
         return z3.Concat(*result)
@@ -123,14 +123,14 @@ class PatternSort(ProxySort):
     @methods.add(name='fullmatch')
     def fullmatch(self, string: ProxySort, ctx: 'Context') -> 'BoolSort':
         if not isinstance(string, types.str):
-            ctx.add_exception(TypeError, "expected string or bytes-like object")
+            ctx.add_exception(TypeError, 'expected string or bytes-like object')
             return types.bool.val(False, ctx=ctx)
         return types.bool(expr=z3.InRe(string.expr, self.expr))
 
     @methods.add(name='match')
     def match(self, string: ProxySort, ctx: 'Context') -> 'BoolSort':
         if not isinstance(string, types.str):
-            ctx.add_exception(TypeError, "expected string or bytes-like object")
+            ctx.add_exception(TypeError, 'expected string or bytes-like object')
             return types.bool.val(False, ctx=ctx)
         rex = z3.Concat(
             self.expr,
@@ -138,7 +138,7 @@ class PatternSort(ProxySort):
                 z3.Range(
                     z3.Unit(z3.BitVecVal(0, 8)),
                     z3.Unit(z3.BitVecVal(255, 8)),
-                )
+                ),
             ),
         )
         return types.bool(expr=z3.InRe(string.expr, rex))

@@ -101,7 +101,7 @@ class Theorem:
                 for subnode in node.body:
                     if not isinstance(subnode, astroid.FunctionDef):
                         continue
-                    if not subnode.type == "staticmethod":
+                    if not subnode.type == 'staticmethod':
                         continue
                     yield cls(node=subnode, timeout=timeout)
 

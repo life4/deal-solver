@@ -30,7 +30,7 @@ def test_model(xtype, xvalue):
     ('list[int]', []),
     ('list[int]', [1]),
     ('list[int]', [1, 2]),
-    ('list[str]', ["hi"]),
+    ('list[str]', ['hi']),
     ('list[bool]', [True]),
     # ('tuple[int]', ()),
     ('list[float]', []),

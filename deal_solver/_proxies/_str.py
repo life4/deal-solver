@@ -42,7 +42,7 @@ class StrSort(ProxySort):
         cls = type(self)
         return TypeFactory(
             type=cls,
-            default=cls(expr=z3.StringVal("", ctx=self.expr.ctx)),
+            default=cls(expr=z3.StringVal('', ctx=self.expr.ctx)),
             subtypes=(),
         )
 

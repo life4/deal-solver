@@ -281,7 +281,7 @@ class UntypedSetSort(SetSort):
 
     @methods.add(name='pop', pure=False)
     def r_pop(self, ctx: 'Context') -> Mutation:
-        ctx.add_exception(KeyError, "pop from an empty set")
+        ctx.add_exception(KeyError, 'pop from an empty set')
         return Mutation(new_value=self, result=self)
 
     @methods.add(name='__len__')

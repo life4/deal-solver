@@ -9,17 +9,17 @@ from ._registry import register
 @register('ntpath.join')
 @register('os.path.join')
 def os_path_join(first_arg: ProxySort, *args: ProxySort, ctx: Context, **kwargs) -> ProxySort:
-    sep = StrSort(z3.StringVal("/"))
+    sep = StrSort(z3.StringVal('/'))
 
     if not isinstance(first_arg, StrSort):
-        msg = "expected str, bytes or os.PathLike object, not {}"
+        msg = 'expected str, bytes or os.PathLike object, not {}'
         msg = msg .format(first_arg.type_name)
         ctx.add_exception(TypeError, msg)
         return sep
 
     for arg in args:
         if not isinstance(arg, StrSort):
-            msg = "expected str, bytes or os.PathLike object, not int"
+            msg = 'expected str, bytes or os.PathLike object, not int'
             msg = msg .format(arg.type_name)
             ctx.add_exception(TypeError, msg)
             return sep

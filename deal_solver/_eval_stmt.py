@@ -31,7 +31,7 @@ def eval_func(node: astroid.FunctionDef, ctx: Context) -> None:
         proxy = type(sort)
         ctx.returns.add(ReturnInfo(
             value=proxy(func(*args)),
-            cond=types.bool.val(True, ctx=ctx)
+            cond=types.bool.val(True, ctx=ctx),
         ))
         return
 
