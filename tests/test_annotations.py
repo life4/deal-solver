@@ -14,17 +14,21 @@ from .helpers import prove_f
     ('str',     'len(a) >= 0'),
 
     # generics
-    ('list[int]',       '(a != []) or (a == [])'),
-    ('set[int]',        '(a != set()) or (a == set())'),
+    ('list[int]',       'a.append'),
+    ('list["int"]',     'a.append'),
+    ('set[int]',        'a.intersection'),
     ('tuple[int, ...]', '(a != ()) or (a == ())'),
-    ('dict[str, int]',  '(a != {}) or (a == {})'),
+    ('dict[str, int]',  'a.fromkeys'),
 
     # typing module
     ('typing.List[int]',        'a.append'),
     ('typing.List[int]',        '(a != []) or (a == [])'),
+    ('typing.Sequence[int]',    'len(a) >= 0'),
+    ('typing.Sized[int]',       'len(a) >= 0'),
     ('typing.Set[int]',         'a.add'),
-    ('typing.Tuple[int, ...]',  'len(a) >= 0'),
+    ('typing.Tuple[int, ...]',  'len(a) >= 0 and a.count'),
     ('typing.Dict[str, int]',   '(a != {}) or (a == {})'),
+    ('typing.Dict[str, int]',   'a.fromkeys'),
     ('typing.Pattern',          'a.fullmatch'),
 ])
 def test_asserts_ok(ann: str, check: str) -> None:
