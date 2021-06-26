@@ -91,9 +91,6 @@ def _sort_from_str(*, name: str, node: astroid.Const, ctx: z3.Context) -> MaybeS
 
 
 def _sort_from_getattr(*, name: str, node: astroid.Subscript, ctx: z3.Context) -> MaybeSort:
-    if not isinstance(node.slice, astroid.Index):
-        return None
-
     # check the module name
     definitions = infer(node.value)
     if len(definitions) != 1:
@@ -102,10 +99,13 @@ def _sort_from_getattr(*, name: str, node: astroid.Subscript, ctx: z3.Context) -
     if module_name not in {'typing', 'builtins'}:
         return None
 
-    if isinstance(node.slice.value, astroid.Tuple):
-        nodes = node.slice.value.elts
+    sl = node.slice
+    if isinstance(sl, astroid.Index):  # pragma: no cover
+        sl = sl.value
+    if isinstance(sl, astroid.Tuple):
+        nodes = sl.elts
     else:
-        nodes = [node.slice.value]
+        nodes = [sl]
 
     type_name = get_name(node.value) or ''
     type_name = type_name.split('.')[-1]
@@ -113,7 +113,7 @@ def _sort_from_getattr(*, name: str, node: astroid.Subscript, ctx: z3.Context) -
 
     if type_name == 'tuple':
         # variable size tuple
-        if len(nodes) == 2 and isinstance(nodes[-1], astroid.Ellipsis):
+        if _is_var_tuple(nodes):
             subtype = ann2type(name=name, node=nodes[0], ctx=ctx)
             if subtype is None:
                 return None
@@ -133,3 +133,14 @@ def _sort_from_getattr(*, name: str, node: astroid.Subscript, ctx: z3.Context) -
             return None
         subtypes.append(subtype)
     return generic.type.var(*subtypes, name=name, ctx=ctx)
+
+
+def _is_var_tuple(nodes: list) -> bool:
+    if len(nodes) != 2:
+        return False
+    last = nodes[-1]
+    if isinstance(last, astroid.Ellipsis):  # pragma: no cover
+        return True
+    if isinstance(last, astroid.Const):
+        return last.value is Ellipsis
+    return False

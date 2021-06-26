@@ -257,7 +257,7 @@ def eval_getitem(node: astroid.Subscript, ctx: Context) -> ProxySort:
 
 
 @eval_expr.register(astroid.Index)
-def eval_index(node: astroid.Index, ctx: Context) -> ProxySort:
+def eval_index(node: astroid.Index, ctx: Context) -> ProxySort:  # pragma: no cover
     return eval_expr(node=node.value, ctx=ctx)
 
 
