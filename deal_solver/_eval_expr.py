@@ -337,20 +337,25 @@ def eval_ternary_op(node: astroid.IfExp, ctx: Context) -> ProxySort:
 
 @eval_expr.register(astroid.Call)
 def eval_call(node: astroid.Call, ctx: Context) -> ProxySort:
-    if node.keywords:
-        raise UnsupportedError('keyword function arguments are unsupported')
-
     call_args = []
     for arg_node in node.args:
         arg_node = eval_expr(node=arg_node, ctx=ctx)
         call_args.append(arg_node)
+
+    call_kwargs = {}
+    if node.keywords:
+        for keyword in node.keywords:
+            assert isinstance(keyword, astroid.Keyword)
+            if not keyword.arg:
+                raise UnsupportedError('dict unpacking is unsupported')
+            call_kwargs[keyword.arg] = eval_expr(node=keyword.value, ctx=ctx)
 
     value = eval_expr(node=node.func, ctx=ctx)
     if isinstance(node.func, astroid.Attribute):
         var_name = node.func.expr.as_string()
     else:
         var_name = node.func.as_string()
-    return value.m_call(*call_args, ctx=ctx, var_name=var_name)
+    return value.m_call(*call_args, ctx=ctx, var_name=var_name, **call_kwargs)
 
 
 @eval_expr.register(astroid.Lambda)

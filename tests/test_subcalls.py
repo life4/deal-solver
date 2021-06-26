@@ -97,3 +97,25 @@ def test_subcall_many_returns():
             assert my_abs(a) * 2 >= 0
     """)
     assert theorem.conclusion is Conclusion.OK
+
+
+def test_call_another_kwarg():
+    theorem = prove_f("""
+        def another(a1, a2) -> int:
+            return a1 - a2
+
+        def f():
+            assert another(7, a2=2) == 5
+    """)
+    assert theorem.conclusion is Conclusion.OK
+
+
+def test_call_another_kwarg_order():
+    theorem = prove_f("""
+        def another(a1, a2) -> int:
+            return a1 - a2
+
+        def f():
+            assert another(a2=2, a1=7) == 5
+    """)
+    assert theorem.conclusion is Conclusion.OK

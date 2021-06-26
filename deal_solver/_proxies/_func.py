@@ -25,15 +25,25 @@ class FuncSort(ProxySort):
         self.impl = impl  # type: ignore
 
     @methods.add(name='__call__')
-    def m_call(self, *args, ctx: 'Context', **kwargs) -> ProxySort:
+    def m_call(self, *args: ProxySort, ctx: 'Context', var_name=None, **kwargs: ProxySort) -> ProxySort:
         """self(*args, **kwargs)
         """
         if isinstance(self.impl, astroid.FunctionDef):
-            return self._call_function(node=self.impl, ctx=ctx, call_args=args)
+            return self._call_function(
+                node=self.impl,
+                ctx=ctx,
+                call_args=args,
+                call_kwargs=kwargs,
+            )
         return self.impl(*args, ctx=ctx, **kwargs)
 
     @staticmethod
-    def _call_function(node: astroid.FunctionDef, ctx: 'Context', call_args=list) -> ProxySort:
+    def _call_function(
+        node: astroid.FunctionDef,
+        ctx: 'Context',
+        call_args: typing.Tuple[ProxySort, ...],
+        call_kwargs: typing.Dict[str, ProxySort],
+    ) -> ProxySort:
         from .._eval_contracts import eval_contracts
         from .._eval_stmt import eval_stmt
 
@@ -41,6 +51,8 @@ class FuncSort(ProxySort):
         func_ctx = ctx.make_empty(get_contracts=ctx.get_contracts, trace=ctx.trace)
         for arg, value in zip(node.args.args or [], call_args):
             func_ctx.scope.set(name=arg.name, value=value)
+        for name, value in call_kwargs.items():
+            func_ctx.scope.set(name=name, value=value)
 
         # call the function
         eval_stmt(node=node, ctx=func_ctx)
