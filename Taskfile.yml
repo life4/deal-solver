@@ -2,7 +2,8 @@
 version: "3"
 
 vars:
-  PYTHON: python3.7
+  PYTHON: python3
+  VENVS: .venvs
   NPROC:
     sh: nproc
 
@@ -12,10 +13,12 @@ env:
 tasks:
   install:base:
     status:
-      - test -f .venvs/base/bin/flitenv
+      - test -f {{.VENVS}}/base/bin/flitenv
     cmds:
-      - "{{.PYTHON}} -m venv .venvs/base"
-      - .venvs/base/bin/python3 -m pip install -U flitenv pip-tools
+      - "{{.PYTHON}} -m venv {{.VENVS}}/base"
+      - >
+        {{.VENVS}}/base/bin/python3 -m pip
+        install -U flitenv pip-tools
   install:test:
     sources:
       - pyproject.toml
@@ -23,7 +26,9 @@ tasks:
     deps:
       - install:base
     cmds:
-      - .venvs/base/bin/flitenv test install
+      - >
+        {{.VENVS}}/base/bin/flitenv test install
+        --venvs={{.VENVS}}
   install:lint:
     sources:
       - pyproject.toml
@@ -31,23 +36,34 @@ tasks:
     deps:
       - install:base
     cmds:
-      - .venvs/base/bin/flitenv lint install
+      - >
+        {{.VENVS}}/base/bin/flitenv lint install
+        --venvs={{.VENVS}}
 
   pytest:run:
     desc: "run Python tests"
     deps:
       - install:test
     cmds:
-      - .venvs/base/bin/flitenv test run pytest -n {{.NPROC}} {{.CLI_ARGS}}
+      - >
+        {{.VENVS}}/base/bin/flitenv test run
+        --venvs={{.VENVS}}
+        pytest -n {{.NPROC}} {{.CLI_ARGS}}
   flake8:run:
     desc: "lint Python code"
     deps:
       - install:lint
     cmds:
-      - .venvs/base/bin/flitenv lint run flake8 {{.ARGS}} .
+      - >
+        {{.VENVS}}/base/bin/flitenv lint run
+        --venvs={{.VENVS}}
+        flake8 {{.CLI_ARGS}} .
   mypy:run:
     desc: "check type annotations"
     deps:
       - install:lint
     cmds:
-      - .venvs/base/bin/flitenv lint run mypy {{.ARGS}}
+      - >
+        {{.VENVS}}/base/bin/flitenv lint run
+        --venvs={{.VENVS}}
+        mypy {{.CLI_ARGS}}
