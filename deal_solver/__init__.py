@@ -1,4 +1,6 @@
-"""Solver core for deal, powered by z3-solver.
+"""z3-powered solver (theorem prover) for deal.
+
+https://github.com/life4/deal
 """
 from ._eval_contracts import Contract
 from ._exceptions import ProveError, UnsupportedError
