@@ -27,8 +27,9 @@ tasks:
       - install:base
     cmds:
       - >
-        {{.VENVS}}/base/bin/flitenv test install
+        {{.VENVS}}/base/bin/flitenv
         --venvs={{.VENVS}}
+        test install
   install:lint:
     sources:
       - pyproject.toml
@@ -37,8 +38,9 @@ tasks:
       - install:base
     cmds:
       - >
-        {{.VENVS}}/base/bin/flitenv lint install
+        {{.VENVS}}/base/bin/flitenv
         --venvs={{.VENVS}}
+        lint install
 
   pytest:run:
     desc: "run Python tests"
@@ -46,8 +48,9 @@ tasks:
       - install:test
     cmds:
       - >
-        {{.VENVS}}/base/bin/flitenv test run
+        {{.VENVS}}/base/bin/flitenv
         --venvs={{.VENVS}}
+        test run
         pytest -n {{.NPROC}} {{.CLI_ARGS}}
   flake8:run:
     desc: "lint Python code"
@@ -55,8 +58,9 @@ tasks:
       - install:lint
     cmds:
       - >
-        {{.VENVS}}/base/bin/flitenv lint run
+        {{.VENVS}}/base/bin/flitenv
         --venvs={{.VENVS}}
+        lint run
         flake8 {{.CLI_ARGS}} .
   mypy:run:
     desc: "check type annotations"
@@ -64,6 +68,7 @@ tasks:
       - install:lint
     cmds:
       - >
-        {{.VENVS}}/base/bin/flitenv lint run
+        {{.VENVS}}/base/bin/flitenv
         --venvs={{.VENVS}}
+        lint run
         mypy {{.CLI_ARGS}}

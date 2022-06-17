@@ -57,10 +57,7 @@ class PatternSort(ProxySort):
 
     @classmethod
     def _parse_token(cls, t_type: int, t_args) -> 'PatternSort':
-        re_all = z3.Range(
-            z3.Unit(z3.BitVecVal(0, 8)),
-            z3.Unit(z3.BitVecVal(255, 8)),
-        )
+        re_all = z3.Range(chr(0), chr(255))
 
         if t_type == sre_constants.LITERAL:
             return z3.Re(chr(t_args))
@@ -135,10 +132,7 @@ class PatternSort(ProxySort):
         rex = z3.Concat(
             self.expr,
             z3.Star(
-                z3.Range(
-                    z3.Unit(z3.BitVecVal(0, 8)),
-                    z3.Unit(z3.BitVecVal(255, 8)),
-                ),
+                z3.Range(chr(0), chr(255)),
             ),
         )
         return types.bool(expr=z3.InRe(string.expr, rex))

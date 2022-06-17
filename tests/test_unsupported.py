@@ -26,7 +26,7 @@ def test_timeout():
             items.append('')
             assert items.count('') >= 1
     """, timeout=.5)
-    assert .5 <= monotonic() - start < 2
+    assert .5 <= monotonic() - start < 5
     assert theorem.conclusion is Conclusion.SKIP
     assert type(theorem.error) is ProveError
     assert theorem.error.args[0] == 'timeout'
