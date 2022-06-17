@@ -10,7 +10,7 @@ author = "Gram"
 author-email = "gram@orsinium.dev"
 home-page = "https://github.com/life4/deal-solver"
 description-file = "README.md"
-requires-python = ">=3.6"
+requires-python = ">=3.7"
 keywords = "deal,contracts,verification"
 
 classifiers=[
