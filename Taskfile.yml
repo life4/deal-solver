@@ -58,8 +58,9 @@ tasks:
       - install:lint
     cmds:
       - >
-        {{.VENVS}}/base/bin/flitenv lint run
+        {{.VENVS}}/base/bin/flitenv
         --venvs={{.VENVS}}
+        lint run
         flake8 {{.CLI_ARGS}} .
   mypy:run:
     desc: "check type annotations"
@@ -67,6 +68,7 @@ tasks:
       - install:lint
     cmds:
       - >
-        {{.VENVS}}/base/bin/flitenv lint run
+        {{.VENVS}}/base/bin/flitenv
         --venvs={{.VENVS}}
+        lint run
         mypy {{.CLI_ARGS}}
