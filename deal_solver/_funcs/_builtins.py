@@ -109,9 +109,9 @@ def builtins_ord(val: ProxySort, ctx: Context, **kwargs) -> IntSort:
         msg='ord() expected a character, but string of length N found',
         cond=val.m_len(ctx=ctx).m_ne(types.int.val(1, ctx=ctx), ctx=ctx),
     )
-    bv = z3.BitVec(random_name('ord_bv'), 8)
-    ctx.given.add(types.bool(z3.Unit(bv) == val.expr))
-    return types.int(z3.BV2Int(bv))
+    target = z3.String(random_name('ord_c'))
+    ctx.given.add(types.bool(target == val.expr))
+    return types.int(z3.StrToCode(target))
 
 
 @register('builtins.abs')
