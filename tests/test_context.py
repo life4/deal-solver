@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from deal_solver._context._layer import Layer
 from deal_solver._context._trace import Trace
 

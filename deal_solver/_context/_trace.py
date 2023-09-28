@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import typing
 from collections import Counter
 from contextlib import contextmanager

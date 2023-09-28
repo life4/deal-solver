@@ -1,4 +1,6 @@
 
+from __future__ import annotations
+
 import typing
 
 import z3
