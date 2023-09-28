@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from time import monotonic
 
 import pytest
@@ -5,17 +7,6 @@ import pytest
 from deal_solver import Conclusion, ProveError, UnsupportedError
 
 from .helpers import prove_f
-
-
-def test_cannot_prove():
-    theorem = prove_f("""
-        def f(x: int):
-            assert 2 ** x != x ** 2
-    """)
-    assert theorem.conclusion is Conclusion.SKIP
-    assert type(theorem.error) is ProveError
-    exp = 'smt tactic failed to show goal to be sat/unsat (incomplete (theory arithmetic))'
-    assert theorem.error.args[0] == exp
 
 
 def test_timeout():

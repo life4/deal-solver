@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import typing
 
 import astroid
@@ -22,7 +24,7 @@ class FuncSort(ProxySort):
     methods = ProxySort.methods.copy()
 
     def __init__(self, impl: F) -> None:
-        self.impl = impl  # type: ignore
+        self.impl = impl
 
     @methods.add(name='__call__')
     def m_call(self, *args: ProxySort, ctx: 'Context', var_name=None, **kwargs: ProxySort) -> ProxySort:

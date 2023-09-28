@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import z3
 
 from .._context import Context

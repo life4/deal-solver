@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any, Callable, Generic, Optional, Type, TypeVar, overload
 
 
@@ -21,6 +23,6 @@ class cached_property(Generic[T]):  # noqa: N801
     def __get__(self, obj, cls):
         if obj is None:
             return self
-        value = self.func(obj)
+        value = self.func(obj)  # type: ignore
         obj.__dict__[self.func.__name__] = value
         return value

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from ._registry import FUNCTIONS, init_all
 
 

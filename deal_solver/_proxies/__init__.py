@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from ._bool import BoolSort
 from ._dict import DictSort, UntypedDictSort
 from ._float import FloatSort

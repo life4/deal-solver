@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import typing
+from typing import Optional
 
 import z3
 
@@ -34,7 +37,7 @@ class VarTupleSort(ProxySort):
         self.subtypes = subtypes
 
     @classmethod
-    def var(cls: typing.Type[T], subtype: ProxySort = None, *, name: str, ctx: z3.Context) -> T:
+    def var(cls: typing.Type[T], subtype: Optional[ProxySort] = None, *, name: str, ctx: z3.Context) -> T:
         assert subtype
         expr = z3.Const(name=name, sort=z3.SeqSort(subtype.sort()))
         return cls(expr=expr, subtypes=(subtype.factory, ))
@@ -113,7 +116,7 @@ class VarTupleSort(ProxySort):
         return types.bool(expr=z3.Contains(self.expr, unit))
 
     @methods.add(name='index')
-    def r_index(self, other: ProxySort, start: ProxySort = None, *, ctx: 'Context') -> 'IntSort':
+    def r_index(self, other: ProxySort, start: Optional[ProxySort] = None, *, ctx: 'Context') -> 'IntSort':
         if start is None:
             start = types.int(z3.IntVal(0))
         unit = z3.Unit(other.expr)

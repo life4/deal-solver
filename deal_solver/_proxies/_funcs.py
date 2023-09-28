@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import typing
 from random import choices
 from string import ascii_letters

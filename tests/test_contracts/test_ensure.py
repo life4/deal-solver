@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from deal_solver import Conclusion
 
 from ..helpers import prove_f

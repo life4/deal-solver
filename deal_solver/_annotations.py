@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import typing
 from types import MappingProxyType
 
@@ -100,8 +102,6 @@ def _sort_from_getattr(*, name: str, node: astroid.Subscript, ctx: z3.Context) -
         return None
 
     sl = node.slice
-    if isinstance(sl, astroid.Index):  # pragma: no cover
-        sl = sl.value
     if isinstance(sl, astroid.Tuple):
         nodes = sl.elts
     else:
@@ -139,8 +139,6 @@ def _is_var_tuple(nodes: list) -> bool:
     if len(nodes) != 2:
         return False
     last = nodes[-1]
-    if isinstance(last, astroid.Ellipsis):  # pragma: no cover
-        return True
     if isinstance(last, astroid.Const):
         return last.value is Ellipsis
     return False

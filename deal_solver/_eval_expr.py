@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import typing
 
 import astroid
@@ -254,11 +256,6 @@ def eval_getitem(node: astroid.Subscript, ctx: Context) -> ProxySort:
     else:
         upper_ref = value_ref.m_len(ctx=ctx)
     return value_ref.get_slice(start=lower_ref, stop=upper_ref, ctx=ctx)
-
-
-@eval_expr.register(astroid.Index)
-def eval_index(node: astroid.Index, ctx: Context) -> ProxySort:  # pragma: no cover
-    return eval_expr(node=node.value, ctx=ctx)
 
 
 @eval_expr.register(astroid.Name)

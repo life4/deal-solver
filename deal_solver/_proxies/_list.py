@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import typing
 
 import z3
@@ -5,8 +7,8 @@ import z3
 from .._exceptions import UnsupportedError
 from ._proxy import ProxySort
 from ._registry import types
-from ._var_tuple import VarTupleSort
 from ._type_factory import TypeFactory
+from ._var_tuple import VarTupleSort
 
 
 if typing.TYPE_CHECKING:

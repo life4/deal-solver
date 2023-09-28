@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import math
+
 import pytest
 
 from deal_solver import Conclusion

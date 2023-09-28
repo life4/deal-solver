@@ -13,7 +13,7 @@ description-file = "README.md"
 requires-python = ">=3.7"
 keywords = "deal,contracts,verification"
 
-classifiers=[
+classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Environment :: Plugins",
     "Intended Audience :: Developers",
@@ -24,24 +24,17 @@ classifiers=[
     "Topic :: Software Development :: Quality Assurance",
 ]
 
-requires = [
-    "astroid",
-    "z3-solver",
-]
+requires = ["astroid", "z3-solver"]
 
 [tool.flit.metadata.requires-extra]
-test = [
-    "hypothesis",
-    "pytest",
-    "pytest-cov",
-    "pytest-xdist",
-]
+test = ["hypothesis", "pytest", "pytest-cov", "pytest-xdist"]
 lint = [
     "flake8",
     "flake8-bugbear",
     "flake8-commas",
     "flake8-quotes",
     "isort",
+    "unify",
     "mypy>=0.910",
 ]
 
@@ -50,7 +43,7 @@ line_length = 90
 combine_as_imports = true
 balanced_wrapping = true
 lines_after_imports = 2
-skip = "venvs/"
+skip = ".venvs/"
 multi_line_output = 5
 include_trailing_comma = true
 

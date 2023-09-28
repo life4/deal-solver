@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 import math
-import pytest
+
 import hypothesis
 import hypothesis.strategies
+import pytest
 from z3 import Z3Exception
 
 from deal_solver import Conclusion
@@ -147,6 +150,7 @@ def test_fuzz_math_floats(left, right, op):
     """
     text = text.format(expr=expr, expected=expected)
     theorem = prove_f(text)
+    pass
     assert theorem.conclusion is Conclusion.OK
 
 

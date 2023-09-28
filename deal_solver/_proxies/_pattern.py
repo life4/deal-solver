@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 import sre_constants
 import sre_parse
 import string
 import typing
+from typing import Optional
 
 import z3
 
@@ -24,7 +27,7 @@ class PatternSort(ProxySort):
     expr: z3.ReRef
     pattern: typing.Optional[str]
 
-    def __init__(self, expr, pattern: str = None) -> None:
+    def __init__(self, expr, pattern: Optional[str] = None) -> None:
         assert z3.is_re(expr)
         self.expr = expr
         self.pattern = pattern
