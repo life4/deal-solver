@@ -256,11 +256,6 @@ def eval_getitem(node: astroid.Subscript, ctx: Context) -> ProxySort:
     return value_ref.get_slice(start=lower_ref, stop=upper_ref, ctx=ctx)
 
 
-@eval_expr.register(astroid.Index)
-def eval_index(node: astroid.Index, ctx: Context) -> ProxySort:  # pragma: no cover
-    return eval_expr(node=node.value, ctx=ctx)
-
-
 @eval_expr.register(astroid.Name)
 def eval_name(node: astroid.Name, ctx: Context) -> ProxySort:
     # resolve local vars
