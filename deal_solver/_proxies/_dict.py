@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import typing
+from typing import Optional
 
 import z3
 
@@ -52,7 +53,7 @@ class DictSort(ProxySort):
 
     @classmethod
     def var(
-        cls, ktype: ProxySort = None, vtype: ProxySort = None,
+        cls, ktype: Optional[ProxySort] = None, vtype: Optional[ProxySort] = None,
         *, name: str, ctx: z3.Context,
     ) -> 'DictSort':
         from .._context import Context

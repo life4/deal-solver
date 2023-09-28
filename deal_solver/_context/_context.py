@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import typing
+from typing import Optional
 
 import z3
 
@@ -68,7 +69,7 @@ class Context(typing.NamedTuple):
             ctx=self,
         )
 
-    def add_exception(self, exc: type, msg: str = '', cond: 'BoolSort' = None) -> None:
+    def add_exception(self, exc: type, msg: str = '', cond: Optional['BoolSort'] = None) -> None:
         if cond is None:
             from .._proxies import BoolSort
             cond = BoolSort.val(True, ctx=self)

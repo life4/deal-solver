@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import typing
+from typing import Optional
 
 import z3
 
@@ -105,7 +106,7 @@ class StrSort(ProxySort):
         return types.bool(expr=expr)
 
     @methods.add(name='index')
-    def r_index(self, other: ProxySort, start: ProxySort = None, *, ctx: 'Context') -> 'IntSort':
+    def r_index(self, other: ProxySort, start: Optional[ProxySort] = None, *, ctx: 'Context') -> 'IntSort':
         assert self.expr is not None
         if start is None:
             start = types.int.val(0, ctx=ctx)
@@ -113,7 +114,7 @@ class StrSort(ProxySort):
         return types.int(expr=z3.IndexOf(self.expr, other.expr, start.expr))
 
     @methods.add(name='find')
-    def r_find(self, other: ProxySort, start: ProxySort = None, *, ctx: 'Context') -> 'IntSort':
+    def r_find(self, other: ProxySort, start: Optional[ProxySort] = None, *, ctx: 'Context') -> 'IntSort':
         assert self.expr is not None
         if start is None:
             start = types.int.val(0, ctx=ctx)

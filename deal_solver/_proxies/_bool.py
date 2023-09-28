@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import typing
+from typing import Optional
 
 import z3
 
@@ -37,7 +38,7 @@ class BoolSort(ProxySort):
         return cls(expr=expr)
 
     @classmethod
-    def val(cls, x, ctx: 'Context' = None) -> 'BoolSort':
+    def val(cls, x, ctx: Optional['Context'] = None) -> 'BoolSort':
         if ctx is not None:
             ctx = ctx.z3_ctx
         return cls(expr=z3.BoolVal(x, ctx=ctx))

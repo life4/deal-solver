@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import typing
+from typing import Optional
 
 import z3
 
@@ -37,7 +38,7 @@ class SetSort(ProxySort):
         return type(self)(**params)
 
     @classmethod
-    def var(cls, subtype: ProxySort = None, *, name: str, ctx: z3.Context) -> 'SetSort':
+    def var(cls, subtype: Optional[ProxySort] = None, *, name: str, ctx: z3.Context) -> 'SetSort':
         from .._context import Context
         assert subtype
         expr = z3.Const(name=name, sort=z3.SetSort(subtype.sort()))

@@ -4,6 +4,7 @@ import math
 import operator
 import typing
 from sys import float_info
+from typing import Optional
 
 import z3
 
@@ -63,13 +64,13 @@ class FloatSort(ProxySort):
         )
 
     @classmethod
-    def sort(cls, ctx: z3.Context = None) -> z3.SortRef:
+    def sort(cls, ctx: Optional[z3.Context] = None) -> z3.SortRef:
         if cls.prefer_real:
             return RealSort.sort(ctx=ctx)
         return FPSort.sort(ctx=ctx)
 
     @classmethod
-    def val(cls, x: float, ctx: 'Context' = None) -> 'FloatSort':
+    def val(cls, x: float, ctx: Optional['Context'] = None) -> 'FloatSort':
         if ctx is not None:
             ctx = ctx.z3_ctx
         if not math.isfinite(x):
@@ -216,11 +217,11 @@ class RealSort(FloatSort):
         self.expr = expr
 
     @staticmethod
-    def sort(ctx: z3.Context = None):
+    def sort(ctx: Optional[z3.Context] = None):
         return z3.RealSort(ctx=ctx)
 
     @classmethod
-    def val(cls, x: float, ctx: z3.Context = None):
+    def val(cls, x: float, ctx: Optional[z3.Context] = None):
         return cls(expr=z3.RealVal(x, ctx=ctx))
 
     @classmethod
@@ -291,12 +292,12 @@ class FPSort(FloatSort):
         self.expr = expr
 
     @staticmethod
-    def sort(ctx: z3.Context = None):
+    def sort(ctx: Optional[z3.Context] = None):
         # return z3.Float32()
         return z3.FPSort(ebits=float_info.dig, sbits=float_info.mant_dig, ctx=ctx)
 
     @classmethod
-    def val(cls, x, ctx: z3.Context = None):
+    def val(cls, x, ctx: Optional[z3.Context] = None):
         return FPSort(expr=z3.FPVal(x, cls.sort(), ctx=ctx))
 
     @classmethod
