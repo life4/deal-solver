@@ -2,8 +2,8 @@ from contextlib import suppress
 from typing import Optional, Tuple
 
 import astroid
-from astroid.node_classes import NodeNG
 from astroid.exceptions import InferenceError
+from astroid.node_classes import NodeNG
 
 from ._types import AstNode
 

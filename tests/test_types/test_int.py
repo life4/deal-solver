@@ -1,6 +1,6 @@
-import pytest
 import hypothesis
 import hypothesis.strategies
+import pytest
 
 from deal_solver import Conclusion
 

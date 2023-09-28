@@ -1,7 +1,8 @@
 import math
-import pytest
+
 import hypothesis
 import hypothesis.strategies
+import pytest
 from z3 import Z3Exception
 
 from deal_solver import Conclusion

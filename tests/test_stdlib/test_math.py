@@ -1,4 +1,5 @@
 import math
+
 import pytest
 
 from deal_solver import Conclusion
