@@ -73,7 +73,7 @@ def test_expr_asserts_ok(check: str) -> None:
     ('(1,).index(2)',   'ValueError: tuple.index(x): x not in tuple'),
 ])
 def test_expr_exception(check: str, error: str) -> None:
-    with pytest.raises(Exception):
+    with pytest.raises((ValueError, IndexError)):
         eval(check)
     text = """
         from typing import List
