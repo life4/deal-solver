@@ -77,7 +77,7 @@ tasks:
     deps:
       - install:test
     cmds:
-      - "{{.TEST_PYTHON}} -m pytest {{.CLI_ARGS}}"
+      - "{{.TEST_PYTHON}} -m pytest -n auto {{.CLI_ARGS}}"
   flake8:
     desc: "lint Python code"
     deps:

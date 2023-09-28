@@ -27,7 +27,7 @@ class Method(ProxySort):
 
     def __init__(self, name, impl, pure, prop, obj=None) -> None:
         self.name = name
-        self.impl = impl  # type: ignore
+        self.impl = impl
         self.pure = pure
         self.prop = prop
         self.obj = obj
