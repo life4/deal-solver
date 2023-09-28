@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from contextlib import suppress
-from typing import Optional, Tuple
 
 import astroid
 from astroid.exceptions import InferenceError

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import typing
-from typing import Optional
 
 import z3
 

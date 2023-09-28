@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Iterator, List
+from typing import Iterator
 
 from ._proxies import BoolSort
 

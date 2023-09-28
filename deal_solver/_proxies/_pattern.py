@@ -4,7 +4,6 @@ import sre_constants
 import sre_parse
 import string
 import typing
-from typing import Optional
 
 import z3
 

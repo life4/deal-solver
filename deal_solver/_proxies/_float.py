@@ -4,7 +4,6 @@ import math
 import operator
 import typing
 from sys import float_info
-from typing import Optional
 
 import z3
 
