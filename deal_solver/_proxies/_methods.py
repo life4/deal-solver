@@ -11,8 +11,8 @@ F = typing.TypeVar('F', bound=typing.Callable)
 
 
 class Methods:
-    _registry: typing.Dict[str, 'Method']
-    _raw: typing.List[dict]
+    _registry: dict[str, Method]
+    _raw: list[dict]
     _final: bool
 
     def __init__(self) -> None:
@@ -46,11 +46,11 @@ class Methods:
         self._final = True
         self._raw = []
 
-    def get(self, name: str) -> typing.Optional['Method']:
+    def get(self, name: str) -> Method | None:
         self._finalize()
         return self._registry.get(name)
 
-    def copy(self) -> 'Methods':
+    def copy(self) -> Methods:
         new = type(self)()
         new._registry = self._registry.copy()
         new._raw = self._raw.copy()

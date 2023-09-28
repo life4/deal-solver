@@ -5,7 +5,7 @@ from importlib import import_module
 
 
 T = typing.TypeVar('T', bound=typing.Callable)
-FUNCTIONS: typing.Dict[str, typing.Any] = dict()
+FUNCTIONS: dict[str, typing.Any] = dict()
 
 
 def init_all():

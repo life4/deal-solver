@@ -30,8 +30,8 @@ class Conclusion(enum.Enum):
 class Proof(typing.NamedTuple):
     conclusion: Conclusion
     description: str
-    error: typing.Optional[Exception] = None
-    example: typing.Optional[Model] = None
+    error: Exception | None = None
+    example: Model | None = None
 
     @property
     def color(self) -> str:
@@ -41,7 +41,7 @@ class Proof(typing.NamedTuple):
             return 'red'
         return 'yellow'
 
-    def evolve(self, **kwargs) -> 'Proof':
+    def evolve(self, **kwargs) -> Proof:
         return self._replace(**kwargs)
 
     def __str__(self) -> str:
@@ -83,7 +83,7 @@ class Theorem:
         cls,
         content: str, *,
         timeout: float = DEFAULT_TIMEOUT,
-    ) -> typing.Iterator['Theorem']:
+    ) -> typing.Iterator[Theorem]:
         content = dedent(content)
         module = astroid.parse(content)
         yield from cls.from_astroid(module=module, timeout=timeout)
@@ -93,7 +93,7 @@ class Theorem:
         cls, *,
         module: astroid.Module,
         timeout: float = DEFAULT_TIMEOUT,
-    ) -> typing.Iterator['Theorem']:
+    ) -> typing.Iterator[Theorem]:
         for node in module.values():
             if isinstance(node, astroid.FunctionDef):
                 yield cls(node=node, timeout=timeout)
@@ -112,7 +112,7 @@ class Theorem:
         return self._func.name or 'unknown_function'
 
     @cached_property
-    def _z3_context(self) -> typing.Optional[z3.Context]:
+    def _z3_context(self) -> z3.Context | None:
         # return z3.Context()
         return None
 
@@ -125,7 +125,7 @@ class Theorem:
         return ctx
 
     @cached_property
-    def arguments(self) -> typing.Dict[str, z3.SortRef]:
+    def arguments(self) -> dict[str, z3.SortRef]:
         result = dict()
         args: astroid.Arguments = self._func.args
         for arg, annotation in zip(args.args, args.annotations):
@@ -240,7 +240,7 @@ class Theorem:
         raise RuntimeError('unreachable')
 
     @staticmethod
-    def _select_proof(proofs: typing.List[Proof]) -> Proof:
+    def _select_proof(proofs: list[Proof]) -> Proof:
         assert all(proof.conclusion != Conclusion.FAIL for proof in proofs)
         if not proofs:
             return Proof(

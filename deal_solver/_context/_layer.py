@@ -13,16 +13,16 @@ T = typing.TypeVar('T')
 
 class ExceptionInfo(typing.NamedTuple):
     name: str               # exception name
-    names: typing.Set[str]  # exception name and names of all its bases
-    cond: 'BoolSort'        # indicates if the exception is raised
+    names: set[str]  # exception name and names of all its bases
+    cond: BoolSort        # indicates if the exception is raised
     message: str = ''
 
 
 class ReturnInfo(typing.NamedTuple):
-    value: 'ProxySort'
-    cond: 'BoolSort'
+    value: ProxySort
+    cond: BoolSort
 
-    def merge(self, other: 'ReturnInfo', ctx: 'Context') -> 'ReturnInfo':
+    def merge(self, other: ReturnInfo, ctx: Context) -> ReturnInfo:
         from .._proxies import if_expr, or_expr
 
         cls = type(self)
@@ -35,8 +35,8 @@ class ReturnInfo(typing.NamedTuple):
 class Layer(typing.Generic[T]):
     __slots__ = ['layer', 'parent']
 
-    layer: typing.List[T]
-    parent: typing.Optional['Layer[T]']
+    layer: list[T]
+    parent: Layer[T] | None
 
     def __init__(self, parent=None) -> None:
         self.layer = []
@@ -45,7 +45,7 @@ class Layer(typing.Generic[T]):
     def add(self, item: T) -> None:
         self.layer.append(item)
 
-    def make_child(self) -> 'Layer[T]':
+    def make_child(self) -> Layer[T]:
         cls = type(self)
         return cls(parent=self)
 

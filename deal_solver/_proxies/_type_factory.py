@@ -8,9 +8,9 @@ if typing.TYPE_CHECKING:
 
 
 class TypeFactory(typing.NamedTuple):
-    type: typing.Type['ProxySort']
-    default: 'ProxySort'
-    subtypes: typing.Tuple[object, ...]
+    type: type[ProxySort]
+    default: ProxySort
+    subtypes: tuple[object, ...]
 
     @property
     def type_name(self) -> str:
@@ -20,12 +20,12 @@ class TypeFactory(typing.NamedTuple):
     def sort(self):
         return self.default.sort()
 
-    def wrap(self, expr) -> 'ProxySort':
+    def wrap(self, expr) -> ProxySort:
         if self.subtypes:
             return self.type(expr, subtypes=self.subtypes)  # type: ignore
         return self.type(expr)
 
-    def match(self, factory: 'TypeFactory') -> bool:
+    def match(self, factory: TypeFactory) -> bool:
         if not issubclass(factory.type, self.type):
             return False
         for t1, t2 in zip(self.subtypes, factory.subtypes):

@@ -12,12 +12,12 @@ if typing.TYPE_CHECKING:
 
 
 class LambdaSort(ProxySort):
-    ctx: 'Context'
+    ctx: Context
     args: astroid.Arguments
     body: astroid.Expr
     methods = ProxySort.methods.copy()
 
-    def __init__(self, *, ctx: 'Context', args: astroid.Arguments, body) -> None:
+    def __init__(self, *, ctx: Context, args: astroid.Arguments, body) -> None:
         self.ctx = ctx
         self.args = args
         self.body = body

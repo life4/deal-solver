@@ -154,7 +154,7 @@ def eval_if_else(node: astroid.If, ctx: Context) -> None:
 
 @eval_stmt.register(astroid.Raise)
 def eval_raise(node: astroid.Raise, ctx: Context) -> None:
-    names: typing.Set[str] = set()
+    names: set[str] = set()
     for exc in (node.exc, node.cause):
         if exc is None:
             continue

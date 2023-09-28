@@ -24,17 +24,17 @@ class ListSort(VarTupleSort):
     methods = VarTupleSort.methods.copy()
 
     @methods.add(name='copy')
-    def m_copy(self, ctx: 'Context') -> 'ListSort':
+    def m_copy(self, ctx: Context) -> ListSort:
         return self
 
     @methods.add(name='clear', pure=False)
-    def m_clear(self, ctx: 'Context') -> 'ListSort':
+    def m_clear(self, ctx: Context) -> ListSort:
         sort = self.expr.sort().basis()
         expr = self.make_empty_expr(sort)
         return self.evolve(expr=expr)
 
     @methods.add(name='append', pure=False)
-    def r_append(self, item: ProxySort, ctx: 'Context') -> 'ListSort':
+    def r_append(self, item: ProxySort, ctx: Context) -> ListSort:
         if not self.subtypes[0].match(item.factory):
             msg = 'element has type {}, expected {}'
             msg = msg.format(item.type_name, self.subtypes[0].type_name)
@@ -43,11 +43,11 @@ class ListSort(VarTupleSort):
         return self.evolve(expr=self.expr + unit)
 
     @methods.add(name='extend', pure=False)
-    def r_extend(self, other: ProxySort, ctx: 'Context') -> ProxySort:
+    def r_extend(self, other: ProxySort, ctx: Context) -> ProxySort:
         return self.m_add(other, ctx=ctx)
 
     @methods.add(name='__eq__')
-    def m_eq(self, other: ProxySort, ctx: 'Context') -> 'BoolSort':
+    def m_eq(self, other: ProxySort, ctx: Context) -> BoolSort:
         if isinstance(other, UntypedListSort):
             empty = self.make_empty_expr(sort=self.sort().basis())
             expr = self.expr == empty
@@ -93,11 +93,11 @@ class UntypedListSort(ListSort):
         return z3.Empty(self.sort())
 
     @methods.add(name='__bool__')
-    def m_bool(self, ctx: 'Context') -> 'BoolSort':
+    def m_bool(self, ctx: Context) -> BoolSort:
         return types.bool.val(False, ctx=ctx)
 
     @methods.add(name='__getitem__')
-    def m_getitem(self, index: ProxySort, ctx: 'Context') -> ProxySort:
+    def m_getitem(self, index: ProxySort, ctx: Context) -> ProxySort:
         if not isinstance(index, types.int):
             msg = '{} indices must be integers or slices, not {}'
             msg = msg.format(self.type_name, index.type_name)
@@ -107,31 +107,31 @@ class UntypedListSort(ListSort):
         ctx.add_exception(IndexError, msg)
         return self
 
-    def get_slice(self, start: ProxySort, stop: ProxySort, ctx: 'Context') -> ProxySort:
+    def get_slice(self, start: ProxySort, stop: ProxySort, ctx: Context) -> ProxySort:
         return self
 
     @methods.add(name='__contains__')
-    def m_contains(self, item: ProxySort, ctx: 'Context') -> 'BoolSort':
+    def m_contains(self, item: ProxySort, ctx: Context) -> BoolSort:
         return types.bool.val(False, ctx=ctx)
 
     @methods.add(name='__len__')
-    def m_len(self, ctx: 'Context') -> 'IntSort':
+    def m_len(self, ctx: Context) -> IntSort:
         return types.int(expr=z3.IntVal(0))
 
     @methods.add(name='count')
-    def r_count(self, item: ProxySort, ctx: 'Context') -> 'IntSort':
+    def r_count(self, item: ProxySort, ctx: Context) -> IntSort:
         return types.int(expr=z3.IntVal(0))
 
     @methods.add(name='clear', pure=False)
-    def m_clear(self, ctx: 'Context') -> 'ListSort':
+    def m_clear(self, ctx: Context) -> ListSort:
         return self
 
     @methods.add(name='append', pure=False)
-    def r_append(self, item: ProxySort, ctx: 'Context') -> 'ListSort':
+    def r_append(self, item: ProxySort, ctx: Context) -> ListSort:
         return ListSort.val([item], ctx=ctx)
 
     @methods.add(name='__add__', pure=False)
-    def m_add(self, other: ProxySort, ctx: 'Context') -> ProxySort:
+    def m_add(self, other: ProxySort, ctx: Context) -> ProxySort:
         if not isinstance(other, types.list):
             msg = 'can only concatenate {s} (not "{o}") to {s}'
             msg = msg.format(s=self.type_name, o=other.type_name)
@@ -140,7 +140,7 @@ class UntypedListSort(ListSort):
         return other
 
     @methods.add(name='__eq__')
-    def m_eq(self, other: ProxySort, ctx: 'Context') -> 'BoolSort':
+    def m_eq(self, other: ProxySort, ctx: Context) -> BoolSort:
         if isinstance(other, UntypedListSort):
             return types.bool.val(True, ctx=ctx)
         if isinstance(other, types.list):

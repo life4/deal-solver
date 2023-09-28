@@ -13,12 +13,12 @@ HandlerType = typing.Callable[[AstNode, 'Context'], T]
 
 
 class HandlersRegistry(typing.Generic[T]):
-    _handlers: typing.Dict[typing.Type[AstNode], HandlerType]
+    _handlers: dict[type[AstNode], HandlerType]
 
     def __init__(self) -> None:
         self._handlers = dict()
 
-    def register(self, node: typing.Type[AstNode]) -> typing.Callable[[HandlerType], HandlerType]:
+    def register(self, node: type[AstNode]) -> typing.Callable[[HandlerType], HandlerType]:
         assert node not in self._handlers
 
         def wrapper(handler: HandlerType) -> HandlerType:

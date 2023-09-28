@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import typing
-from typing import Optional
 
 import z3
 
@@ -27,7 +26,7 @@ class VarTupleSort(ProxySort):
     methods = ProxySort.methods.copy()
 
     expr: z3.SeqRef
-    subtypes: typing.Tuple[TypeFactory, ...]
+    subtypes: tuple[TypeFactory, ...]
 
     def __init__(self, expr, subtypes=()) -> None:
         assert len(subtypes) == 1
@@ -37,7 +36,7 @@ class VarTupleSort(ProxySort):
         self.subtypes = subtypes
 
     @classmethod
-    def var(cls: typing.Type[T], subtype: Optional[ProxySort] = None, *, name: str, ctx: z3.Context) -> T:
+    def var(cls: type[T], subtype: ProxySort | None = None, *, name: str, ctx: z3.Context) -> T:
         assert subtype
         expr = z3.Const(name=name, sort=z3.SeqSort(subtype.sort()))
         return cls(expr=expr, subtypes=(subtype.factory, ))
@@ -62,7 +61,7 @@ class VarTupleSort(ProxySort):
         )
 
     @classmethod
-    def val(cls: typing.Type[T], values: typing.List[ProxySort], ctx: 'Context') -> T:
+    def val(cls: type[T], values: list[ProxySort], ctx: Context) -> T:
         items = cls.make_empty_expr(sort=values[0].expr.sort())
         for value in values:
             if not value.factory.match(values[0].factory):
@@ -79,12 +78,12 @@ class VarTupleSort(ProxySort):
         return z3.Empty(z3.SeqSort(sort))
 
     @methods.add(name='__bool__')
-    def m_bool(self, ctx: 'Context') -> 'BoolSort':
+    def m_bool(self, ctx: Context) -> BoolSort:
         expr = z3.Length(self.expr) != z3.IntVal(0)
         return types.bool(expr=expr)
 
     @methods.add(name='__getitem__')
-    def m_getitem(self, index: ProxySort, ctx: 'Context') -> ProxySort:
+    def m_getitem(self, index: ProxySort, ctx: Context) -> ProxySort:
         if not isinstance(index, types.int):
             msg = '{} indices must be integers or slices, not {}'
             msg = msg.format(self.type_name, index.type_name)
@@ -98,7 +97,7 @@ class VarTupleSort(ProxySort):
         expr = self.expr[index.expr]
         return self.subtypes[0].wrap(expr)
 
-    def get_slice(self, start: ProxySort, stop: ProxySort, ctx: 'Context') -> ProxySort:
+    def get_slice(self, start: ProxySort, stop: ProxySort, ctx: Context) -> ProxySort:
         start_expr = start.expr
         stop_expr = stop.expr
         expr = z3.SubSeq(
@@ -109,14 +108,14 @@ class VarTupleSort(ProxySort):
         return self.evolve(expr=expr)
 
     @methods.add(name='__contains__')
-    def m_contains(self, item: ProxySort, ctx: 'Context') -> 'BoolSort':
+    def m_contains(self, item: ProxySort, ctx: Context) -> BoolSort:
         if not self.subtypes[0].match(item.factory):
             return types.bool.val(False, ctx=ctx)
         unit = z3.Unit(item.expr)
         return types.bool(expr=z3.Contains(self.expr, unit))
 
     @methods.add(name='index')
-    def r_index(self, other: ProxySort, start: Optional[ProxySort] = None, *, ctx: 'Context') -> 'IntSort':
+    def r_index(self, other: ProxySort, start: ProxySort | None = None, *, ctx: Context) -> IntSort:
         if start is None:
             start = types.int(z3.IntVal(0))
         unit = z3.Unit(other.expr)
@@ -128,11 +127,11 @@ class VarTupleSort(ProxySort):
         return types.int(expr=z3.IndexOf(self.expr, unit, start.expr))
 
     @methods.add(name='__len__')
-    def m_len(self, ctx: 'Context') -> 'IntSort':
+    def m_len(self, ctx: Context) -> IntSort:
         return types.int(expr=z3.Length(self.expr))
 
     @methods.add(name='count')
-    def r_count(self, item: ProxySort, ctx: 'Context') -> 'IntSort':
+    def r_count(self, item: ProxySort, ctx: Context) -> IntSort:
         item_expr = item.expr
         f = z3.RecFunction(
             random_name('list_count'),
@@ -150,7 +149,7 @@ class VarTupleSort(ProxySort):
         return types.int(result)
 
     @methods.add(name='__add__')
-    def m_add(self, other: ProxySort, ctx: 'Context') -> ProxySort:
+    def m_add(self, other: ProxySort, ctx: Context) -> ProxySort:
         if self.type_name != other.type_name:
             msg = 'can only concatenate {s} (not "{o}") to {s}'
             msg = msg.format(s=self.type_name, o=other.type_name)
@@ -159,7 +158,7 @@ class VarTupleSort(ProxySort):
         return self.evolve(expr=self.expr + other.expr)
 
     @methods.add(name='__mul__')
-    def m_mul(self, other: ProxySort, ctx: 'Context') -> ProxySort:
+    def m_mul(self, other: ProxySort, ctx: Context) -> ProxySort:
         if not isinstance(other, types.int):
             msg = "can't multiply sequence by non-int of type '{}'"
             msg = msg.format(other.type_name)
@@ -168,7 +167,7 @@ class VarTupleSort(ProxySort):
         raise UnsupportedError('cannot multiply list')
 
     @methods.add(name='__eq__')
-    def m_eq(self, other: ProxySort, ctx: 'Context') -> 'BoolSort':
+    def m_eq(self, other: ProxySort, ctx: Context) -> BoolSort:
         if isinstance(other, UntypedVarTupleSort):
             empty = self.make_empty_expr(sort=self.sort().basis())
             expr = self.expr == empty
@@ -178,15 +177,15 @@ class VarTupleSort(ProxySort):
         return super().m_eq(other, ctx=ctx)
 
     @methods.add(name='__pos__')
-    def m_pos(self, ctx: 'Context') -> 'VarTupleSort':
+    def m_pos(self, ctx: Context) -> VarTupleSort:
         return self._bad_un_op(op='+', ctx=ctx)
 
     @methods.add(name='__neg__')
-    def m_neg(self, ctx: 'Context') -> 'VarTupleSort':
+    def m_neg(self, ctx: Context) -> VarTupleSort:
         return self._bad_un_op(op='-', ctx=ctx)
 
     @methods.add(name='__inv__')
-    def m_inv(self, ctx: 'Context') -> 'VarTupleSort':
+    def m_inv(self, ctx: Context) -> VarTupleSort:
         return self._bad_un_op(op='~', ctx=ctx)
 
 
@@ -217,32 +216,32 @@ class UntypedVarTupleSort(VarTupleSort):
         return z3.Empty(self.sort())
 
     @methods.add(name='__bool__')
-    def m_bool(self, ctx: 'Context') -> 'BoolSort':
+    def m_bool(self, ctx: Context) -> BoolSort:
         return types.bool.val(False, ctx=ctx)
 
     @methods.add(name='__getitem__')
-    def m_getitem(self, index: ProxySort, ctx: 'Context') -> ProxySort:
+    def m_getitem(self, index: ProxySort, ctx: Context) -> ProxySort:
         msg = '{} index out of range'.format(self.type_name)
         ctx.add_exception(IndexError, msg)
         return self
 
-    def get_slice(self, start: ProxySort, stop: ProxySort, ctx: 'Context') -> ProxySort:
+    def get_slice(self, start: ProxySort, stop: ProxySort, ctx: Context) -> ProxySort:
         return self
 
     @methods.add(name='__contains__')
-    def m_contains(self, item: ProxySort, ctx: 'Context') -> 'BoolSort':
+    def m_contains(self, item: ProxySort, ctx: Context) -> BoolSort:
         return types.bool.val(False, ctx=ctx)
 
     @methods.add(name='__len__')
-    def m_len(self, ctx: 'Context') -> 'IntSort':
+    def m_len(self, ctx: Context) -> IntSort:
         return types.int(expr=z3.IntVal(0))
 
     @methods.add(name='count')
-    def r_count(self, item: ProxySort, ctx: 'Context') -> 'IntSort':
+    def r_count(self, item: ProxySort, ctx: Context) -> IntSort:
         return types.int(expr=z3.IntVal(0))
 
     @methods.add(name='__add__')
-    def m_add(self, other: ProxySort, ctx: 'Context') -> ProxySort:
+    def m_add(self, other: ProxySort, ctx: Context) -> ProxySort:
         if not isinstance(other, types.tuple) or isinstance(other, types.list):
             msg = 'can only concatenate {s} (not "{o}") to {s}'
             msg = msg.format(s=self.type_name, o=other.type_name)

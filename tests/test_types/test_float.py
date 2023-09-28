@@ -150,7 +150,6 @@ def test_fuzz_math_floats(left, right, op):
     """
     text = text.format(expr=expr, expected=expected)
     theorem = prove_f(text)
-    pass
     assert theorem.conclusion is Conclusion.OK
 
 

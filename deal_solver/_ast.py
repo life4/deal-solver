@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from contextlib import suppress
-from typing import Optional, Tuple
 
 import astroid
 from astroid.exceptions import InferenceError
@@ -9,7 +8,7 @@ from astroid.exceptions import InferenceError
 from ._types import AstNode
 
 
-def get_name(expr) -> Optional[str]:
+def get_name(expr) -> str | None:
     if isinstance(expr, astroid.Name):
         return expr.name
     if isinstance(expr, astroid.Attribute):
@@ -20,7 +19,7 @@ def get_name(expr) -> Optional[str]:
     return None
 
 
-def get_full_name(expr) -> Tuple[str, str]:
+def get_full_name(expr) -> tuple[str, str]:
     assert expr.parent is not None
 
     if type(expr.parent) is astroid.Module:
@@ -38,7 +37,7 @@ def get_full_name(expr) -> Tuple[str, str]:
     return path, func_name
 
 
-def infer(expr: astroid.NodeNG) -> Tuple[AstNode, ...]:
+def infer(expr: astroid.NodeNG) -> tuple[AstNode, ...]:
     with suppress(InferenceError, RecursionError):
         guesses = expr.infer()
         if guesses is astroid.Uninferable:  # pragma: no cover
