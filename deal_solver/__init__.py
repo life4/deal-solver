@@ -9,7 +9,7 @@ from ._exceptions import ProveError, UnsupportedError
 from ._theorem import Conclusion, Proof, Theorem
 
 
-__version__ = '0.1.1'
+__version__ = '0.1.2'
 __all__ = [
     'Theorem',
     'Conclusion',
