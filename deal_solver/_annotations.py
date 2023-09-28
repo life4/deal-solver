@@ -11,7 +11,7 @@ from ._proxies import ProxySort, VarTupleSort, types
 from ._types import AstNode
 
 
-SIMPLE_SORTS: typing.Mapping[str, typing.Type[ProxySort]]
+SIMPLE_SORTS: typing.Mapping[str, type[ProxySort]]
 SIMPLE_SORTS = MappingProxyType({
     'bool':     types.bool,
     'int':      types.int,
@@ -38,7 +38,7 @@ MaybeSort = typing.Optional[ProxySort]
 
 
 class Generic(typing.NamedTuple):
-    type: typing.Type[ProxySort]
+    type: type[ProxySort]
     arity: int
 
 

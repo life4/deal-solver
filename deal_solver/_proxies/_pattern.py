@@ -25,15 +25,15 @@ class PatternSort(ProxySort):
     methods = ProxySort.methods.copy()
 
     expr: z3.ReRef
-    pattern: typing.Optional[str]
+    pattern: str | None
 
-    def __init__(self, expr, pattern: Optional[str] = None) -> None:
+    def __init__(self, expr, pattern: str | None = None) -> None:
         assert z3.is_re(expr)
         self.expr = expr
         self.pattern = pattern
 
     @classmethod
-    def var(cls, *, name: str, ctx: z3.Context) -> 'PatternSort':
+    def var(cls, *, name: str, ctx: z3.Context) -> PatternSort:
         expr = z3.Const(
             name=name,
             sort=z3.ReSort(z3.StringSort(ctx=ctx)),
@@ -41,7 +41,7 @@ class PatternSort(ProxySort):
         return cls(expr=expr)
 
     @classmethod
-    def val(cls, pattern: str, flags: int = 0) -> 'PatternSort':
+    def val(cls, pattern: str, flags: int = 0) -> PatternSort:
         parsed = sre_parse.parse(pattern, flags=flags)
         expr = cls._parse_pattern(parsed)
         return cls(expr=expr, pattern=pattern)
@@ -59,7 +59,7 @@ class PatternSort(ProxySort):
         return z3.Concat(*result)
 
     @classmethod
-    def _parse_token(cls, t_type: int, t_args) -> 'PatternSort':
+    def _parse_token(cls, t_type: int, t_args) -> PatternSort:
         re_all = z3.Range(chr(0), chr(255))
 
         if t_type == sre_constants.LITERAL:
@@ -121,14 +121,14 @@ class PatternSort(ProxySort):
         raise UnsupportedError('cannot interpret regexp')
 
     @methods.add(name='fullmatch')
-    def fullmatch(self, string: ProxySort, ctx: 'Context') -> 'BoolSort':
+    def fullmatch(self, string: ProxySort, ctx: Context) -> BoolSort:
         if not isinstance(string, types.str):
             ctx.add_exception(TypeError, 'expected string or bytes-like object')
             return types.bool.val(False, ctx=ctx)
         return types.bool(expr=z3.InRe(string.expr, self.expr))
 
     @methods.add(name='match')
-    def match(self, string: ProxySort, ctx: 'Context') -> 'BoolSort':
+    def match(self, string: ProxySort, ctx: Context) -> BoolSort:
         if not isinstance(string, types.str):
             ctx.add_exception(TypeError, 'expected string or bytes-like object')
             return types.bool.val(False, ctx=ctx)

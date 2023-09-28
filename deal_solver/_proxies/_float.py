@@ -43,7 +43,7 @@ class FloatSort(ProxySort):
         return FPSort.__new__(FPSort)
 
     @classmethod
-    def var(cls, *, name: str, ctx: z3.Context) -> 'FloatSort':
+    def var(cls, *, name: str, ctx: z3.Context) -> FloatSort:
         expr = z3.Const(
             name=name,
             sort=cls.sort(ctx=ctx),
@@ -64,13 +64,13 @@ class FloatSort(ProxySort):
         )
 
     @classmethod
-    def sort(cls, ctx: Optional[z3.Context] = None) -> z3.SortRef:
+    def sort(cls, ctx: z3.Context | None = None) -> z3.SortRef:
         if cls.prefer_real:
             return RealSort.sort(ctx=ctx)
         return FPSort.sort(ctx=ctx)
 
     @classmethod
-    def val(cls, x: float, ctx: Optional['Context'] = None) -> 'FloatSort':
+    def val(cls, x: float, ctx: Context | None = None) -> FloatSort:
         if ctx is not None:
             ctx = ctx.z3_ctx
         if not math.isfinite(x):
@@ -82,7 +82,7 @@ class FloatSort(ProxySort):
     @methods.add(name='__float__')
     @methods.add(name='conjugate')
     @methods.add(name='real', prop=True)
-    def m_float(self, ctx: 'Context') -> 'FloatSort':
+    def m_float(self, ctx: Context) -> FloatSort:
         return self
 
     @property
@@ -94,21 +94,21 @@ class FloatSort(ProxySort):
         return z3.is_fp(self.expr)
 
     @methods.add(name='__str__')
-    def m_str(self, ctx: 'Context'):
+    def m_str(self, ctx: Context):
         raise UnsupportedError('cannot convert float to str')
 
     @property
-    def is_nan(self) -> 'BoolSort':
+    def is_nan(self) -> BoolSort:
         raise NotImplementedError
 
     @methods.add(name='__pow__')
-    def m_pow(self, other: ProxySort, ctx: 'Context') -> ProxySort:
+    def m_pow(self, other: ProxySort, ctx: Context) -> ProxySort:
         if not isinstance(other, (types.bool, types.int, types.float)):
             return self._bad_bin_op(other, op='** or pow()', ctx=ctx)
         raise UnsupportedError('cannot raise float in a power')
 
     @methods.add(name='__floordiv__')
-    def m_floordiv(self, other: ProxySort, ctx: 'Context') -> 'ProxySort':
+    def m_floordiv(self, other: ProxySort, ctx: Context) -> ProxySort:
         if isinstance(other, types.bool):
             other = other.m_int(ctx=ctx)
         if not isinstance(other, (types.float, types.int)):
@@ -143,7 +143,7 @@ class FloatSort(ProxySort):
         return result
 
     @methods.add(name='__mul__')
-    def m_mul(self, other: ProxySort, ctx: 'Context') -> 'FloatSort':
+    def m_mul(self, other: ProxySort, ctx: Context) -> FloatSort:
         if isinstance(other, (types.str, types.list)):
             msg = "can't multiply sequence by non-int of type '{}'"
             msg = msg.format(self.type_name)
@@ -157,7 +157,7 @@ class FloatSort(ProxySort):
         return types.float(expr)
 
     @methods.add(name='__add__')
-    def m_add(self, other: ProxySort, ctx: 'Context') -> ProxySort:
+    def m_add(self, other: ProxySort, ctx: Context) -> ProxySort:
         if isinstance(other, types.bool):
             other = other.m_int(ctx=ctx)
         if not isinstance(other, (types.float, types.int)):
@@ -166,7 +166,7 @@ class FloatSort(ProxySort):
         return types.float(expr)
 
     @methods.add(name='__sub__')
-    def m_sub(self, other: ProxySort, ctx: 'Context') -> ProxySort:
+    def m_sub(self, other: ProxySort, ctx: Context) -> ProxySort:
         if isinstance(other, types.bool):
             other = other.m_int(ctx=ctx)
         if not isinstance(other, (types.float, types.int)):
@@ -175,11 +175,11 @@ class FloatSort(ProxySort):
         return types.float(expr)
 
     @methods.add(name='imag', prop=True)
-    def m_imag(self, ctx: 'Context') -> 'FloatSort':
+    def m_imag(self, ctx: Context) -> FloatSort:
         return self.val(0)
 
     @methods.add(name='is_integer')
-    def m_is_integer(self, ctx: 'Context') -> 'BoolSort':
+    def m_is_integer(self, ctx: Context) -> BoolSort:
         return self.m_eq(self.m_int(ctx=ctx).m_float(ctx=ctx), ctx=ctx)
 
     @methods.add(name='as_integer_ratio')
@@ -190,7 +190,7 @@ class FloatSort(ProxySort):
         raise UnsupportedError(msg)
 
     @methods.add(name='__eq__')
-    def m_eq(self, other: ProxySort, ctx: 'Context') -> 'BoolSort':
+    def m_eq(self, other: ProxySort, ctx: Context) -> BoolSort:
         if isinstance(other, (types.int, types.bool, types.float)):
             if self.is_real:
                 other = other.m_real(ctx=ctx)
@@ -217,41 +217,41 @@ class RealSort(FloatSort):
         self.expr = expr
 
     @staticmethod
-    def sort(ctx: Optional[z3.Context] = None):
+    def sort(ctx: z3.Context | None = None):
         return z3.RealSort(ctx=ctx)
 
     @classmethod
-    def val(cls, x: float, ctx: Optional[z3.Context] = None):
+    def val(cls, x: float, ctx: z3.Context | None = None):
         return cls(expr=z3.RealVal(x, ctx=ctx))
 
     @classmethod
     def _as_fp(cls, x):
         return z3.fpRealToFP(z3.RNE(), x, FPSort.sort())
 
-    def m_real(self, ctx: 'Context') -> 'RealSort':
+    def m_real(self, ctx: Context) -> RealSort:
         return self
 
-    def m_fp(self, ctx: 'Context') -> 'FPSort':
+    def m_fp(self, ctx: Context) -> FPSort:
         return FPSort(expr=self._as_fp(self.expr))
 
     @methods.add(name='__int__')
-    def m_int(self, ctx: 'Context') -> 'IntSort':
+    def m_int(self, ctx: Context) -> IntSort:
         return types.int(expr=z3.ToInt(self.expr))
 
     @methods.add(name='__bool__')
-    def m_bool(self, ctx: 'Context') -> 'BoolSort':
+    def m_bool(self, ctx: Context) -> BoolSort:
         return types.bool(expr=self.expr != z3.RealVal(0))
 
     @methods.add(name='__abs__')
-    def m_abs(self, ctx: 'Context') -> ProxySort:
+    def m_abs(self, ctx: Context) -> ProxySort:
         expr = z3.If(self.expr >= z3.RealVal(0), self.expr, -self.expr, ctx=ctx.z3_ctx)
         return type(self)(expr=expr)
 
     @property
-    def is_nan(self) -> 'BoolSort':
+    def is_nan(self) -> BoolSort:
         return types.bool.val(False)
 
-    def _binary_op(self, other: ProxySort, handler: typing.Callable, ctx: 'Context'):
+    def _binary_op(self, other: ProxySort, handler: typing.Callable, ctx: Context):
         if isinstance(other, (types.int, types.bool)):
             return handler(self.expr, other.m_real(ctx=ctx).expr)
         if other.is_real:
@@ -261,7 +261,7 @@ class RealSort(FloatSort):
         return handler(self.m_fp(ctx=ctx).expr, other.expr)
 
     @methods.add(name='__mod__')
-    def m_mod(self, other: ProxySort, ctx: 'Context') -> ProxySort:
+    def m_mod(self, other: ProxySort, ctx: Context) -> ProxySort:
         if isinstance(other, types.bool):
             other = other.m_int(ctx=ctx)
         if isinstance(other, types.float):
@@ -271,7 +271,7 @@ class RealSort(FloatSort):
         return self._bad_bin_op(other, op='%', ctx=ctx)
 
     @methods.add(name='__truediv__')
-    def m_truediv(self, other: ProxySort, ctx: 'Context') -> FloatSort:
+    def m_truediv(self, other: ProxySort, ctx: Context) -> FloatSort:
         if isinstance(other, (types.int, types.bool)):
             return RealSort(expr=self.m_real(ctx=ctx).expr / other.m_real(ctx=ctx).expr)
         if not isinstance(other, types.float):
@@ -292,42 +292,42 @@ class FPSort(FloatSort):
         self.expr = expr
 
     @staticmethod
-    def sort(ctx: Optional[z3.Context] = None):
+    def sort(ctx: z3.Context | None = None):
         # return z3.Float32()
         return z3.FPSort(ebits=float_info.dig, sbits=float_info.mant_dig, ctx=ctx)
 
     @classmethod
-    def val(cls, x, ctx: Optional[z3.Context] = None):
+    def val(cls, x, ctx: z3.Context | None = None):
         return FPSort(expr=z3.FPVal(x, cls.sort(), ctx=ctx))
 
     @classmethod
     def _as_real(cls, x):
         return z3.fpToReal(x)
 
-    def m_real(self, ctx: 'Context') -> 'RealSort':
+    def m_real(self, ctx: Context) -> RealSort:
         return RealSort(expr=self._as_real(self.expr))
 
-    def m_fp(self, ctx: 'Context') -> 'FPSort':
+    def m_fp(self, ctx: Context) -> FPSort:
         return self
 
     @methods.add(name='__int__')
-    def m_int(self, ctx: 'Context') -> 'IntSort':
+    def m_int(self, ctx: Context) -> IntSort:
         return types.int(expr=z3.ToInt(self.m_real(ctx=ctx).expr))
 
     @methods.add(name='__bool__')
-    def m_bool(self, ctx: 'Context') -> 'BoolSort':
+    def m_bool(self, ctx: Context) -> BoolSort:
         expr = self.expr != z3.FPVal(0, self.sort())
         return types.bool(expr=expr)
 
     @property
-    def is_nan(self) -> 'BoolSort':
+    def is_nan(self) -> BoolSort:
         return types.bool(expr=z3.fpIsNaN(self.expr))
 
     @methods.add(name='__abs__')
-    def m_abs(self, ctx: 'Context') -> ProxySort:
+    def m_abs(self, ctx: Context) -> ProxySort:
         return FPSort(expr=z3.fpAbs(self.expr, ctx=ctx.z3_ctx))
 
-    def _binary_op(self, other: ProxySort, handler: typing.Callable, ctx: 'Context'):
+    def _binary_op(self, other: ProxySort, handler: typing.Callable, ctx: Context):
         real_handler = handler
         fp_handler = FP_HANDLERS.get(handler, handler)
         if isinstance(other, (types.int, types.bool)):
@@ -340,7 +340,7 @@ class FPSort(FloatSort):
         return fp_handler(self.expr, other.m_fp(ctx=ctx).expr)
 
     @methods.add(name='__truediv__')
-    def m_truediv(self, other: ProxySort, ctx: 'Context') -> 'FloatSort':
+    def m_truediv(self, other: ProxySort, ctx: Context) -> FloatSort:
         if isinstance(other, (types.int, types.bool)):
             return type(self)(expr=self.m_fp(ctx=ctx).expr / other.m_fp(ctx=ctx).expr)
         if not isinstance(other, types.float):
@@ -353,7 +353,7 @@ class FPSort(FloatSort):
         return type(self)(expr=self.expr / other.m_fp(ctx=ctx).expr)
 
     @methods.add(name='__mod__')
-    def m_mod(self, other: ProxySort, ctx: 'Context') -> ProxySort:
+    def m_mod(self, other: ProxySort, ctx: Context) -> ProxySort:
         if isinstance(other, types.bool):
             other = other.m_int(ctx=ctx)
         if not isinstance(other, (types.float, types.int)):

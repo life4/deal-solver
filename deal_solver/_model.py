@@ -35,7 +35,7 @@ class Model:
     def __init__(self, model: z3.ModelRef) -> None:
         self._model = model
 
-    def __iter__(self) -> typing.Iterator[typing.Tuple[str, object]]:
+    def __iter__(self) -> typing.Iterator[tuple[str, object]]:
         for decl in self._model.decls():
             name = decl.name()
             z3_val = self._model[decl]

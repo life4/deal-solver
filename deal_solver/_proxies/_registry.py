@@ -23,27 +23,27 @@ Str = str
 
 class Registry:
     # built-ins
-    bool: typing.Type['BoolSort']
-    int: typing.Type['IntSort']
-    float: typing.Type['FloatSort']
-    list: typing.Type['ListSort']
-    set: typing.Type['SetSort']
-    str: typing.Type['StrSort']
-    tuple: typing.Type['VarTupleSort']
-    dict: typing.Type['DictSort']
+    bool: type[BoolSort]
+    int: type[IntSort]
+    float: type[FloatSort]
+    list: type[ListSort]
+    set: type[SetSort]
+    str: type[StrSort]
+    tuple: type[VarTupleSort]
+    dict: type[DictSort]
 
     # internal
-    func: typing.Type['FuncSort']
+    func: type[FuncSort]
 
     # stdlib
-    pattern: typing.Type['PatternSort']
+    pattern: type[PatternSort]
 
-    _proxies: typing.Dict[Str, typing.Type['ProxySort']]
+    _proxies: dict[Str, type[ProxySort]]
 
     def __init__(self) -> None:
         self._proxies = dict()
 
-    def __getattr__(self, name: Str) -> typing.Type['ProxySort']:
+    def __getattr__(self, name: Str) -> type[ProxySort]:
         return self._proxies[name]
 
     def add(self, cls: P) -> P:

@@ -6,7 +6,7 @@ from ._proxies import BoolSort
 
 
 class Goal:
-    _items: List[BoolSort]
+    _items: list[BoolSort]
 
     def __init__(self) -> None:
         self._items = []

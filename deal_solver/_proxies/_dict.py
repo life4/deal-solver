@@ -24,7 +24,7 @@ class DictSort(ProxySort):
     methods = ProxySort.methods.copy()
 
     expr: z3.ArrayRef
-    subtypes: typing.Tuple[TypeFactory, ...]
+    subtypes: tuple[TypeFactory, ...]
 
     def __init__(self, expr, subtypes: tuple) -> None:
         assert z3.is_array(expr)
@@ -53,9 +53,9 @@ class DictSort(ProxySort):
 
     @classmethod
     def var(
-        cls, ktype: Optional[ProxySort] = None, vtype: Optional[ProxySort] = None,
+        cls, ktype: ProxySort | None = None, vtype: ProxySort | None = None,
         *, name: str, ctx: z3.Context,
-    ) -> 'DictSort':
+    ) -> DictSort:
         from .._context import Context
         assert ktype
         assert vtype
@@ -76,7 +76,7 @@ class DictSort(ProxySort):
         )
 
     @classmethod
-    def make_empty(cls, key: ProxySort, value: ProxySort) -> 'DictSort':
+    def make_empty(cls, key: ProxySort, value: ProxySort) -> DictSort:
         item_sort = z3.Datatype(f'dict_val__{value.type_name}')
         item_sort.declare(
             'new',
@@ -94,7 +94,7 @@ class DictSort(ProxySort):
         )
 
     @methods.add(name='__setitem__', pure=False)
-    def m_setitem(self, key: ProxySort, value: ProxySort, ctx: 'Context') -> 'DictSort':
+    def m_setitem(self, key: ProxySort, value: ProxySort, ctx: Context) -> DictSort:
         if not self.subtypes[0].match(key.factory):
             raise UnsupportedError('key has type {}, expected {}'.format(
                 key.type_name,
@@ -110,7 +110,7 @@ class DictSort(ProxySort):
         return self.evolve(expr=expr)
 
     @methods.add(name='__getitem__', pure=False)
-    def m_getitem(self, key: ProxySort, ctx: 'Context') -> ProxySort:
+    def m_getitem(self, key: ProxySort, ctx: Context) -> ProxySort:
         if not self.subtypes[0].match(key.factory):
             ctx.add_exception(exc=KeyError)
             return self.subtypes[1].default
@@ -123,7 +123,7 @@ class DictSort(ProxySort):
         return self._val_type.wrap(expr)
 
     @methods.add(name='get')
-    def r_get(self, key: ProxySort, default: ProxySort, *, ctx: 'Context') -> ProxySort:
+    def r_get(self, key: ProxySort, default: ProxySort, *, ctx: Context) -> ProxySort:
         item = z3.Select(self.expr, key.expr)
         expr = z3.If(
             self.item_sort.exists(item),
@@ -133,17 +133,17 @@ class DictSort(ProxySort):
         return self._val_type.wrap(expr)
 
     @methods.add(name='copy')
-    def r_copy(self, ctx: 'Context') -> 'DictSort':
+    def r_copy(self, ctx: Context) -> DictSort:
         return self
 
     @methods.add(name='clear', pure=False)
-    def r_clear(self, ctx: 'Context') -> 'DictSort':
+    def r_clear(self, ctx: Context) -> DictSort:
         item = self.expr.default()
         expr = z3.K(self.expr.domain(), item)
         return self.evolve(expr=expr)
 
     @methods.add(name='pop', pure=False)
-    def r_pop(self, key: ProxySort, ctx: 'Context') -> Mutation:
+    def r_pop(self, key: ProxySort, ctx: Context) -> Mutation:
         if not self.subtypes[0].match(key.factory):
             ctx.add_exception(exc=KeyError)
             return Mutation(new_value=self, result=self.subtypes[1].default)
@@ -162,7 +162,7 @@ class DictSort(ProxySort):
         return Mutation(new_value=new_value, result=result)
 
     @methods.add(name='__contains__')
-    def m_contains(self, key: ProxySort, ctx: 'Context') -> 'BoolSort':
+    def m_contains(self, key: ProxySort, ctx: Context) -> BoolSort:
         if not self.subtypes[0].match(key.factory):
             return types.bool.val(False, ctx=ctx)
         item = z3.Select(self.expr, key.expr)
@@ -170,13 +170,13 @@ class DictSort(ProxySort):
         return types.bool(expr=expr)
 
     @methods.add(name='__bool__')
-    def m_bool(self, ctx: 'Context') -> 'BoolSort':
+    def m_bool(self, ctx: Context) -> BoolSort:
         empty = z3.K(dom=self.expr.domain(), v=self.expr.default())
         expr = self.expr != empty
         return types.bool(expr=expr)
 
     @methods.add(name='__eq__')
-    def m_eq(self, other: ProxySort, ctx: 'Context') -> 'BoolSort':
+    def m_eq(self, other: ProxySort, ctx: Context) -> BoolSort:
         if isinstance(other, UntypedDictSort):
             return other.m_eq(self, ctx=ctx)
         if not self.factory.match(other.factory):
@@ -225,29 +225,29 @@ class UntypedDictSort(DictSort):
         return z3.K(dom=z3.IntSort(), v=item)
 
     @methods.add(name='__setitem__', pure=False)
-    def m_setitem(self, key: ProxySort, value: ProxySort, ctx: 'Context') -> 'DictSort':
+    def m_setitem(self, key: ProxySort, value: ProxySort, ctx: Context) -> DictSort:
         dict_val = DictSort.make_empty(key, value)
         return dict_val.m_setitem(key=key, value=value, ctx=ctx)
 
     @methods.add(name='__getitem__', pure=False)
-    def m_getitem(self, key: ProxySort, ctx: 'Context') -> ProxySort:
+    def m_getitem(self, key: ProxySort, ctx: Context) -> ProxySort:
         ctx.add_exception(KeyError, '')
         return self
 
     @methods.add(name='clear', pure=False)
-    def r_clear(self, ctx: 'Context') -> 'DictSort':
+    def r_clear(self, ctx: Context) -> DictSort:
         return self
 
     @methods.add(name='get')
-    def r_get(self, key: ProxySort, default: ProxySort, *, ctx: 'Context') -> ProxySort:
+    def r_get(self, key: ProxySort, default: ProxySort, *, ctx: Context) -> ProxySort:
         return default
 
     @methods.add(name='__contains__')
-    def m_contains(self, key: ProxySort, ctx: 'Context') -> 'BoolSort':
+    def m_contains(self, key: ProxySort, ctx: Context) -> BoolSort:
         return types.bool.val(False, ctx=ctx)
 
     @methods.add(name='__eq__')
-    def m_eq(self, other: ProxySort, ctx: 'Context') -> 'BoolSort':
+    def m_eq(self, other: ProxySort, ctx: Context) -> BoolSort:
         if not isinstance(other, types.dict):
             return types.bool.val(False, ctx=ctx)
         if isinstance(other, UntypedDictSort):

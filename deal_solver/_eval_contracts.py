@@ -18,13 +18,13 @@ class Contract(typing.NamedTuple):
       and many nodes for `raises` (which are exceptions).
     """
     name: str
-    args: typing.List[AstNode]
+    args: list[AstNode]
 
 
 class Contracts(typing.NamedTuple):
     pre: Goal
     post: Goal
-    raises: typing.Set[str]
+    raises: set[str]
 
 
 def eval_contracts(func: astroid.FunctionDef, ctx: Context) -> Contracts:
@@ -51,7 +51,7 @@ def eval_contracts(func: astroid.FunctionDef, ctx: Context) -> Contracts:
     return goals
 
 
-def _eval_pre(ctx: Context, args: list) -> typing.Optional[BoolSort]:
+def _eval_pre(ctx: Context, args: list) -> BoolSort | None:
     contract = args[0]
     if not isinstance(contract, astroid.Lambda):
         return None

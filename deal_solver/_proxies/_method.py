@@ -23,7 +23,7 @@ class Method(ProxySort):
     impl: typing.Callable
     pure: bool
     prop: bool
-    obj: typing.Optional[ProxySort]
+    obj: ProxySort | None
 
     def __init__(self, name, impl, pure, prop, obj=None) -> None:
         self.name = name
@@ -32,7 +32,7 @@ class Method(ProxySort):
         self.prop = prop
         self.obj = obj
 
-    def with_obj(self, obj: ProxySort) -> 'Method':
+    def with_obj(self, obj: ProxySort) -> Method:
         return type(self)(
             name=self.name,
             impl=self.impl,
@@ -42,7 +42,7 @@ class Method(ProxySort):
         )
 
     @methods.add(name='__call__')
-    def m_call(self, *args, ctx: 'Context', var_name: str = '', **kwargs) -> ProxySort:
+    def m_call(self, *args, ctx: Context, var_name: str = '', **kwargs) -> ProxySort:
         assert self.obj is not None
         result = self.impl(self.obj, *args, ctx=ctx, **kwargs)
         if isinstance(result, Mutation):

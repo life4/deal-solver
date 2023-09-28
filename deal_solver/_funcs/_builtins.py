@@ -41,7 +41,7 @@ def builtins_sum(items: ProxySort, ctx: Context, **kwargs) -> ProxySort:
 
 # TODO: support more than 2 explicit arguments.
 @register('builtins.min')
-def builtins_min(a: ProxySort, b: Optional[ProxySort] = None, *, ctx: Context, **kwargs) -> ProxySort:
+def builtins_min(a: ProxySort, b: ProxySort | None = None, *, ctx: Context, **kwargs) -> ProxySort:
     if b is not None:
         return if_expr(a.m_lt(b, ctx=ctx), a, b, ctx=ctx)
 
@@ -71,7 +71,7 @@ def builtins_min(a: ProxySort, b: Optional[ProxySort] = None, *, ctx: Context, *
 
 
 @register('builtins.max')
-def builtins_max(a: ProxySort, b: Optional[ProxySort] = None, *, ctx: Context, **kwargs) -> ProxySort:
+def builtins_max(a: ProxySort, b: ProxySort | None = None, *, ctx: Context, **kwargs) -> ProxySort:
     if b is not None:
         return if_expr(a.m_gt(b, ctx=ctx), a, b, ctx=ctx)
 
@@ -124,7 +124,7 @@ def builtins_abs(x: ProxySort, ctx: Context, **kwargs) -> ProxySort:
 
 
 @register('builtins.len')
-def builtins_len(items: ProxySort, ctx: 'Context', **kwargs) -> IntSort:
+def builtins_len(items: ProxySort, ctx: Context, **kwargs) -> IntSort:
     return items.m_len(ctx=ctx)
 
 
