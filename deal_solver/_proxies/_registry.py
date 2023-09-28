@@ -17,7 +17,7 @@ if typing.TYPE_CHECKING:
     from ._var_tuple import VarTupleSort
 
 
-P = typing.TypeVar('P', bound=typing.Type['ProxySort'])
+P = typing.TypeVar('P', bound='type[ProxySort]')
 Str = str
 
 
@@ -38,7 +38,7 @@ class Registry:
     # stdlib
     pattern: type[PatternSort]
 
-    _proxies: dict[Str, type[ProxySort]]
+    _proxies: typing.Dict[Str, type[ProxySort]]
 
     def __init__(self) -> None:
         self._proxies = dict()
