@@ -92,6 +92,12 @@ from .helpers import prove_f
     # compare mismatching empty types
     'set() != []',
     'not (set() == [])',
+
+    # chained comparison
+    '1 < 2 < 3',
+    '1 <= 1 < 2 <= 2',
+    '0.5 < 1 < 1.5',
+    'not (1 < 3 < 2)',
 ])
 def test_asserts_ok(prefer_real: bool, check: str) -> None:
     assert eval(check)
@@ -116,6 +122,10 @@ def test_asserts_ok(prefer_real: bool, check: str) -> None:
     '3 + 6 == 10',
     'False if True else True',
     'True if False else False',
+    # chained comparison: only the last link is false
+    '1 < 3 < 2',
+    '3 > 2 > 2',
+    '1 <= 2 <= 3 <= 0',
 ])
 def test_asserts_fail(check: str) -> None:
     assert not eval(check)
