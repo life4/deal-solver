@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 import typing
 
 import z3
@@ -26,7 +27,23 @@ GLOBALS = dict(
     Int=int,
     Real=float,
     FPSort=lambda x, y: float,
+
+    # special floating-point values, z3 prints them as `NaN`, `+oo`, and `-oo`
+    NaN=math.nan,
+    oo=math.inf,
 )
+
+
+def _to_python(z3_val: z3.ExprRef) -> object:
+    if isinstance(z3_val, z3.FPNumRef):
+        # An infinity can be printed as `1*(2**1024)` and an integral number
+        # as `1*(2**10)`, so check special values explicitly and cast to float.
+        if z3_val.isNaN():
+            return math.nan
+        if z3_val.isInf():
+            return -math.inf if z3_val.isNegative() else math.inf
+        return float(eval(repr(z3_val), GLOBALS))
+    return eval(repr(z3_val), GLOBALS)
 
 
 class Model:
@@ -41,8 +58,7 @@ class Model:
             z3_val = self._model[decl]
             if isinstance(z3_val, z3.FuncInterp):  # pragma: no cover
                 continue
-            py_val = eval(repr(z3_val), GLOBALS)
-            yield name, py_val
+            yield name, _to_python(z3_val)
 
     def __bool__(self) -> bool:
         return len(self._model) != 0

@@ -28,6 +28,23 @@ def test_model(xtype, xvalue):
     assert model['x'] == xvalue
 
 
+@pytest.mark.parametrize('check, expected', [
+    ('x == x', 'nan'),
+    ('not x > 1.7976931348623157e+308', 'inf'),
+    ('not x < -1.7976931348623157e+308', '-inf'),
+])
+def test_model_float_special_values(check: str, expected: str) -> None:
+    proof = prove_f(f"""
+        def f(x: float):
+            assert {check}
+    """)
+    assert proof.conclusion == Conclusion.FAIL
+    assert proof.example is not None
+    model = dict(proof.example)
+    assert repr(model['x']) == expected
+    assert str(proof.example) == f'x={expected}'
+
+
 @pytest.mark.parametrize('xtype, xvalue', [
     ('list[int]', []),
     ('list[int]', [1]),
