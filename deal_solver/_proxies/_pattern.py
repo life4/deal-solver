@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-import sre_constants
-import sre_parse
 import string
+import sys
 import typing
 
 import z3
@@ -10,6 +9,17 @@ import z3
 from .._exceptions import UnsupportedError
 from ._proxy import ProxySort
 from ._registry import types
+
+
+if sys.version_info >= (3, 11):  # pragma: no cover
+    # The regex parser moved to `re._parser` and `re._constants` in Python 3.11.
+    # The `sre_*` modules were deprecated aliases since then and are removed in 3.15.
+    from re import (  # type: ignore[attr-defined]
+        _constants as sre_constants, _parser as sre_parse,
+    )
+else:  # pragma: no cover
+    import sre_constants
+    import sre_parse
 
 
 if typing.TYPE_CHECKING:
@@ -126,6 +136,7 @@ class PatternSort(ProxySort):
             return types.bool.val(False, ctx=ctx)
         return types.bool(expr=z3.InRe(string.expr, self.expr))
 
+    @methods.add(name='prefixmatch')  # Python 3.15+
     @methods.add(name='match')
     def match(self, string: ProxySort, ctx: Context) -> BoolSort:
         if not isinstance(string, types.str):

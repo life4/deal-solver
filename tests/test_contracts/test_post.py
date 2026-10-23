@@ -37,6 +37,20 @@ def test_fail_1_out_of_2():
     assert dict(theorem.example)['a'] in (3, -3)
 
 
+def test_fail_chained_comparison():
+    # Every link of the chain must hold, not only the first one: `0 <= result` holds
+    # for all `a` allowed by the pre-condition, while `result <= 10` does not.
+    theorem = prove_f("""
+        @deal.pre(lambda a: 0 <= a <= 10)
+        @deal.post(lambda result: 0 <= result <= 10)
+        def f(a: int) -> int:
+            return a * 2
+    """)
+    assert theorem.conclusion is Conclusion.FAIL
+    assert theorem.example is not None
+    assert dict(theorem.example)['a'] in range(6, 11)
+
+
 def test_pre_post_condition_name_conflict():
     theorem = prove_f("""
         @deal.post(lambda a: a > 10)

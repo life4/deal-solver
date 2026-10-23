@@ -85,6 +85,8 @@ def eval_bin_op(node: astroid.BinOp, ctx: Context) -> ProxySort:
 
 @eval_expr.register(astroid.Compare)
 def eval_compare(node: astroid.Compare, ctx: Context) -> ProxySort:
+    # `a < b < c` is `a < b and b < c`, with `b` evaluated only once.
+    results = []
     left = eval_expr(node=node.left, ctx=ctx)
     for op, right_node in node.ops:
         assert op, 'missed comparison operator'
@@ -93,10 +95,14 @@ def eval_compare(node: astroid.Compare, ctx: Context) -> ProxySort:
             raise UnsupportedError('unsupported comparison operator', op)
 
         right = eval_expr(node=right_node, ctx=ctx)
-        # TODO: proper chain
         method = left.m_getattr(op_name, ctx=ctx)
-        return method.m_call(right, ctx=ctx)
-    raise RuntimeError('unreachable')
+        results.append(method.m_call(right, ctx=ctx))
+        left = right
+    if not results:
+        raise RuntimeError('unreachable')
+    if len(results) == 1:
+        return results[0]
+    return and_expr(*results, ctx=ctx)
 
 
 @eval_expr.register(astroid.BoolOp)

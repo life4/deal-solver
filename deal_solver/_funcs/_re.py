@@ -17,6 +17,9 @@ def re_fullmatch(
     return pat.fullmatch(string, ctx=ctx)
 
 
+# Python 3.15 added `re.prefixmatch`, and `re.match` became its alias,
+# so the call target of `re.match` is inferred as `re.prefixmatch`.
+@register('re.prefixmatch')
 @register('re.match')
 def re_match(
     pattern: ProxySort,
