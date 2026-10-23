@@ -1,12 +1,20 @@
 from __future__ import annotations
 
 import re
+import sys
 
 import pytest
 
 from deal_solver import Conclusion
 
 from .helpers import prove_f
+
+
+# Python 3.14 changed the message of `TypeError` raised by `in` for a non-container.
+if sys.version_info >= (3, 14):
+    NOT_ITERABLE = 'is not a container or iterable'
+else:
+    NOT_ITERABLE = 'is not iterable'
 
 
 @pytest.mark.parametrize('expr, err', [
@@ -31,7 +39,7 @@ from .helpers import prove_f
     ('4 / "a"',   "unsupported operand type(s) for /: 'int' and 'str'"),
     ('4 // "a"',  "unsupported operand type(s) for //: 'int' and 'str'"),
     ('4 % "a"',   "unsupported operand type(s) for %: 'int' and 'str'"),
-    ('13 in 123', "argument of type 'int' is not iterable"),
+    ('13 in 123', f"argument of type 'int' {NOT_ITERABLE}"),
 
     # bitwise operations for int
     ('3 | []',   "unsupported operand type(s) for |: 'int' and 'list'"),
@@ -49,7 +57,7 @@ from .helpers import prove_f
     ('4.1 // []', "unsupported operand type(s) for //: 'float' and 'list'"),
     ('4.1 % []',  "unsupported operand type(s) for %: 'float' and 'list'"),
     ('4.1 + []',  "unsupported operand type(s) for +: 'float' and 'list'"),
-    ('13 in 1.3', "argument of type 'float' is not iterable"),
+    ('13 in 1.3', f"argument of type 'float' {NOT_ITERABLE}"),
 
     # unary operations for float
     ('~3.14',     "bad operand type for unary ~: 'float'"),

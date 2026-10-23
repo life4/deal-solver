@@ -1,6 +1,8 @@
 
 from __future__ import annotations
 
+import sys
+
 import pytest
 
 from deal_solver import Conclusion
@@ -148,6 +150,26 @@ from ..helpers import prove_f
     'not re.compile("[ab]").match("c")',
 ])
 def test_re_module(check: str) -> None:
+    text = """
+        import re
+
+        def f():
+            assert {}
+    """
+    text = text.format(check)
+    theorem = prove_f(text)
+    assert theorem.conclusion is Conclusion.OK
+
+
+@pytest.mark.skipif(sys.version_info < (3, 15), reason='re.prefixmatch is new in Python 3.15')
+@pytest.mark.parametrize('check', [
+    're.prefixmatch("[ab]", "a")',
+    're.prefixmatch("[ab]", "ac")',
+    'not re.prefixmatch("[ab]", "c")',
+    're.compile("[ab]").prefixmatch("ac")',
+    'not re.compile("[ab]").prefixmatch("c")',
+])
+def test_re_prefixmatch(check: str) -> None:
     text = """
         import re
 

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import operator
+import sys
 import typing
 
 import z3
@@ -8,6 +9,13 @@ import z3
 from .._exceptions import UnsupportedError
 from ._methods import Methods
 from ._type_factory import TypeFactory
+
+
+# Python 3.14 changed the message of `TypeError` raised by `in` for a non-container.
+if sys.version_info >= (3, 14):  # pragma: no cover
+    CONTAINS_ERROR = "argument of type '{}' is not a container or iterable"
+else:  # pragma: no cover
+    CONTAINS_ERROR = "argument of type '{}' is not iterable"
 
 
 if typing.TYPE_CHECKING:
@@ -155,7 +163,7 @@ class ProxySort:
         """item in self
         """
         from ._registry import types
-        msg = "argument of type '{}' is not iterable".format(self.type_name)
+        msg = CONTAINS_ERROR.format(self.type_name)
         ctx.add_exception(TypeError, msg)
         return types.bool.val(False, ctx=ctx)
 
