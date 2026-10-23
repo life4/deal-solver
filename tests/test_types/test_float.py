@@ -69,6 +69,10 @@ def test_expr_asserts_ok(prefer_real: bool, check: str) -> None:
     '8.0 // float("-inf") == -1.0',
     '-8.0 // float("-inf") == 0.0',
     '0.0 // float("inf") == 0.0',
+    # overflow and underflow of IEEE 754 binary64, as for Python float
+    '1e308 + 1e308 - 1e308 != 1e308',
+    '1e308 * 10 == float("inf")',
+    '5e-324 / 2 == 0.0',
 ])
 def test_assert_ok_fp_only(check: str):
     assert eval(check)

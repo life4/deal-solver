@@ -292,8 +292,10 @@ class FPSort(FloatSort):
 
     @staticmethod
     def sort(ctx: z3.Context | None = None):
-        # return z3.Float32()
-        return z3.FPSort(ebits=float_info.dig, sbits=float_info.mant_dig, ctx=ctx)
+        # Python float is IEEE 754 binary64: 11 exponent bits and 53 significand bits.
+        # Note that `float_info.dig` is the number of decimal digits (15), not exponent bits.
+        ebits = (float_info.max_exp - 1).bit_length() + 1
+        return z3.FPSort(ebits=ebits, sbits=float_info.mant_dig, ctx=ctx)
 
     @classmethod
     def val(cls, x, ctx: z3.Context | None = None):
